@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMI - En Construcción</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #FDFBF7;
+            --card-white: #ffffff;
+            --text-dark: #2d3436;
+            --accent-tan: #E4DCCF;
+            --sami-blue: #1a5cff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--text-dark);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .wip-container {
+            text-align: center;
+            background: var(--card-white);
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border: 1px solid var(--accent-tan);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .icon-box {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        p {
+            color: #636e72;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .btn-back {
+            background-color: var(--text-dark);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-back:hover {
+            background-color: var(--sami-blue); 
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(26, 92, 255, 0.3);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wip-container">
+        <div class="icon-box">🚧</div>
+        <h1>W.I.P</h1>
+        <p>Este módulo del sistema <strong>SAMI</strong> está actualmente en desarrollo... <br> ¡Vuelva pronto!</p>
+        
+        <button class="btn-back" onclick="goBack()">
+            ← Volver a la página anterior
+        </button>
+    </div>
+
+    <script>
+        function goBack() {
+            // Esta función utiliza el historial del navegador para regresar
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

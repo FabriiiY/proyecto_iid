@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SAMI - Sistema de Marcación</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+    <link rel="stylesheet" href="../css/dashboard-style1.css" />
+    <link rel="stylesheet" href="../css/horarios.css" />
+    <link rel="stylesheet" href="../css/addstudent-style.css" />
+  </head>
+  <body data-role="estudiante">
+    <!-- ================== HEADER / TOP BAR ================== -->
+    <header class="top-bar">
+      <div class="top-left">
+        <a href="#" id="logo-trigger" class="logo-container">
+          <img src="../image/sami-logo.svg" alt="SAMI Logo" class="main-logo" />
+        </a>
+      </div>
+      <div class="top-right">
+
+        <div class="user-info">
+          <span id="user-name">Usuario</span>
+          <div class="user-avatar" id="avatar-circle">U</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ================== SIDEBAR ================== -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <ul class="nav-list primary-nav">
+          <!-- ================== VISTA ESTUDIANTE ================== -->
+          <li class="nav-item student-only">
+            <a href="#" class="nav-link active">
+              <span class="material-symbols-rounded">calendar_month</span>
+              <span class="nav-label">Mis Horarios</span>
+            </a>
+          </li>
+          <li class="nav-item dropdown-container student-only">
+            <a href="#" class="nav-link dropdown-toggle">
+              <span class="material-symbols-rounded">history</span>
+              <span class="nav-label">Reportes</span>
+              <span class="dropdown-icon material-symbols-rounded"
+                >keyboard_arrow_down</span
+              >
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a href="WIP.html" class="dropdown-link">Asistencia Diaria</a>
+              </li>
+              <li>
+                <a href="WIP.html" class="dropdown-link">Resumen Mensual</a>
+              </li>
+            </ul>
+          </li>
+
+          <!-- ================== VISTA ADMIN ================== -->
+          <li class="nav-item admin-only">
+            <a href="#" class="nav-link active" id="nav-add-students">
+              <span class="material-symbols-rounded">person_add</span>
+              <span class="nav-label">Agregar Estudiantes</span>
+            </a>
+          </li>
+          <li class="nav-item admin-only">
+            <a href="#" class="nav-link" id="nav-add-users">
+              <span class="material-symbols-rounded">manage_accounts</span>
+              <span class="nav-label">Agregar Usuario</span>
+            </a>
+          </li>
+          <li class="nav-item admin-only">
+            <a href="WIP.html" class="nav-link">
+              <span class="material-symbols-rounded">library_books</span>
+              <span class="nav-label">Materias Disponibles</span>
+            </a>
+          </li>
+        </ul>
+        <ul class="nav-list secondary-nav">
+          <li class="nav-item">
+            <a href="WIP.html" class="nav-link">
+              <span class="material-symbols-rounded">settings</span>
+              <span class="nav-label">Configuración</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#" id="logout-btn" class="nav-link logout">
+              <span class="material-symbols-rounded">logout</span>
+              <span class="nav-label">Cerrar Sesión</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- ================== MAIN CONTENT ================== -->
+    <main class="main-content">
+      <!-- VISTA ESTUDIANTE (EL CARRUSEL) -->
+      <div id="student-view" class="student-only">
+        <div class="dashboard-header">
+          <h1>
+            <span class="material-symbols-rounded">schedule</span> Clases de Hoy
+            (Martes)
+          </h1>
+          <p>
+            Desliza para ver tus clases programadas y marca tu asistencia al
+            entrar al aula.
+          </p>
+        </div>
+
+        <!-- CONTENEDOR DEL CARRUSEL -->
+        <div class="carousel-wrapper">
+          <button class="nav-btn prev" id="btn-prev">
+            <span class="material-symbols-rounded">chevron_left</span>
+          </button>
+
+          <div class="carousel-track-container">
+            <div class="carousel-track" id="carousel-track">
+              <!-- Las tarjetas se insertarán aquí dinámicamente -->
+            </div>
+          </div>
+
+          <button class="nav-btn next" id="btn-next">
+            <span class="material-symbols-rounded">chevron_right</span>
+          </button>
+        </div>
+
+        <!-- Indicadores (Puntitos) -->
+        <div class="carousel-indicators" id="carousel-indicators"></div>
+      </div>
+
+      <!-- VISTA ADMIN (PANEL DE GESTIÓN) -->
+      <div id="admin-view" class="admin-only">
+        <!-- VISTA: AGREGAR ESTUDIANTES -->
+        <div id="admin-view-students">
+          <div class="dashboard-header">
+            <h1>
+              <span class="material-symbols-rounded">person_add</span>
+              Gestión de Estudiantes
+            </h1>
+
+            <p>
+              Agrega nuevos estudiantes y asígnales sus materias
+              correspondientes.
+            </p>
+          </div>
+
+          <div class="admin-grid">
+            <!-- FORMULARIO -->
+            <div class="admin-card">
+              <h3>
+                <span class="material-symbols-rounded">badge</span>
+                Nuevo Estudiante
+              </h3>
+
+              <form id="add-student-form">
+                <div class="form-group">
+                  <label for="student-name">Nombre Completo</label>
+
+                  <input
+                    type="text"
+                    id="student-name"
+                    placeholder="Ej. Juan Pérez"
+                    required
+                    autocomplete="off"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label>Asignar Materias (Ciclo 1/2026)</label>
+
+                  <label class="subject-checkbox">
+                    <input type="checkbox" value="Robótica" />
+                    Robótica
+                  </label>
+
+                  <label class="subject-checkbox">
+                    <input type="checkbox" value="Programación" />
+                    Programación
+                  </label>
+
+                  <label class="subject-checkbox">
+                    <input type="checkbox" value="Comunicación" />
+                    Comunicación
+                  </label>
+
+                  <label class="subject-checkbox">
+                    <input type="checkbox" value="Redes" />
+                    Redes
+                  </label>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                  <span class="material-symbols-rounded">add_circle</span>
+                  Agregar Estudiante
+                </button>
+              </form>
+            </div>
+
+            <!-- TABLA -->
+            <div class="admin-card">
+              <div class="table-header">
+                <h3 style="margin: 0">
+                  <span class="material-symbols-rounded">groups</span>
+                  Estudiantes Registrados
+                </h3>
+
+                <button
+                  id="clear-students-btn"
+                  class="btn-danger"
+                  style="display: none"
+                >
+                  <span
+                    class="material-symbols-rounded"
+                    style="font-size: 1.1rem"
+                  >
+                    delete_sweep
+                  </span>
+
+                  Borrar Todos
+                </button>
+              </div>
+
+              <div class="students-table-wrapper">
+                <table
+                  class="students-table"
+                  id="students-table"
+                  style="display: none"
+                >
+                  <thead>
+                    <tr>
+                      <th>Nombre del Estudiante</th>
+                      <th>Materias Asignadas</th>
+                      <th style="text-align: center">Acción</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="students-tbody"></tbody>
+                </table>
+
+                <div id="empty-students-msg" class="empty-state">
+                  No hay estudiantes registrados temporalmente.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- VISTA: AGREGAR USUARIOS -->
+        <div id="admin-view-users" style="display: none">
+          <div class="dashboard-header">
+            <h1>
+              <span class="material-symbols-rounded">manage_accounts</span>
+              Agregar Usuario
+            </h1>
+
+            <p>Registra las credenciales de acceso.</p>
+          </div>
+
+          <div class="admin-grid">
+            <!-- FORMULARIO -->
+            <div class="admin-card">
+              <h3>
+                <span class="material-symbols-rounded">id_card</span>
+                Credenciales
+              </h3>
+
+              <form id="add-user-form">
+                <div class="form-group">
+                  <label for="new-user-name">Nombre Completo</label>
+
+                  <input
+                    type="text"
+                    id="new-user-name"
+                    placeholder="Ej. Ana Lidia"
+                    required
+                    autocomplete="off"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="new-user-email">Correo Electrónico</label>
+
+                  <input
+                    type="email"
+                    id="new-user-email"
+                    placeholder="estudiante@itca.edu.sv"
+                    required
+                    autocomplete="off"
+                    style="
+                      width: 100%;
+                      padding: 12px;
+                      border-radius: 8px;
+                      border: 1px solid var(--borde);
+                      outline: none;
+                      font-family: inherit;
+                    "
+                  />
+                </div>
+
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 15px;
+                  "
+                >
+                  <div class="form-group">
+                    <label for="new-user-carnet">Carnet</label>
+
+                    <input
+                      type="text"
+                      id="new-user-carnet"
+                      placeholder="Ej. 123456"
+                      required
+                      autocomplete="off"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="new-user-group">Grupo</label>
+
+                    <input
+                      type="text"
+                      id="new-user-group"
+                      placeholder="Ej. D-02"
+                      required
+                      autocomplete="off"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="new-user-password">Contraseña</label>
+
+                  <input
+                    type="password"
+                    id="new-user-password"
+                    placeholder="Crea una contraseña segura"
+                    required
+                    style="
+                      width: 100%;
+                      padding: 12px;
+                      border-radius: 8px;
+                      border: 1px solid var(--borde);
+                      outline: none;
+                      font-family: inherit;
+                    "
+                  />
+                </div>
+
+                <button type="submit" class="btn-primary">
+                  <span class="material-symbols-rounded">save</span>
+                  Guardar Usuario
+                </button>
+              </form>
+            </div>
+
+            <!-- TABLA -->
+            <div class="admin-card">
+              <div class="table-header">
+                <h3 style="margin: 0">
+                  <span class="material-symbols-rounded">
+                    admin_panel_settings
+                  </span>
+
+                  Usuarios del Sistema
+                </h3>
+
+                <button
+                  id="clear-users-btn"
+                  class="btn-danger"
+                  style="display: none"
+                >
+                  <span
+                    class="material-symbols-rounded"
+                    style="font-size: 1.1rem"
+                  >
+                    delete_sweep
+                  </span>
+
+                  Borrar Todos
+                </button>
+              </div>
+
+              <div class="students-table-wrapper">
+                <table
+                  class="students-table"
+                  id="users-table"
+                  style="display: none"
+                >
+                  <thead>
+                    <tr>
+                      <th>Usuario e Email</th>
+                      <th>Carnet</th>
+                      <th>Grupo</th>
+                      <th style="text-align: center">Acción</th>
+                    </tr>
+                  </thead>
+
+                  <tbody id="users-tbody"></tbody>
+                </table>
+
+                <div id="empty-users-msg" class="empty-state">
+                  No hay usuarios registrados temporalmente.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="../javascript/dashboard-script1.js"></script>
+    <script src="../javascript/horarios.js"></script>
+    <script src="../javascript/addstudent-menu.js"></script>
+  </body>
+</html>

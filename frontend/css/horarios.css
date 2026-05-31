@@ -1,0 +1,301 @@
+/* ==========================================
+     MARCACIÓN CARRUSEL
+========================================== */
+
+.dashboard-header {
+    margin-bottom: 30px;
+}
+
+.dashboard-header h1 {
+    font-size: 1.8rem;
+    color: var(--azul-sami);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dashboard-header p {
+    color: #666;
+    margin-top: 5px;
+    font-size: 0.95rem;
+}
+
+/* Contenedor del Carrusel */
+.carousel-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 40px;
+    /* Espacio para las flechas */
+}
+
+.carousel-track-container {
+    overflow: hidden;
+    border-radius: 20px;
+    padding: 10px 0;
+}
+
+.carousel-track {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    /* Ocultar scrollbar en Firefox */
+    -ms-overflow-style: none;
+    /* Ocultar scrollbar en IE/Edge */
+    scroll-behavior: smooth;
+}
+
+.carousel-track::-webkit-scrollbar {
+    display: none;
+    /* Ocultar scrollbar en Chrome/Safari */
+}
+
+/* Botones de navegación del carrusel */
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    border: 1px solid var(--borde);
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    color: var(--azul-sami);
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.nav-btn:hover {
+    background: var(--azul-sami);
+    color: white;
+}
+
+.nav-btn.prev {
+    left: -10px;
+}
+
+.nav-btn.next {
+    right: -10px;
+}
+
+/* Tarjeta de Clase (La "Gran Tarjeta") */
+.class-slide {
+    flex: 0 0 100%;
+    /* Ocupa el 100% del contenedor visible */
+    scroll-snap-align: center;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+    border-top: 8px solid #ccc;
+    /* Color por defecto */
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+    transition: transform 0.3s ease;
+}
+
+/* Colores dinámicos basados en la materia */
+.class-slide.ciberseguridad {
+    border-top-color: var(--color-ciberseguridad);
+}
+
+.class-slide.ingles {
+    border-top-color: var(--color-ingles);
+}
+
+.class-slide.robotica {
+    border-top-color: var(--color-robotica);
+}
+
+.class-slide.programacion {
+    border-top-color: var(--color-programacion);
+}
+
+.class-slide.comunicacion {
+    border-top-color: var(--color-comunicacion);
+}
+
+.class-slide.redes {
+    border-top-color: var(--color-redes);
+}
+
+.class-top-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.class-type {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-badge.pending {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.status-badge.attended {
+    background: #E8F5E9;
+    color: #2E7D32;
+}
+
+.class-main-info {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.class-main-info h2 {
+    font-size: 1.8rem;
+    color: var(--texto);
+    margin-bottom: 10px;
+    line-height: 1.2;
+}
+
+.class-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--azul-sami);
+    background: #f4f6fa;
+    padding: 8px 20px;
+    border-radius: 12px;
+}
+
+.class-details {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--borde);
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.detail-item span.icon {
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.detail-item strong {
+    font-size: 0.85rem;
+    color: #888;
+    text-transform: uppercase;
+}
+
+.detail-item p {
+    font-weight: 500;
+    color: var(--texto);
+}
+
+/* Botón de Marcación */
+.attendance-btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--azul-sami);
+    color: white;
+    box-shadow: 0 4px 15px rgba(59, 89, 152, 0.3);
+}
+
+.attendance-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 89, 152, 0.4);
+}
+
+.attendance-btn:active {
+    transform: translateY(0);
+}
+
+.attendance-btn.attended {
+    background: #4CAF50;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    pointer-events: none;
+    /* Evitar múltiples clics */
+}
+
+/* Indicadores de carrusel (Puntitos) */
+.carousel-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ccc;
+    transition: 0.3s;
+}
+
+.dot.active {
+    background: var(--azul-sami);
+    width: 25px;
+    border-radius: 5px;
+}
+
+@media (max-width: 600px) {
+    .carousel-wrapper {
+        padding: 0;
+    }
+
+    .nav-btn {
+        display: none;
+    }
+
+    /* Ocultar flechas en móvil, usar swipe */
+    .class-slide {
+        padding: 20px;
+    }
+
+    .class-main-info h2 {
+        font-size: 1.4rem;
+    }
+
+    .class-details {
+        flex-direction: column;
+        gap: 15px;
+    }
+}

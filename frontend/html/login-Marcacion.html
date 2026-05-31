@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SAMI</title>
+    <link rel="icon" href="../image/icon-sami.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../css/style-login.css">
+    <!-- Enlace a FontAwesome (versión gratuita) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://kit.fontawesome.com/your-code.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="mainlogo-login">
+            <img src="../image/sami-logo.svg" alt="SAMI Logo" class="login-logo">
+        </div>
+
+        <form class="login-form">
+            <h2>Bienvenido/a</h2>
+            <p>Ingrese sus credenciales</p>
+            
+            <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="correo" placeholder="usuario@institucion.edu.sv" required>
+            </div>
+
+            <div class="input-group">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" placeholder="Password" required>
+            </div>
+
+            <button type="submit" class="login-btn">Acceder</button>
+            
+            <a href="WIP.html" class="forgot-password">¿Olvidaste tu contraseña?</a>
+        </form>
+    </div>
+
+    <script src="../javascript/login.js"></script>
+</body>
+</html>

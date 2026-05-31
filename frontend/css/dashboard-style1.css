@@ -1,0 +1,368 @@
+/* IMPORTACIÓN Y VARIABLES */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+    --bg-crema: #FDFBF7;
+    --sidebar-bg: #EFEBE9;
+    --topbar-bg: #FFFFFF;
+    --azul-sami: #3b5998;
+    --magenta-sami: #ff00ff;
+    --texto: #4E342E;
+    --borde: #D7CCC8;
+    --header-height: 70px;
+    --sidebar-width: 270px;
+    --sidebar-collapsed-width: 85px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: var(--bg-crema);
+    color: var(--texto);
+    overflow-x: hidden;
+}
+
+/* 2. BARRA SUPERIOR (TOP BAR) */
+.top-bar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: var(--header-height);
+    background: var(--topbar-bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px; /* Un poco más de aire a los lados */
+    border-bottom: 1px solid var(--borde);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+/* Clases del HTML para dar estructura */
+.top-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    flex: 1; /* Ocupa espacio a la derecha */
+}
+
+/* Ajuste en la caja de la izquierda */
+.top-left {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-right: auto;
+}
+
+/* Contenedor del Logo (El que genera el cuadro de hover) */
+.logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 60px;
+    width: 190px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    transition:
+        background 0.3s ease,
+        transform 0.3s ease;
+}
+
+
+.logo-container:hover {
+    background: rgba(0, 0, 0, 0.05); /* Un gris muy suave */
+    transform: translateY(-1px);    /* Pequeño levante sutil */
+}
+
+/* El Logo dentro del contenedor */
+.main-logo {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--azul-sami);
+}
+
+.user-avatar {
+    width: 38px;
+    height: 38px;
+    background: var(--azul-sami);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+}
+
+/* 3. SIDEBAR (BARRA LATERAL) */
+.sidebar {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    width: var(--sidebar-width);
+    height: calc(100vh - var(--header-height));
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--borde);
+    z-index: 999;
+    transition:
+        width 0.4s ease,
+        transform 0.4s ease;
+}
+
+/* Estado Comprimido */
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+/* Layout Flex para empujar Configuración/Salir al fondo */
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 15px 0;
+}
+
+.primary-nav {
+    flex-grow: 1; /* Ocupa el espacio disponible */
+    list-style: none;
+}
+
+.secondary-nav {
+    list-style: none;
+    border-top: 1px solid var(--borde);
+    padding-top: 15px;
+    margin-bottom: 10px;
+}
+
+/* Enlaces de Navegación */
+.nav-item {
+    padding: 0 15px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    color: var(--texto);
+    text-decoration: none;
+    border-radius: 12px;
+    white-space: nowrap;
+    transition: 0.3s ease;
+    position: relative;
+}
+
+.nav-link:hover, 
+.dropdown-container.open > .nav-link {
+    background: var(--azul-sami);
+    color: white;
+}
+
+/* Alineación de Iconos */
+.material-symbols-rounded {
+    width: 24px; 
+    min-width: 24px;
+    display: flex;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+.nav-label {
+    margin-left: 12px;
+    font-size: 0.95rem;
+    transition: opacity 0.3s;
+}
+
+.dropdown-icon {
+    margin-left: auto;
+    font-size: 1.2rem;
+    transition: transform 0.3s;
+}
+
+/* 4. SUBMENÚS (DROPDOWNS) */
+.dropdown-menu {
+    list-style: none;
+    height: 0;
+    overflow: hidden;
+    transition: height 0.4s ease;
+    padding-left: 0;
+}
+
+.dropdown-link {
+    display: block;
+    /* 15px lateral + 24px icono + 12px margen = 51px para alinear con el texto padre */
+    padding: 10px 15px 10px 51px;
+    font-size: 0.85rem;
+    color: var(--texto);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.dropdown-link:hover {
+    color: var(--magenta-sami);
+    background: rgba(0, 0, 0, 0.04);
+}
+
+/* Rotación de flecha */
+.dropdown-container.open .dropdown-icon {
+    transform: rotate(180deg);
+}
+
+/* 5. CONTROL DE VISIBILIDAD (COMPRIMIDO) */
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .dropdown-icon,
+.sidebar.collapsed .dropdown-menu {
+    display: none;
+    opacity: 0;
+}
+
+/* Centrar iconos cuando está colapsado */
+.sidebar.collapsed .nav-link {
+    justify-content: center;
+    padding: 12px 0;
+}
+
+.sidebar.collapsed .material-symbols-rounded {
+    margin: 0;
+}
+
+/* 6. CONTENIDO PRINCIPAL */
+.main-content {
+    margin-top: var(--header-height);
+    margin-left: var(--sidebar-width);
+    padding: 40px;
+    min-height: calc(100vh - var(--header-height));
+    transition:
+        width 0.4s ease,
+        margin-left 0.4s ease,
+        transform 0.4s ease;
+}
+
+.sidebar.collapsed ~ .main-content {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+/* Estilo para el botón de cerrar sesión */
+.logout:hover {
+    background: #dfc3c7 !important;
+    color: #D32F2F !important;
+}
+
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+/*Movil*/
+@media (max-width: 768px) {
+
+    .sidebar {
+        transform: translateX(-100%);
+        width: var(--sidebar-width);
+    }
+
+    .sidebar.open-mobile {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0 !important;
+    }
+
+    /* Restaurar elementos ocultos */
+    .sidebar .nav-label,
+    .sidebar .dropdown-icon {
+        opacity: 1 !important;
+        display: block !important;
+    }
+
+    .sidebar .dropdown-menu {
+        position: static;
+        opacity: 1;
+        pointer-events: auto;
+        background: transparent;
+    }
+}
+
+/*Horarios Dashboard*/
+.dashboard-header {
+
+    padding: 16px;
+    border-radius: 16px;
+
+    font-size: 1rem;
+    font-weight: 600;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    cursor: pointer;
+
+    margin-top: auto;
+
+    transition:
+        transform 0.3s ease,
+        opacity 0.3s ease;
+}
+
+.attendance-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.95;
+}
+
+.attendance-btn.attended {
+    background: #4CAF50;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .schedule-container {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .class-card {
+        min-height: auto;
+        padding: 22px;
+    }
+
+}
+
+/* ==========================================
+ 3. NUEVO CSS: CONTROL DE ROLES (Admin vs Estudiante)
+ ========================================== */
+body[data-role="admin"] .student-only {
+    display: none !important;
+}
+
+body[data-role="estudiante"] .admin-only {
+    display: none !important;
+}
