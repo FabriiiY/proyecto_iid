@@ -169,7 +169,8 @@ body {
     position: relative;
 }
 
-.nav-link:hover, 
+.nav-link:hover,
+.nav-link.active,
 .dropdown-container.open > .nav-link {
     background: var(--azul-sami);
     color: white;

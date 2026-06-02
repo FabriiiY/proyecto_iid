@@ -1,0 +1,183 @@
+/* ==========================================
+   ADMIN PANEL — admin-style.css
+   Complementa dashboard-style1.css y addstudent-style.css
+   con los estilos específicos del panel de administrador.
+========================================== */
+
+/* ------------------------------------------
+   TARJETA CONTENEDORA (admin-card)
+------------------------------------------ */
+.admin-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--borde);
+}
+
+.admin-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--azul-sami);
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--borde);
+}
+
+/* ------------------------------------------
+   GRUPOS DE FORMULARIO (form-group)
+------------------------------------------ */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #555;
+}
+
+/* Inputs genéricos dentro de form-group
+   (los que no tienen clase explícita) */
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--borde);
+    outline: none;
+    font-family: inherit;
+    font-size: 0.9rem;
+    background: #fff;
+    color: var(--texto);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--azul-sami);
+    box-shadow: 0 0 0 3px rgba(59, 89, 152, 0.1);
+}
+
+.form-group input::placeholder {
+    color: #bbb;
+}
+
+/* ------------------------------------------
+   BOTÓN PRIMARIO (btn-primary)
+------------------------------------------ */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: var(--azul-sami);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(59, 89, 152, 0.25);
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background: #2e4a85;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(59, 89, 152, 0.35);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* ------------------------------------------
+   TABLA DE USUARIOS / ALUMNOS
+------------------------------------------ */
+.students-table-wrapper {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--borde);
+}
+
+.students-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.students-table thead {
+    background: #f4f6fa;
+}
+
+.students-table th {
+    padding: 13px 16px;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #888;
+    border-bottom: 1px solid var(--borde);
+    white-space: nowrap;
+}
+
+.students-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0ece8;
+    color: var(--texto);
+    vertical-align: middle;
+}
+
+.students-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.students-table tbody tr:hover {
+    background: #faf8f5;
+}
+
+/* ------------------------------------------
+   ETIQUETA DE ROL (subject-tag)
+------------------------------------------ */
+.subject-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: #eef1f9;
+    color: var(--azul-sami);
+    border: 1px solid #d0d9ef;
+    white-space: nowrap;
+}
+
+/* ------------------------------------------
+   ESTADO VACÍO (empty-state)
+------------------------------------------ */
+.empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: #aaa;
+    font-size: 0.95rem;
+    font-style: italic;
+}
+
+/* ------------------------------------------
+   FEEDBACK DE GUARDADO (estado éxito)
+------------------------------------------ */
+.btn-primary.success {
+    background: #4CAF50;
+    box-shadow: 0 4px 14px rgba(76, 175, 80, 0.3);
+}
