@@ -62,8 +62,8 @@ function renderViewMateriasAgregar(container) {
                     <label>Estado <span class="req">*</span></label>
                     <select id="m-estado" required class="form-select">
                         <option value="" disabled selected>Selecciona...</option>
-                        <option value="activa">Activa</option>
-                        <option value="inactiva">Inactiva</option>
+                        <option value="ACTIVA">ACTIVA</option>
+                        <option value="INACTIVA">INACTIVA</option>
                     </select>
                 </div>
 
@@ -91,22 +91,71 @@ function renderViewMateriasAgregar(container) {
         e.preventDefault();
 
         const nueva = {
-            id:            Date.now(),
-            nombre:        document.getElementById("m-nombre").value.trim(),
-            horasTeorica:  parseInt(document.getElementById("m-horas-teoricas").value) || 0,
-            horasPractica: parseInt(document.getElementById("m-horas-practicas").value) || 0,
-            uv:            parseInt(document.getElementById("m-uv").value) || 0,
-            descripcion:   document.getElementById("m-descripcion").value.trim(),
-            estado:        document.getElementById("m-estado").value
-        };
+
+    nombre: document.getElementById("m-nombre").value.trim(),
+
+    horas_teoricas: parseInt(
+        document.getElementById("m-horas-teoricas").value
+    ) || 0,
+
+    horas_practicas: parseInt(
+        document.getElementById("m-horas-practicas").value
+    ) || 0,
+
+    unidades_valorativas: parseInt(
+        document.getElementById("m-uv").value
+    ) || 0,
+
+    descripcion: document.getElementById("m-descripcion").value.trim(),
+
+    estado: document.getElementById("m-estado").value
+
+};
 
         // TODO: reemplazar con fetch() POST /materias
-        const lista = getMaterias();
-        lista.push(nueva);
-        saveMaterias(lista);
+        fetch("http://127.0.0.1:5000/materias", {
+
+    method: "POST",
+
+    headers: {
+        "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify(nueva)
+
+})
+
+.then(res => res.json())
+
+.then(data => {
+
+    if(data.success){
+
+        e.target.reset();
+
+        alert("Materia registrada correctamente");
+
+    }else{
+
+        alert(data.mensaje);
+
+    }
+
+})
+
+.catch(error => {
+
+    console.error(error);
+
+    alert("Error al registrar materia");
+
+});
+
+
+
 
         // Feedback visual
-        e.target.reset();
+    
         const btn = e.target.querySelector(".btn-primary");
         btn.innerHTML = `<span class="material-symbols-rounded">check_circle</span> ¡Materia Guardada!`;
         btn.style.background = "#4CAF50";
@@ -206,8 +255,8 @@ function renderViewMateriasVer(container) {
                     <div class="form-group" style="margin-bottom:20px;">
                         <label>Estado</label>
                         <select id="edit-m-estado" class="form-select">
-                            <option value="activa">Activa</option>
-                            <option value="inactiva">Inactiva</option>
+                            <option value="ACTIVA">Activa</option>
+                            <option value="INACTIVA">INACTIVA</option>
                         </select>
                     </div>
 
@@ -262,8 +311,8 @@ function renderViewMateriasVer(container) {
                 <td style="text-align:center;">${m.horasPractica}</td>
                 <td style="text-align:center;">${m.uv}</td>
                 <td style="text-align:center;">
-                    <span class="status-badge ${m.estado === "activa" ? "attended" : "pending"}">
-                        ${m.estado === "activa" ? "Activa" : "Inactiva"}
+                    <span class="status-badge ${m.estado === "ACTIVA" ? "attended" : "pending"}">
+                        ${m.estado === "ACTIVA" ? "Activa" : "Inactiva"}
                     </span>
                 </td>
                 <td style="text-align:center;">
@@ -271,10 +320,10 @@ function renderViewMateriasVer(container) {
                         <button class="btn-icon btn-edit-materia" data-id="${m.id}" title="Editar">
                             <span class="material-symbols-rounded">edit</span>
                         </button>
-                        <button class="btn-icon ${m.estado === "activa" ? "btn-icon-danger" : "btn-icon-success"} btn-toggle-materia"
+                        <button class="btn-icon ${m.estado === "ACTIVA" ? "btn-icon-danger" : "btn-icon-success"} btn-toggle-materia"
                                 data-id="${m.id}"
-                                title="${m.estado === "activa" ? "Desactivar" : "Activar"}">
-                            <span class="material-symbols-rounded">${m.estado === "activa" ? "block" : "check_circle"}</span>
+                                title="${m.estado === "ACTIVA" ? "Desactivar" : "Activar"}">
+                            <span class="material-symbols-rounded">${m.estado === "ACTIVA" ? "block" : "check_circle"}</span>
                         </button>
                     </div>
                 </td>
