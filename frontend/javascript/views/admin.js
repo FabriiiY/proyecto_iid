@@ -104,9 +104,9 @@ function renderViewAdminUsuarios(container) {
                         <label>Rol <span class="req">*</span></label>
                         <select id="u-rol" required class="form-select">
                             <option value="" disabled selected>Selecciona un rol...</option>
-                            <option value="1">Admin</option>
-                            <option value="2">Maestro</option>
-                            <option value="3">Estudiante</option>
+                            <option value="1">ADMINISTRADOR</option>
+                            <option value="2">MAESTRO</option>
+                            <option value="3">ESTUDIANTE</option>
                         </select>
                     </div>
                 </div>
