@@ -39,8 +39,9 @@ body {
     align-items: center;
     padding: 0 30px; /* Un poco más de aire a los lados */
     border-bottom: 1px solid var(--borde);
-    z-index: 1000;
-    overflow: hidden;
+    /*Cambios*/
+    z-index: 1010;
+    overflow: visible;
 }
 
 /* Clases del HTML para dar estructura */
@@ -92,6 +93,8 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
+    /*Agragado*/
+    position: relative;
 }
 
 .user-name {

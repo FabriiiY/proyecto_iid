@@ -17,11 +17,105 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.SAMI = { usuario: usuarioActivo, rol, esAdmin, esMaestro };
 
-    // 2. HEADER
-    document.getElementById("user-name").textContent =
-        `${usuarioActivo.nombre} ${usuarioActivo.apellido}`;
-    document.getElementById("avatar-circle").textContent =
-        usuarioActivo.nombre.charAt(0).toUpperCase();
+    // 2. HEADER — nombre, avatar e iniciales
+    const nombreCompleto = `${usuarioActivo.nombre} ${usuarioActivo.apellido}`;
+    document.getElementById("user-name").textContent = nombreCompleto;
+
+    const avatarCircle = document.getElementById("avatar-circle");
+
+    // Foto guardada o inicial
+    const fotoPerfil = localStorage.getItem(`sami_foto_${usuarioActivo.correoInstitucional}`);
+    if (fotoPerfil) {
+        avatarCircle.style.backgroundImage = `url(${fotoPerfil})`;
+        avatarCircle.style.backgroundSize  = "cover";
+        avatarCircle.style.backgroundPosition = "center";
+        avatarCircle.textContent = "";
+    } else {
+        avatarCircle.textContent = usuarioActivo.nombre.charAt(0).toUpperCase();
+    }
+
+    // Etiqueta de rol legible
+    const rolesLabel = { 1: "Administrador", 2: "Maestro", 3: "Estudiante" };
+    const rolLabel   = rolesLabel[rol] || "Usuario";
+
+    // Badge secundario (carnet para estudiante/maestro, rol para admin)
+    const badgeHTML = esAdmin
+        ? `<span class="pd-badge pd-badge-role">${rolLabel}</span>`
+        : `<span class="pd-badge pd-badge-carnet">Carnet: ${usuarioActivo.carnet || "—"}</span>`;
+
+    // Inyectar dropdown en el top-bar (justo después del avatar)
+    const userInfo = document.querySelector(".user-info");
+    userInfo.style.position = "relative";
+    userInfo.style.cursor   = "pointer";
+
+    const dropdown = document.createElement("div");
+    dropdown.id        = "profile-dropdown";
+    dropdown.className = "profile-dropdown";
+    dropdown.innerHTML = `
+        <div class="pd-header">
+            <div class="pd-avatar" id="pd-avatar-img">${fotoPerfil
+                ? `<img src="${fotoPerfil}" alt="Foto de perfil" />`
+                : `<span>${usuarioActivo.nombre.charAt(0).toUpperCase()}</span>`
+            }</div>
+            <div class="pd-info">
+                <strong class="pd-name">${nombreCompleto}</strong>
+                <span class="pd-email">${usuarioActivo.correoInstitucional || usuarioActivo.correoPersonal || ""}</span>
+                ${badgeHTML}
+            </div>
+        </div>
+        <div class="pd-divider"></div>
+        <button class="pd-btn" id="pd-btn-perfil">
+            <span class="material-symbols-rounded">account_circle</span> Mi Perfil
+        </button>
+        <button class="pd-btn pd-btn-logout" id="pd-btn-logout">
+            <span class="material-symbols-rounded">logout</span> Cerrar Sesión
+        </button>
+    `;
+    userInfo.appendChild(dropdown);
+
+    // Toggle dropdown al hacer clic en user-info
+    userInfo.addEventListener("click", e => {
+        e.stopPropagation();
+        dropdown.classList.toggle("open");
+    });
+
+    // Cerrar al hacer clic fuera
+    document.addEventListener("click", () => dropdown.classList.remove("open"));
+
+    // Botón Mi Perfil dentro del dropdown
+    document.getElementById("pd-btn-perfil").addEventListener("click", e => {
+        e.stopPropagation();
+        dropdown.classList.remove("open");
+        SAMI.navegar("mi-perfil");
+    });
+
+    // Logout desde dropdown
+    document.getElementById("pd-btn-logout").addEventListener("click", e => {
+        e.stopPropagation();
+        localStorage.removeItem("usuarioActivo");
+        window.location.href = "../html/login-Marcacion.html";
+    });
+
+    // Función global para refrescar el avatar cuando se cambia la foto
+    SAMI.refrescarAvatar = function(dataUrl) {
+        // Top-bar
+        if (dataUrl) {
+            avatarCircle.style.backgroundImage    = `url(${dataUrl})`;
+            avatarCircle.style.backgroundSize     = "cover";
+            avatarCircle.style.backgroundPosition = "center";
+            avatarCircle.textContent = "";
+        } else {
+            avatarCircle.style.backgroundImage = "";
+            avatarCircle.textContent = usuarioActivo.nombre.charAt(0).toUpperCase();
+        }
+        // Dropdown
+        const pdAvatar = document.getElementById("pd-avatar-img");
+        if (pdAvatar) {
+            pdAvatar.innerHTML = dataUrl
+                ? `<img src="${dataUrl}" alt="Foto de perfil" />`
+                : `<span>${usuarioActivo.nombre.charAt(0).toUpperCase()}</span>`;
+        }
+    };
 
     // 3. SIDEBAR ITEMS SEGÚN ROL
     const navItemsEstudiante = [
@@ -152,7 +246,8 @@ document.addEventListener("DOMContentLoaded", () => {
         else { sidebar.classList.remove("collapsed"); cerrarDropdowns(); }
     });
 
-    // 7. LOGOUT
+    // 7. LOGOUT — manejado desde el dropdown del perfil (ver sección 2)
+    // Se mantiene el botón de sidebar como fallback
     document.getElementById("logout-btn").addEventListener("click", e => {
         e.preventDefault();
         localStorage.removeItem("usuarioActivo");
@@ -166,7 +261,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "admin-registrados": () => renderViewAdminRegistrados(main),
         "maestro-alumnos":   () => renderViewMaestroAlumnos(main),
         "materias-agregar":  () => renderViewMateriasAgregar(main),
-        "materias-ver":      () => renderViewMateriasVer(main)
+        "materias-ver":      () => renderViewMateriasVer(main),
+        "mi-perfil":         () => renderViewMiPerfil(main)
     };
 
     const main = document.getElementById("main-content");
