@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 02, 2026 at 07:42 AM
+-- Generation Time: Jun 03, 2026 at 01:41 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -219,9 +219,17 @@ CREATE TABLE `materia` (
   `horas_practicas` int(11) NOT NULL,
   `unidades_valorativas` int(11) NOT NULL,
   `descripcion` varchar(255) DEFAULT NULL,
-  `estado` enum('ACTIVO','INACTIVO') NOT NULL DEFAULT 'ACTIVO',
+  `estado` enum('ACTIVA','INACTIVA') NOT NULL DEFAULT 'ACTIVA',
   `fecha_actualizacion` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `materia`
+--
+
+INSERT INTO `materia` (`id_materia`, `nombre`, `horas_teoricas`, `horas_practicas`, `unidades_valorativas`, `descripcion`, `estado`, `fecha_actualizacion`) VALUES
+(1, 'Programacion para la industria 4.0', 20, 34, 4, 'Prueba de materia', 'ACTIVA', '2026-06-02 16:33:45'),
+(2, 'MATEMATICAS', 40, 20, 4, 'Materia transversal', 'ACTIVA', '2026-06-02 16:53:54');
 
 -- --------------------------------------------------------
 
@@ -413,7 +421,7 @@ INSERT INTO `usuario` (`id_usuario`, `primer_nombre`, `segundo_nombre`, `primer_
 (2, 'CARLOS', 'JOSUE', 'SANCHEZ', 'MENDEZ', '2006-04-10', 'MASCULINO', 'carlos10@gmail.com', 'cjosue.sanchez25@itca.edu.sv', '12345678', '22113344', 'Av. Olímpica, 345', '009128746', '062825', NULL, NULL, 'scrypt:32768:8:1$2HMjFPNtujm3xBM1$f0d66d3883a9d1a05b76548bea6a39447dfbe007220de073f71e19390a2e5f553b46409e39606164a3554f736ea9975d140c417292fb4e944daaf0a798b7b2a7', 'ACTIVO', '2026-05-30', '2026-05-30 19:35:10', '2026-05-30 19:48:58', NULL, 1),
 (3, 'JEFFERSON', 'JESUS', 'GOMEZ', 'TOLENTINO', '2005-09-12', 'MASCULINO', 'jeffesor12@gmail.com', 'jefferson.tolentino25@itca.edu.sv', '78981234', '22309822', 'Alameda Roosevelt, 2102', '987654321', '160725', NULL, NULL, 'scrypt:32768:8:1$2HMjFPNtujm3xBM1$f0d66d3883a9d1a05b76548bea6a39447dfbe007220de073f71e19390a2e5f553b46409e39606164a3554f736ea9975d140c417292fb4e944daaf0a798b7b2a7', 'ACTIVO', '2026-05-30', '2026-05-30 19:40:11', '2026-05-30 19:54:06', NULL, 3),
 (4, 'ANDRES', 'FERNANDO', 'MONTES', 'LOPEZ', '2006-02-05', 'MASCULINO', 'andres43@gmail.com', 'andres.montes25@itca.edu.sv', '89323456', '22223333', 'Paseo General Escalón, 3700', '123475689', '109525', NULL, NULL, 'scrypt:32768:8:1$2HMjFPNtujm3xBM1$f0d66d3883a9d1a05b76548bea6a39447dfbe007220de073f71e19390a2e5f553b46409e39606164a3554f736ea9975d140c417292fb4e944daaf0a798b7b2a7', 'ACTIVO', '2026-05-30', '2026-05-30 19:45:51', '2026-05-30 19:54:19', NULL, 2),
-(5, 'Juan', 'Carlos', 'Perez', 'Lopez', '2000-05-10', 'MASCULINO', 'juan@gmail.com', 'juan.perez@itca.edu.sv', '77778882', '22223333', 'San Salvador', '12345678-9', 'TEST0017', '', NULL, 'scrypt:32768:8:1$HipX9JKjCPqRWbhA$4a177b0df21df21461d883fd2d4f7538a8d9661fd3b77d660fb9cdb58fd1a1ccdf702abfc833fff1df16540028814454ed29dcc984c9e8aec27bdf290fe6318a', 'INACTIVO', '2026-06-01', '2026-06-01 20:21:02', '2026-06-01 23:36:48', NULL, 3),
+(5, 'Juan', 'Carlos', 'Perez', 'Lopez', '2000-05-10', 'MASCULINO', 'juan@gmail.com', 'juan.perez@itca.edu.sv', '77778882', '22223333', 'San Salvador', '12345678-9', 'TEST0017', '', NULL, 'scrypt:32768:8:1$HipX9JKjCPqRWbhA$4a177b0df21df21461d883fd2d4f7538a8d9661fd3b77d660fb9cdb58fd1a1ccdf702abfc833fff1df16540028814454ed29dcc984c9e8aec27bdf290fe6318a', 'INACTIVO', '2026-06-01', '2026-06-01 20:21:02', '2026-06-02 16:00:55', NULL, 3),
 (6, 'DAVID', 'JOSUE', 'GARCIA', 'FLAMENGO', '2005-02-10', 'MASCULINO', 'davidjaja@gmail.com', 'davidjaja@itca.edu.sv', '76554433', '22114477', 'Direccion de prueba 123', '124589095', '124466', '1233445555', NULL, 'scrypt:32768:8:1$bLebprEKY6cHkuTh$cfc884798c624fd566af162e7ea977a3f270aa3762f07ea65be2a98a7c3a345962d830bee188be53be20897a70ad515cdb4ed6bcd16c0588e597d9c44a7876c7', 'ACTIVO', '2026-06-01', '2026-06-01 20:43:51', '2026-06-01 20:48:44', NULL, 3),
 (7, 'JOSUE', 'ALVARADO', 'GONZALES', 'LOPEZ', '2005-06-18', 'MASCULINO', 'gonzales3131@gmail.com', 'gonzales097@itca.edu.sv', '78782322', '22990033', 'Direccion aleatoria', '126753028', '210926', NULL, NULL, 'scrypt:32768:8:1$URtAp8HOY6YNhMlG$b7f44aa79e93103429584a5bd00e4d5fdd42198f6b3e67350c2755231cd02e4fe8594ac2200fb70a0001c7972adf267ae70544a261fc9d4f15b8009253dc2c06', 'ACTIVO', '2026-06-01', '2026-06-01 23:39:58', '2026-06-01 23:39:58', NULL, 2);
 
@@ -638,7 +646,7 @@ ALTER TABLE `inscripcion`
 -- AUTO_INCREMENT for table `materia`
 --
 ALTER TABLE `materia`
-  MODIFY `id_materia` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_materia` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `modalidad`
