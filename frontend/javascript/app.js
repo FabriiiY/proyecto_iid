@@ -35,13 +35,24 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     const navItemsMaestro = [
-        { id: "nav-maestro-alumnos", icon: "groups", label: "Mis Alumnos", view: "maestro-alumnos" }
+        { id: "nav-maestro-alumnos", icon: "groups", label: "Mis Alumnos", view: "maestro-alumnos" },
+        { id: "nav-materias-maestro", icon: "library_books", label: "Materias",
+          dropdown: [
+            { label: "Agregar Materia", view: "materias-agregar" },
+            { label: "Ver Materias",    view: "materias-ver"     }
+          ]
+        }
     ];
 
     const navItemsAdmin = [
-        { id: "nav-admin-usuarios",    icon: "manage_accounts", label: "Admin. Usuarios", view: "admin-usuarios"    },
+        { id: "nav-admin-usuarios",    icon: "manage_accounts", label: "Admin Usuarios", view: "admin-usuarios"    },
         { id: "nav-admin-registrados", icon: "group",           label: "Usuarios Registrados",        view: "admin-registrados" },
-        { id: "nav-materias",          icon: "library_books",   label: "Materias Disponibles",        href: "WIP.html"          }
+        { id: "nav-materias-admin",    icon: "library_books",   label: "Materias",
+          dropdown: [
+            { label: "Agregar Materia", view: "materias-agregar" },
+            { label: "Ver Materias",    view: "materias-ver"     }
+          ]
+        }
     ];
 
     const items = esAdmin ? navItemsAdmin : esMaestro ? navItemsMaestro : navItemsEstudiante;
@@ -61,8 +72,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span class="dropdown-icon material-symbols-rounded">keyboard_arrow_down</span>
                 </a>
                 <ul class="dropdown-menu">
-                    ${item.dropdown.map(d =>
-                        `<li><a href="${d.href}" class="dropdown-link">${d.label}</a></li>`
+                    ${item.dropdown.map(d => d.view
+                        ? `<li><a href="#" class="dropdown-link" data-view="${d.view}">${d.label}</a></li>`
+                        : `<li><a href="${d.href}" class="dropdown-link">${d.label}</a></li>`
                     ).join("")}
                 </ul>`;
         } else if (item.href) {
@@ -152,7 +164,9 @@ document.addEventListener("DOMContentLoaded", () => {
         "horarios":          () => renderViewHorarios(main),
         "admin-usuarios":    () => renderViewAdminUsuarios(main),
         "admin-registrados": () => renderViewAdminRegistrados(main),
-        "maestro-alumnos":   () => renderViewMaestroAlumnos(main)
+        "maestro-alumnos":   () => renderViewMaestroAlumnos(main),
+        "materias-agregar":  () => renderViewMateriasAgregar(main),
+        "materias-ver":      () => renderViewMateriasVer(main)
     };
 
     const main = document.getElementById("main-content");
@@ -163,6 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         main.innerHTML = "";
 
+        // Marcar activo en nav-links directos
         document.querySelectorAll("#sidebar-primary-nav a[data-view]").forEach(link => {
             link.classList.toggle("active", link.getAttribute("data-view") === viewId);
         });

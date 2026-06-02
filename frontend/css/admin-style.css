@@ -181,3 +181,29 @@
     background: #4CAF50;
     box-shadow: 0 4px 14px rgba(76, 175, 80, 0.3);
 }
+
+/* ------------------------------------------
+   TEXTAREA EN FORMULARIOS DE MATERIA
+------------------------------------------ */
+.materia-textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--borde);
+    outline: none;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--texto);
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.materia-textarea:focus {
+    border-color: var(--azul-sami);
+    box-shadow: 0 0 0 3px rgba(59, 89, 152, 0.1);
+}
+
+.materia-textarea::placeholder {
+    color: #bbb;
+}
