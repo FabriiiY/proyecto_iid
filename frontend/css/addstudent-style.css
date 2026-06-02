@@ -191,3 +191,14 @@
     background: #f0f0f0;
     color: #333;
 }
+
+/* ==========================================
+   INPUT MAYÚSCULAS (nombres y apellidos)
+========================================== */
+.input-uppercase {
+    text-transform: uppercase;
+}
+
+.input-uppercase::placeholder {
+    text-transform: uppercase;
+}

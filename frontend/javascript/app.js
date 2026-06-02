@@ -281,7 +281,93 @@ document.addEventListener("DOMContentLoaded", () => {
         fn();
     };
 
-    // Vista inicial
-    const vistaInicial = esAdmin ? "admin-usuarios" : esMaestro ? "maestro-alumnos" : "horarios";
-    SAMI.navegar(vistaInicial);
+
+    // 9. PANTALLA DE BIENVENIDA
+    function renderViewBienvenida() {
+        const primerNombre = usuarioActivo.primerNombre || usuarioActivo.nombre || "Usuario";
+        const panelLabel   = esAdmin ? "Administrador" : esMaestro ? "Docente" : "Estudiante";
+        const iconoPanel   = esAdmin ? "admin_panel_settings" : esMaestro ? "school" : "menu_book";
+
+        const accesosRapidos = esAdmin
+            ? [
+                { icon: "manage_accounts", label: "Agregar Usuario", view: "admin-usuarios"    },
+                { icon: "group",           label: "Ver Usuarios",     view: "admin-registrados" },
+                { icon: "library_books",   label: "Agregar Materia",  view: "materias-agregar"  },
+              ]
+            : esMaestro
+            ? [
+                { icon: "groups",        label: "Mis Alumnos",  view: "maestro-alumnos" },
+                { icon: "library_books", label: "Ver Materias", view: "materias-ver"    },
+              ]
+            : [
+                { icon: "calendar_month", label: "Mis Horarios", view: "horarios" },
+              ];
+
+        main.innerHTML = `
+            <div style="
+                min-height: calc(100vh - var(--header-height) - 80px);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 40px 20px;
+                gap: 32px;
+            ">
+                <div style="
+                    width: 100px; height: 100px;
+                    border-radius: 50%;
+                    background: #eef1f9;
+                    display: flex; align-items: center; justify-content: center;
+                    box-shadow: 0 4px 20px rgba(59,89,152,0.12);
+                ">
+                    <span class="material-symbols-rounded" style="font-size: 3rem; color: var(--azul-sami);">
+                        ${iconoPanel}
+                    </span>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <h1 style="font-size:2rem; color:var(--azul-sami); font-weight:700; line-height:1.2;">
+                        ¡Bienvenido, ${primerNombre}!
+                    </h1>
+                    <p style="color:#888; font-size:1rem;">
+                        Ingresaste como <strong style="color:var(--texto);">${panelLabel}</strong>.
+                        Selecciona una opción del menú para comenzar.
+                    </p>
+                </div>
+
+                <div style="display:flex; flex-wrap:wrap; gap:16px; justify-content:center; margin-top:8px;">
+                    ${accesosRapidos.map(a => `
+                        <button data-view="${a.view}" style="
+                            display: flex; flex-direction: column; align-items: center; gap: 10px;
+                            padding: 24px 32px;
+                            background: white;
+                            border: 1px solid var(--borde);
+                            border-radius: 16px;
+                            cursor: pointer;
+                            font-family: inherit;
+                            font-size: 0.9rem;
+                            font-weight: 600;
+                            color: var(--texto);
+                            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+                            transition: transform 0.2s, box-shadow 0.2s;
+                            min-width: 140px;
+                        "
+                        onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(59,89,152,0.15)';"
+                        onmouseout="this.style.transform='';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.05)';">
+                            <span class="material-symbols-rounded" style="font-size:2rem; color:var(--azul-sami);">${a.icon}</span>
+                            ${a.label}
+                        </button>
+                    `).join("")}
+                </div>
+            </div>
+        `;
+
+        main.querySelectorAll("button[data-view]").forEach(btn => {
+            btn.addEventListener("click", () => SAMI.navegar(btn.dataset.view));
+        });
+    }
+
+    // Vista inicial -> bienvenida
+    renderViewBienvenida();
 });

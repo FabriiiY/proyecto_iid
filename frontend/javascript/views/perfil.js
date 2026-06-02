@@ -34,29 +34,15 @@ function renderViewMiPerfil(container) {
             <!-- Columna izquierda: foto -->
             <div class="admin-card perfil-foto-card">
                 <div class="perfil-avatar-wrap">
-                    <div class="perfil-avatar" id="perfil-avatar-preview">
+                    <div class="perfil-avatar" id="perfil-avatar-preview" style="cursor:default;">
                         ${fotoActual
                             ? `<img src="${fotoActual}" alt="Foto de perfil" id="perfil-img" />`
                             : `<span id="perfil-inicial">${u.nombre.charAt(0).toUpperCase()}</span>`
                         }
-                        <div class="perfil-avatar-overlay" id="perfil-avatar-trigger" title="Cambiar foto">
-                            <span class="material-symbols-rounded">photo_camera</span>
-                        </div>
                     </div>
-                    <input type="file" id="perfil-file-input" accept="image/*" style="display:none;" />
                 </div>
                 <h2 class="perfil-nombre">${u.nombre} ${u.apellido || ""}</h2>
                 <span class="subject-tag">${rolLabel}</span>
-
-                <div class="perfil-foto-acciones">
-                    <button class="btn-primary" id="btn-cambiar-foto" style="width:100%; margin-top:16px;">
-                        <span class="material-symbols-rounded">upload</span> Cambiar Foto
-                    </button>
-                    <button class="btn-secondary" id="btn-quitar-foto" style="width:100%; margin-top:8px;
-                        ${fotoActual ? "" : "display:none;"}">
-                        <span class="material-symbols-rounded">delete</span> Quitar Foto
-                    </button>
-                </div>
             </div>
 
             <!-- Columna derecha: datos -->
@@ -132,78 +118,5 @@ function renderViewMiPerfil(container) {
 
             </div><!-- /perfil-datos-col -->
         </div><!-- /perfil-layout -->
-
-        <!-- Toast de feedback -->
-        <div id="perfil-toast" class="perfil-toast"></div>
     `;
-
-    // ── Lógica de foto ──────────────────────────────────────
-    const fileInput    = document.getElementById("perfil-file-input");
-    const btnCambiar   = document.getElementById("btn-cambiar-foto");
-    const btnQuitar    = document.getElementById("btn-quitar-foto");
-    const avatarTrigger= document.getElementById("perfil-avatar-trigger");
-    const preview      = document.getElementById("perfil-avatar-preview");
-    const toast        = document.getElementById("perfil-toast");
-
-    function mostrarToast(msg, tipo = "ok") {
-        toast.textContent = msg;
-        toast.className   = `perfil-toast perfil-toast-${tipo} show`;
-        setTimeout(() => toast.classList.remove("show"), 3000);
-    }
-
-    function aplicarFoto(dataUrl) {
-        // Preview en la vista
-        preview.innerHTML = `
-            <img src="${dataUrl}" alt="Foto de perfil" id="perfil-img" />
-            <div class="perfil-avatar-overlay" id="perfil-avatar-trigger-new" title="Cambiar foto">
-                <span class="material-symbols-rounded">photo_camera</span>
-            </div>`;
-        document.getElementById("perfil-avatar-trigger-new")
-            .addEventListener("click", () => fileInput.click());
-
-        // Guardar y refrescar top-bar/dropdown
-        localStorage.setItem(fotoKey, dataUrl);
-        SAMI.refrescarAvatar(dataUrl);
-
-        btnQuitar.style.display = "";
-        mostrarToast("Foto actualizada correctamente.");
-    }
-
-    // Clic en overlay de la foto
-    avatarTrigger?.addEventListener("click", () => fileInput.click());
-
-    // Botón "Cambiar Foto"
-    btnCambiar.addEventListener("click", () => fileInput.click());
-
-    // Quitar foto
-    btnQuitar.addEventListener("click", () => {
-        localStorage.removeItem(fotoKey);
-        SAMI.refrescarAvatar(null);
-        const inicial = u.nombre.charAt(0).toUpperCase();
-        preview.innerHTML = `
-            <span id="perfil-inicial">${inicial}</span>
-            <div class="perfil-avatar-overlay" id="perfil-avatar-trigger-new" title="Cambiar foto">
-                <span class="material-symbols-rounded">photo_camera</span>
-            </div>`;
-        document.getElementById("perfil-avatar-trigger-new")
-            .addEventListener("click", () => fileInput.click());
-        btnQuitar.style.display = "none";
-        mostrarToast("Foto eliminada.", "warn");
-    });
-
-    // Leer archivo
-    fileInput.addEventListener("change", () => {
-        const file = fileInput.files[0];
-        if (!file) return;
-
-        // Validar tamaño (máx 2 MB)
-        if (file.size > 2 * 1024 * 1024) {
-            mostrarToast("La imagen no puede superar los 2 MB.", "error");
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = e => aplicarFoto(e.target.result);
-        reader.readAsDataURL(file);
-    });
 }

@@ -2,6 +2,73 @@
 //  views/admin.js — Vistas del Administrador
 // ============================================================
 
+// ── HELPERS DE FORMATO ───────────────────────────────────────
+
+/**
+ * Formatea un input de teléfono salvadoreño visualmente como XXXX-XXXX.
+ * Solo permite dígitos, máx 8. El dato limpio (sin guión) se obtiene con .replace('-','').
+ */
+function setupTelFormat(inputId) {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+    el.addEventListener("input", function () {
+        let digits = this.value.replace(/\D/g, "").slice(0, 8);
+        this.value = digits.length > 4 ? digits.slice(0, 4) + "-" + digits.slice(4) : digits;
+    });
+    el.addEventListener("keydown", function (e) {
+        // Permitir backspace, delete, tab, flechas
+        if ([8, 9, 37, 38, 39, 40, 46].includes(e.keyCode)) return;
+        // Bloquear todo lo que no sea dígito
+        if (!/^\d$/.test(e.key)) e.preventDefault();
+    });
+}
+
+/**
+ * Formatea un input de DUI salvadoreño visualmente como 00000000-0.
+ * Solo permite dígitos, máx 9 (8 + 1 verificador).
+ */
+function setupDuiFormat(inputId) {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+    el.addEventListener("input", function () {
+        let digits = this.value.replace(/\D/g, "").slice(0, 9);
+        this.value = digits.length > 8 ? digits.slice(0, 8) + "-" + digits.slice(8) : digits;
+    });
+    el.addEventListener("keydown", function (e) {
+        if ([8, 9, 37, 38, 39, 40, 46].includes(e.keyCode)) return;
+        if (!/^\d$/.test(e.key)) e.preventDefault();
+    });
+}
+
+/**
+ * Convierte a mayúsculas en tiempo real mientras el usuario escribe.
+ * setSelectionRange preserva la posición del cursor al reemplazar el valor.
+ */
+function setupUppercase(inputId) {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+    el.addEventListener("input", function () {
+        const pos = this.selectionStart;
+        this.value = this.value.toUpperCase();
+        this.setSelectionRange(pos, pos);
+    });
+}
+
+/**
+ * Permite solo dígitos en un input (para carnet, etc.).
+ */
+function setupNumericOnly(inputId) {
+    const el = document.getElementById(inputId);
+    if (!el) return;
+    el.addEventListener("keydown", function (e) {
+        if ([8, 9, 37, 38, 39, 40, 46].includes(e.keyCode)) return;
+        if (!/^\d$/.test(e.key)) e.preventDefault();
+    });
+    el.addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, "");
+    });
+}
+
 // ── VISTA: ADMINISTRACIÓN DE USUARIOS ────────────────────────
 function renderViewAdminUsuarios(container) {
     container.innerHTML = `
@@ -10,33 +77,62 @@ function renderViewAdminUsuarios(container) {
             <p>Registra un nuevo usuario en el sistema con todos sus datos.</p>
         </div>
 
-        <div class="admin-card" style="max-width:900px;">
+        <div class="admin-card" style="max-width:960px;">
             <h3><span class="material-symbols-rounded">badge</span> Nuevo Usuario</h3>
 
-            <form id="add-user-form">
+            <form id="add-user-form" novalidate>
 
+                <!-- ── FOTO DE PERFIL ── -->
+                <div class="form-group" style="align-items:flex-start; margin-bottom:24px;">
+                    <label>Foto de Perfil <span class="opt">(opcional)</span></label>
+                    <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap; margin-top:6px;">
+                        <div id="foto-preview-wrap" style="
+                            width:90px; height:90px; border-radius:50%;
+                            background:var(--azul-sami); color:white;
+                            display:flex; align-items:center; justify-content:center;
+                            font-size:2rem; font-weight:700; overflow:hidden;
+                            border:2px solid var(--borde); cursor:pointer;
+                            flex-shrink:0;"
+                            title="Haz clic para seleccionar foto" id="foto-preview-circle">
+                            <span class="material-symbols-rounded" style="font-size:2.2rem;">person</span>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <button type="button" class="btn-primary" id="btn-elegir-foto" style="width:auto; padding:10px 20px;">
+                                <span class="material-symbols-rounded">upload</span> Elegir Foto
+                            </button>
+                            <button type="button" class="btn-secondary" id="btn-quitar-foto-form" style="display:none;">
+                                <span class="material-symbols-rounded">delete</span> Quitar Foto
+                            </button>
+                            <small style="color:#aaa; font-size:0.78rem;">JPG o PNG · Máx 2 MB</small>
+                        </div>
+                    </div>
+                    <input type="file" id="u-foto-input" accept="image/jpeg,image/png" style="display:none;" />
+                </div>
+
+                <!-- ── NOMBRES ── -->
                 <div class="form-row">
                     <div class="form-group">
                         <label>Primer Nombre <span class="req">*</span></label>
-                        <input type="text" id="u-primer-nombre" placeholder="Ej. Juan" required autocomplete="off" />
+                        <input type="text" id="u-primer-nombre" placeholder="Ej. JUAN" required autocomplete="off" class="input-uppercase" />
                     </div>
                     <div class="form-group">
-                        <label>Segundo Nombre <span class="opt">(opcional)</span></label>
-                        <input type="text" id="u-segundo-nombre" placeholder="Ej. Carlos" autocomplete="off" />
+                        <label>Segundo Nombre <span class="req">*</span></label>
+                        <input type="text" id="u-segundo-nombre" placeholder="Ej. CARLOS" required autocomplete="off" class="input-uppercase" />
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label>Primer Apellido <span class="req">*</span></label>
-                        <input type="text" id="u-primer-apellido" placeholder="Ej. Pérez" required autocomplete="off" />
+                        <input type="text" id="u-primer-apellido" placeholder="Ej. PÉREZ" required autocomplete="off" class="input-uppercase" />
                     </div>
                     <div class="form-group">
-                        <label>Segundo Apellido <span class="opt">(opcional)</span></label>
-                        <input type="text" id="u-segundo-apellido" placeholder="Ej. González" autocomplete="off" />
+                        <label>Segundo Apellido <span class="req">*</span></label>
+                        <input type="text" id="u-segundo-apellido" placeholder="Ej. GONZÁLEZ" required autocomplete="off" class="input-uppercase" />
                     </div>
                 </div>
 
+                <!-- ── NACIMIENTO Y GÉNERO ── -->
                 <div class="form-row">
                     <div class="form-group">
                         <label>Fecha de Nacimiento <span class="req">*</span></label>
@@ -52,6 +148,7 @@ function renderViewAdminUsuarios(container) {
                     </div>
                 </div>
 
+                <!-- ── CORREOS ── -->
                 <div class="form-row">
                     <div class="form-group">
                         <label>Correo Personal <span class="req">*</span></label>
@@ -63,37 +160,53 @@ function renderViewAdminUsuarios(container) {
                     </div>
                 </div>
 
+                <!-- ── TELÉFONOS ── -->
                 <div class="form-row">
                     <div class="form-group">
                         <label>Teléfono Móvil <span class="req">*</span></label>
-                        <input type="tel" id="u-tel-movil" placeholder="Ej. 7777-8888" required autocomplete="off" />
+                        <input type="text" id="u-tel-movil" placeholder="7777-8888" required autocomplete="off" maxlength="9" inputmode="numeric" />
                     </div>
                     <div class="form-group">
                         <label>Teléfono Fijo <span class="opt">(opcional)</span></label>
-                        <input type="tel" id="u-tel-fijo" placeholder="Ej. 2222-3333" autocomplete="off" />
+                        <input type="text" id="u-tel-fijo" placeholder="2222-3333" autocomplete="off" maxlength="9" inputmode="numeric" />
                     </div>
                 </div>
 
+                <!-- ── DIRECCIÓN ── -->
                 <div class="form-group">
                     <label>Dirección <span class="req">*</span></label>
                     <input type="text" id="u-direccion" placeholder="Ej. Colonia X, Calle Y, Casa Z" required autocomplete="off" class="form-input-full" />
                 </div>
 
-                <div class="form-row form-row-3">
+                <!-- ── DUI ── -->
+                <div class="form-row">
                     <div class="form-group">
-                        <label>DUI <span class="req">*</span></label>
-                        <input type="text" id="u-dui" placeholder="00000000-0" required autocomplete="off" />
+                        <label>Tipo de DUI <span class="req">*</span></label>
+                        <select id="u-dui-tipo" required class="form-select">
+                            <option value="" disabled selected>Selecciona...</option>
+                            <option value="PERSONAL">Personal</option>
+                            <option value="RESPONSABLE">Del Responsable</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label>Carnet <span class="req">*</span></label>
-                        <input type="text" id="u-carnet" placeholder="Ej. 123456" required autocomplete="off" />
-                    </div>
-                    <div class="form-group">
-                        <label>Carnet de Minoridad <span class="opt">(opcional)</span></label>
-                        <input type="text" id="u-carnet-minoridad" placeholder="Ej. 654321" autocomplete="off" />
+                        <label>Número de DUI <span class="req">*</span></label>
+                        <input type="text" id="u-dui" placeholder="00000000-0" required autocomplete="off" maxlength="10" inputmode="numeric" />
                     </div>
                 </div>
 
+                <!-- ── CARNETS ── -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Carnet <span class="req">*</span></label>
+                        <input type="text" id="u-carnet" placeholder="Ej. 20231234" required autocomplete="off" inputmode="numeric" />
+                    </div>
+                    <div class="form-group">
+                        <label>Carnet de Minoridad <span class="opt">(opcional)</span></label>
+                        <input type="text" id="u-carnet-minoridad" placeholder="Ej. 654321" autocomplete="off" inputmode="numeric" />
+                    </div>
+                </div>
+
+                <!-- ── CONTRASEÑA Y ROL ── -->
                 <div class="form-row">
                     <div class="form-group">
                         <label>Contraseña <span class="req">*</span></label>
@@ -120,75 +233,130 @@ function renderViewAdminUsuarios(container) {
         </div>
     `;
 
+    // ── Formatos de inputs ───────────────────────────────────
+    setupUppercase("u-primer-nombre");
+    setupUppercase("u-segundo-nombre");
+    setupUppercase("u-primer-apellido");
+    setupUppercase("u-segundo-apellido");
+    setupTelFormat("u-tel-movil");
+    setupTelFormat("u-tel-fijo");
+    setupDuiFormat("u-dui");
+    setupNumericOnly("u-carnet");
+    setupNumericOnly("u-carnet-minoridad");
+
+    // ── Lógica de foto de perfil ─────────────────────────────
+    let fotoBase64 = null;
+
+    const fotoInput      = document.getElementById("u-foto-input");
+    const btnElegirFoto  = document.getElementById("btn-elegir-foto");
+    const btnQuitarFoto  = document.getElementById("btn-quitar-foto-form");
+    const fotoCircle     = document.getElementById("foto-preview-circle");
+
+    fotoCircle.addEventListener("click", () => fotoInput.click());
+    btnElegirFoto.addEventListener("click", () => fotoInput.click());
+
+    fotoInput.addEventListener("change", () => {
+        const file = fotoInput.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+            alert("La imagen no puede superar los 2 MB.");
+            fotoInput.value = "";
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = e => {
+            fotoBase64 = e.target.result;
+            fotoCircle.innerHTML = `<img src="${fotoBase64}" alt="Foto" style="width:100%;height:100%;object-fit:cover;" />`;
+            btnQuitarFoto.style.display = "";
+        };
+        reader.readAsDataURL(file);
+    });
+
+    btnQuitarFoto.addEventListener("click", () => {
+        fotoBase64 = null;
+        fotoInput.value = "";
+        fotoCircle.innerHTML = `<span class="material-symbols-rounded" style="font-size:2.2rem;">person</span>`;
+        btnQuitarFoto.style.display = "none";
+    });
+
+    // ── Envío del formulario ─────────────────────────────────
     const form = document.getElementById("add-user-form");
+
     form.addEventListener("submit", e => {
         e.preventDefault();
 
+        // Validación manual de campos requeridos
+        const requeridos = [
+            "u-primer-nombre", "u-segundo-nombre",
+            "u-primer-apellido", "u-segundo-apellido",
+            "u-fecha-nac", "u-genero",
+            "u-correo-personal", "u-correo-institucional",
+            "u-tel-movil", "u-direccion",
+            "u-dui-tipo", "u-dui",
+            "u-carnet", "u-password", "u-rol"
+        ];
+        let valido = true;
+        requeridos.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el.value.trim()) {
+                el.style.borderColor = "#e74c3c";
+                valido = false;
+                el.addEventListener("input", () => el.style.borderColor = "", { once: true });
+            }
+        });
+        if (!valido) {
+            alert("Por favor completa todos los campos obligatorios.");
+            return;
+        }
+
+        // Limpiar teléfonos (quitar guión visual)
+        const telMovilRaw = document.getElementById("u-tel-movil").value.replace("-", "").trim();
+        const telFijoRaw  = document.getElementById("u-tel-fijo").value.replace("-", "").trim();
+        // Limpiar DUI (quitar guión visual)
+        const duiRaw = document.getElementById("u-dui").value.replace("-", "").trim();
+
         const nuevo = {
-            primer_nombre: document.getElementById("u-primer-nombre").value.trim(),
-            segundo_nombre: document.getElementById("u-segundo-nombre").value.trim(),
-
-            primer_apellido: document.getElementById("u-primer-apellido").value.trim(),
-            segundo_apellido: document.getElementById("u-segundo-apellido").value.trim(),
-
-            fecha_nacimiento: document.getElementById("u-fecha-nac").value,
-
-            sexo: document.getElementById("u-genero").value,
-
-            correo_personal: document.getElementById("u-correo-personal").value.trim(),
-
-            correo_institucional: document.getElementById("u-correo-institucional").value.trim(),
-
-            telefono_movil: document.getElementById("u-tel-movil").value.trim(),
-
-            telefono_fijo: document.getElementById("u-tel-fijo").value.trim(),
-
-            direccion: document.getElementById("u-direccion").value.trim(),
-
-            dui: document.getElementById("u-dui").value.trim(),
-
-            carnet: document.getElementById("u-carnet").value.trim(),
-
-            carnet_minoridad: document.getElementById("u-carnet-minoridad").value.trim(),
-
-            password: document.getElementById("u-password").value,
-
-            id_rol: parseInt(document.getElementById("u-rol").value)
+            primer_nombre:       document.getElementById("u-primer-nombre").value.trim(),
+            segundo_nombre:      document.getElementById("u-segundo-nombre").value.trim(),
+            primer_apellido:     document.getElementById("u-primer-apellido").value.trim(),
+            segundo_apellido:    document.getElementById("u-segundo-apellido").value.trim(),
+            fecha_nacimiento:    document.getElementById("u-fecha-nac").value,
+            sexo:                document.getElementById("u-genero").value,
+            correo_personal:     document.getElementById("u-correo-personal").value.trim(),
+            correo_institucional:document.getElementById("u-correo-institucional").value.trim(),
+            telefono_movil:      telMovilRaw,
+            telefono_fijo:       telFijoRaw,
+            direccion:           document.getElementById("u-direccion").value.trim(),
+            dui_tipo:            document.getElementById("u-dui-tipo").value,
+            dui:                 duiRaw,
+            carnet:              document.getElementById("u-carnet").value.trim(),
+            carnet_minoridad:    document.getElementById("u-carnet-minoridad").value.trim(),
+            password:            document.getElementById("u-password").value,
+            id_rol:              parseInt(document.getElementById("u-rol").value),
+            foto_perfil:         fotoBase64 || null
         };
 
-
-        // TODO: reemplazar con fetch() POST /usuarios
         fetch("http://127.0.0.1:5000/usuarios", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify(nuevo)
-})
-.then(res => res.json())
-.then(data => {
-
-    if(data.success){
-
-        form.reset();
-
-        alert("Usuario registrado correctamente");
-
-    }else{
-
-        alert(data.error || data.mensaje);
-
-    }
-
-})
-.catch(error => {
-
-    console.error(error);
-
-    alert("Error al conectar con el servidor");
-
-});
-
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(nuevo)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                form.reset();
+                fotoBase64 = null;
+                fotoCircle.innerHTML = `<span class="material-symbols-rounded" style="font-size:2.2rem;">person</span>`;
+                btnQuitarFoto.style.display = "none";
+                alert("Usuario registrado correctamente");
+            } else {
+                alert(data.error || data.mensaje);
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Error al conectar con el servidor");
+        });
     });
 }
 
