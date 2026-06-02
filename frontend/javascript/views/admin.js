@@ -46,9 +46,8 @@ function renderViewAdminUsuarios(container) {
                         <label>Género <span class="req">*</span></label>
                         <select id="u-genero" required class="form-select">
                             <option value="" disabled selected>Selecciona...</option>
-                            <option value="M">Masculino</option>
-                            <option value="F">Femenino</option>
-                            <option value="O">Otro</option>
+                            <option value="MASCULINO">Masculino</option>
+                            <option value="FEMENINO">Femenino</option>
                         </select>
                     </div>
                 </div>
@@ -126,37 +125,70 @@ function renderViewAdminUsuarios(container) {
         e.preventDefault();
 
         const nuevo = {
-            primerNombre:        document.getElementById("u-primer-nombre").value.trim(),
-            segundoNombre:       document.getElementById("u-segundo-nombre").value.trim(),
-            primerApellido:      document.getElementById("u-primer-apellido").value.trim(),
-            segundoApellido:     document.getElementById("u-segundo-apellido").value.trim(),
-            fechaNacimiento:     document.getElementById("u-fecha-nac").value,
-            genero:              document.getElementById("u-genero").value,
-            correoPersonal:      document.getElementById("u-correo-personal").value.trim(),
-            correoInstitucional: document.getElementById("u-correo-institucional").value.trim(),
-            telMovil:            document.getElementById("u-tel-movil").value.trim(),
-            telFijo:             document.getElementById("u-tel-fijo").value.trim(),
-            direccion:           document.getElementById("u-direccion").value.trim(),
-            dui:                 document.getElementById("u-dui").value.trim(),
-            carnet:              document.getElementById("u-carnet").value.trim(),
-            carnetMinoridad:     document.getElementById("u-carnet-minoridad").value.trim(),
-            rol:                 parseInt(document.getElementById("u-rol").value),
-            activo:              true
+            primer_nombre: document.getElementById("u-primer-nombre").value.trim(),
+            segundo_nombre: document.getElementById("u-segundo-nombre").value.trim(),
+
+            primer_apellido: document.getElementById("u-primer-apellido").value.trim(),
+            segundo_apellido: document.getElementById("u-segundo-apellido").value.trim(),
+
+            fecha_nacimiento: document.getElementById("u-fecha-nac").value,
+
+            sexo: document.getElementById("u-genero").value,
+
+            correo_personal: document.getElementById("u-correo-personal").value.trim(),
+
+            correo_institucional: document.getElementById("u-correo-institucional").value.trim(),
+
+            telefono_movil: document.getElementById("u-tel-movil").value.trim(),
+
+            telefono_fijo: document.getElementById("u-tel-fijo").value.trim(),
+
+            direccion: document.getElementById("u-direccion").value.trim(),
+
+            dui: document.getElementById("u-dui").value.trim(),
+
+            carnet: document.getElementById("u-carnet").value.trim(),
+
+            carnet_minoridad: document.getElementById("u-carnet-minoridad").value.trim(),
+
+            password: document.getElementById("u-password").value,
+
+            id_rol: parseInt(document.getElementById("u-rol").value)
         };
 
+
         // TODO: reemplazar con fetch() POST /usuarios
-        const lista = JSON.parse(localStorage.getItem("sami_usuarios_v2")) || [];
-        lista.push(nuevo);
-        localStorage.setItem("sami_usuarios_v2", JSON.stringify(lista));
+        fetch("http://127.0.0.1:5000/usuarios", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify(nuevo)
+})
+.then(res => res.json())
+.then(data => {
+
+    if(data.success){
 
         form.reset();
-        const btn = form.querySelector(".btn-primary");
-        btn.innerHTML = `<span class="material-symbols-rounded">check_circle</span> ¡Usuario Guardado!`;
-        btn.style.background = "#4CAF50";
-        setTimeout(() => {
-            btn.innerHTML = `<span class="material-symbols-rounded">save</span> Guardar Usuario`;
-            btn.style.background = "";
-        }, 2500);
+
+        alert("Usuario registrado correctamente");
+
+    }else{
+
+        alert(data.error || data.mensaje);
+
+    }
+
+})
+.catch(error => {
+
+    console.error(error);
+
+    alert("Error al conectar con el servidor");
+
+});
+
     });
 }
 
@@ -278,12 +310,22 @@ function renderViewAdminRegistrados(container) {
     const editForm= document.getElementById("edit-form");
 
     // TODO: reemplazar con fetch() GET /usuarios
-    let usuarios = JSON.parse(localStorage.getItem("sami_usuarios_v2")) || [];
+    let usuarios = [];
 
     function nombreCompleto(u) {
-        return [u.primerNombre, u.segundoNombre, u.primerApellido, u.segundoApellido]
-            .filter(Boolean).join(" ");
-    }
+
+    return [
+
+        u.primer_nombre,
+        u.segundo_nombre,
+        u.primer_apellido,
+        u.segundo_apellido
+
+    ]
+    .filter(Boolean)
+    .join(" ");
+
+}
 
     function renderTabla(lista) {
         tbody.innerHTML = "";
@@ -300,12 +342,12 @@ function renderViewAdminRegistrados(container) {
             const tr  = document.createElement("tr");
             tr.innerHTML = `
                 <td><strong>${nombreCompleto(u)}</strong></td>
-                <td>${u.correoInstitucional}</td>
+                <td>${u.correo_institucional}</td>
                 <td>${u.carnet}</td>
-                <td><span class="subject-tag">${ROLES[u.rol] || "—"}</span></td>
+                <td><span class="subject-tag">${ROLES[u.id_rol] || "—"}</span></td>
                 <td style="text-align:center;">
-                    <span class="status-badge ${u.activo ? "attended" : "pending"}">
-                        ${u.activo ? "Activo" : "Inactivo"}
+                    <span class="status-badge ${u.estado === "ACTIVO" ? "attended" : "pending"}">
+                        ${u.estado === "ACTIVO" ? "Activo" : "Inactivo"}
                     </span>
                 </td>
                 <td style="text-align:center;">
@@ -313,8 +355,8 @@ function renderViewAdminRegistrados(container) {
                         <button class="btn-icon btn-edit" data-idx="${idx}" title="Editar">
                             <span class="material-symbols-rounded">edit</span>
                         </button>
-                        <button class="btn-icon ${u.activo ? "btn-icon-danger" : "btn-icon-success"} btn-toggle" data-idx="${idx}" title="${u.activo ? "Deshabilitar" : "Habilitar"}">
-                            <span class="material-symbols-rounded">${u.activo ? "block" : "check_circle"}</span>
+                        <button class="btn-icon ${u.estado === "ACTIVO" ? "btn-icon-danger" : "btn-icon-success"} btn-toggle" data-idx="${idx}" title="${u.estado === "ACTIVO" ? "Deshabilitar" : "Habilitar"}">
+                            <span class="material-symbols-rounded">${u.estado === "ACTIVO" ? "block" : "check_circle"}</span>
                         </button>
                     </div>
                 </td>
@@ -326,20 +368,69 @@ function renderViewAdminRegistrados(container) {
             btn.addEventListener("click", () => abrirModal(parseInt(btn.dataset.idx)));
         });
         tbody.querySelectorAll(".btn-toggle").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const i = parseInt(btn.dataset.idx);
-                usuarios[i].activo = !usuarios[i].activo;
-                localStorage.setItem("sami_usuarios_v2", JSON.stringify(usuarios));
+
+    btn.addEventListener("click", () => {
+
+        const i = parseInt(btn.dataset.idx);
+
+        const usuario = usuarios[i];
+
+        const nuevoEstado =
+            usuario.estado === "ACTIVO"
+            ? "INACTIVO"
+            : "ACTIVO";
+
+        fetch(
+            `http://127.0.0.1:5000/usuarios/${usuario.id_usuario}/estado`,
+            {
+                method: "PUT",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    estado: nuevoEstado
+                })
+            }
+        )
+
+        .then(res => res.json())
+
+        .then(data => {
+
+            if(data.success){
+
+                usuario.estado = nuevoEstado;
+
                 renderTabla(filtrar());
-            });
+
+            }else{
+
+                alert(data.mensaje);
+
+            }
+
+        })
+
+        .catch(error => {
+
+            console.error(error);
+
+            alert("Error al cambiar estado");
+
         });
+
+    });
+
+});
     }
 
     function filtrar() {
         const q = search.value.toLowerCase().trim();
         return q ? usuarios.filter(u =>
             nombreCompleto(u).toLowerCase().includes(q) ||
-            u.correoInstitucional.toLowerCase().includes(q) ||
+            u.correo_institucional.toLowerCase().includes(q)||
             u.carnet.toLowerCase().includes(q)
         ) : [...usuarios];
     }
@@ -350,15 +441,15 @@ function renderViewAdminRegistrados(container) {
     function abrirModal(idx) {
         const u = usuarios[idx];
         document.getElementById("edit-index").value             = idx;
-        document.getElementById("edit-primer-nombre").value     = u.primerNombre || "";
-        document.getElementById("edit-segundo-nombre").value    = u.segundoNombre || "";
-        document.getElementById("edit-primer-apellido").value   = u.primerApellido || "";
-        document.getElementById("edit-segundo-apellido").value  = u.segundoApellido || "";
-        document.getElementById("edit-correo-personal").value   = u.correoPersonal || "";
-        document.getElementById("edit-correo-institucional").value = u.correoInstitucional || "";
-        document.getElementById("edit-tel-movil").value         = u.telMovil || "";
+        document.getElementById("edit-primer-nombre").value     = u.primer_nombre || "";
+        document.getElementById("edit-segundo-nombre").value    = u.segundo_nombre || "";
+        document.getElementById("edit-primer-apellido").value   = u.primer_apellido || "";
+        document.getElementById("edit-segundo-apellido").value  = u.segundo_apellido || "";
+        document.getElementById("edit-correo-personal").value   = u.correo_personal || "";
+        document.getElementById("edit-correo-institucional").value = u.correo_institucional || "";
+        document.getElementById("edit-tel-movil").value         = u.telefono_movil || "";
         document.getElementById("edit-carnet").value            = u.carnet || "";
-        document.getElementById("edit-rol").value               = u.rol || 3;
+        document.getElementById("edit-rol").value               = u.id_rol || 3;
         document.getElementById("edit-direccion").value         = u.direccion || "";
         overlay.style.display = "flex";
     }
@@ -370,25 +461,104 @@ function renderViewAdminRegistrados(container) {
     overlay.addEventListener("click", e => { if (e.target === overlay) cerrarModal(); });
 
     editForm.addEventListener("submit", e => {
-        e.preventDefault();
-        const idx = parseInt(document.getElementById("edit-index").value);
-        usuarios[idx] = {
-            ...usuarios[idx],
-            primerNombre:        document.getElementById("edit-primer-nombre").value.trim(),
-            segundoNombre:       document.getElementById("edit-segundo-nombre").value.trim(),
-            primerApellido:      document.getElementById("edit-primer-apellido").value.trim(),
-            segundoApellido:     document.getElementById("edit-segundo-apellido").value.trim(),
-            correoPersonal:      document.getElementById("edit-correo-personal").value.trim(),
-            correoInstitucional: document.getElementById("edit-correo-institucional").value.trim(),
-            telMovil:            document.getElementById("edit-tel-movil").value.trim(),
-            carnet:              document.getElementById("edit-carnet").value.trim(),
-            rol:                 parseInt(document.getElementById("edit-rol").value),
-            direccion:           document.getElementById("edit-direccion").value.trim()
-        };
-        localStorage.setItem("sami_usuarios_v2", JSON.stringify(usuarios));
-        cerrarModal();
-        renderTabla(filtrar());
+
+    e.preventDefault();
+
+    const idx = parseInt(
+        document.getElementById("edit-index").value
+    );
+
+    const usuario = usuarios[idx];
+
+    console.log(usuario);
+    console.log(usuario.id_usuario);
+
+    const datos = {
+
+        primer_nombre: document.getElementById("edit-primer-nombre").value.trim(),
+
+        segundo_nombre: document.getElementById("edit-segundo-nombre").value.trim(),
+
+        primer_apellido: document.getElementById("edit-primer-apellido").value.trim(),
+
+        segundo_apellido: document.getElementById("edit-segundo-apellido").value.trim(),
+
+        correo_personal: document.getElementById("edit-correo-personal").value.trim(),
+
+        correo_institucional: document.getElementById("edit-correo-institucional").value.trim(),
+
+        telefono_movil: document.getElementById("edit-tel-movil").value.trim(),
+
+        carnet: document.getElementById("edit-carnet").value.trim(),
+
+        direccion: document.getElementById("edit-direccion").value.trim(),
+
+        id_rol: parseInt(
+            document.getElementById("edit-rol").value
+        )
+
+    };
+
+    fetch(`http://127.0.0.1:5000/usuarios/${usuario.id_usuario}`, {
+
+        method: "PUT",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify(datos)
+
+    })
+
+    .then(res => res.json())
+
+    .then(data => {
+
+        if(data.success){
+
+            alert("Usuario actualizado correctamente");
+
+            cerrarModal();
+
+            location.reload();
+
+        }else{
+
+            alert(data.mensaje);
+
+        }
+
+    })
+
+    .catch(error => {
+
+        console.error(error);
+
+        alert("Error al actualizar usuario");
+
     });
 
-    renderTabla(usuarios);
+});
+
+    fetch("http://127.0.0.1:5000/usuarios")
+    .then(res => res.json())
+    .then(data => {
+
+        if(data.success){
+
+            usuarios = data.usuarios;
+
+            renderTabla(usuarios);
+
+        }
+
+    })
+    .catch(error => {
+
+        console.error(error);
+
+        alert("Error al cargar usuarios");
+
+    });
 }
