@@ -35,17 +35,20 @@
           <!-- Inyectado por app.js según el rol -->
         </ul>
         <ul class="nav-list secondary-nav">
-          <li class="nav-item">
-            <a href="WIP.html" class="nav-link">
+          <li class="nav-item dropdown-container" id="config-dropdown-container">
+            <a href="#" class="nav-link dropdown-toggle" id="nav-config">
               <span class="material-symbols-rounded">settings</span>
               <span class="nav-label">Configuración</span>
+              <span class="dropdown-icon material-symbols-rounded">keyboard_arrow_down</span>
             </a>
-          </li>
-          <li class="nav-item">
-            <a href="#" class="nav-link logout" id="logout-btn">
-              <span class="material-symbols-rounded">logout</span>
-              <span class="nav-label">Cerrar Sesión</span>
-            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a href="#" class="dropdown-link logout" id="logout-btn">
+                  <span class="material-symbols-rounded" style="font-size:1rem;vertical-align:middle;margin-right:6px;">logout</span>
+                  Cerrar Sesión
+                </a>
+              </li>
+            </ul>
           </li>
         </ul>
       </nav>

@@ -86,14 +86,14 @@ function renderViewAdminUsuarios(container) {
                 <div class="form-group" style="align-items:flex-start; margin-bottom:24px;">
                     <label>Foto de Perfil <span class="opt">(opcional)</span></label>
                     <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap; margin-top:6px;">
-                        <div id="foto-preview-wrap" style="
-                            width:90px; height:90px; border-radius:50%;
-                            background:var(--azul-sami); color:white;
-                            display:flex; align-items:center; justify-content:center;
-                            font-size:2rem; font-weight:700; overflow:hidden;
-                            border:2px solid var(--borde); cursor:pointer;
-                            flex-shrink:0;"
-                            title="Haz clic para seleccionar foto" id="foto-preview-circle">
+                        <div id="foto-preview-circle" style="
+                        width:90px; height:90px; border-radius:50%;
+                        background:var(--azul-sami); color:white;
+                        display:flex; align-items:center; justify-content:center;
+                        font-size:2rem; font-weight:700; overflow:hidden;
+                        border:2px solid var(--borde); cursor:pointer;
+                        flex-shrink:0;"
+                        title="Haz clic para seleccionar foto">
                             <span class="material-symbols-rounded" style="font-size:2.2rem;">person</span>
                         </div>
                         <div style="display:flex; flex-direction:column; gap:8px;">
@@ -184,8 +184,8 @@ function renderViewAdminUsuarios(container) {
                         <label>Tipo de DUI <span class="req">*</span></label>
                         <select id="u-dui-tipo" required class="form-select">
                             <option value="" disabled selected>Selecciona...</option>
-                            <option value="PERSONAL">PERSONAL</option>
-                            <option value="RESPONSABLE">DEL RESPONSABLE</option>
+                            <option value="PERSONAL">Personal</option>
+                            <option value="RESPONSABLE">Del Responsable</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -393,113 +393,162 @@ function renderViewAdminRegistrados(container) {
             </div>
         </div>
 
-        <!-- MODAL -->
+        <!-- MODAL EDITAR USUARIO -->
         <div id="modal-overlay" class="modal-overlay" style="display:none;">
-            <div class="modal-card">
+            <div class="modal-card" style="max-width:740px;">
                 <div class="modal-header">
                     <h3><span class="material-symbols-rounded">edit</span> Editar Usuario</h3>
                     <button id="modal-close" class="modal-close-btn">
                         <span class="material-symbols-rounded">close</span>
                     </button>
                 </div>
-                <form id="edit-form">
+                <form id="edit-form" novalidate>
                     <input type="hidden" id="edit-index" />
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Primer Nombre</label>
-                            <input type="text" id="edit-primer-nombre" required autocomplete="off" />
-                        </div>
-                        <div class="form-group">
-                            <label>Segundo Nombre</label>
-                            <input type="text" id="edit-segundo-nombre" autocomplete="off" />
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Primer Apellido</label>
-                            <input type="text" id="edit-primer-apellido" required autocomplete="off" />
-                        </div>
-                        <div class="form-group">
-                            <label>Segundo Apellido</label>
-                            <input type="text" id="edit-segundo-apellido" autocomplete="off" />
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Fecha de Nacimiento</label>
-                            <input type="date" id="edit-fecha-nacimiento" />
-                        </div>
 
+                    <!-- FOTO DE PERFIL -->
+                    <div class="form-group" style="margin-bottom:20px;">
+                        <label>Foto de Perfil</label>
+                        <div class="foto-upload-wrapper">
+                            <div class="foto-preview" id="edit-foto-preview">
+                                <span class="material-symbols-rounded" style="font-size:2.5rem;color:#ccc;">account_circle</span>
+                            </div>
+                            <div class="foto-upload-info">
+                                <button type="button" class="btn-secondary" id="btn-edit-foto-upload">
+                                    <span class="material-symbols-rounded">upload</span> Cambiar Foto
+                                </button>
+                                <span id="edit-foto-nombre" style="font-size:0.82rem;color:#999;margin-top:4px;display:block;">
+                                    Sin cambios
+                                </span>
+                                <span style="font-size:0.78rem;color:#bbb;">JPG, PNG o WEBP · máx 2 MB</span>
+                            </div>
+                            <input type="file" id="edit-foto-input" accept="image/jpeg,image/png,image/webp" style="display:none;" />
+                        </div>
+                    </div>
+
+                    <!-- NOMBRES -->
+                    <div class="form-row">
                         <div class="form-group">
-                            <label>Sexo</label>
-                            <select id="edit-sexo" class="form-select">
+                            <label>Primer Nombre <span class="req">*</span></label>
+                            <input type="text" id="edit-primer-nombre" required autocomplete="off" class="input-uppercase" />
+                        </div>
+                        <div class="form-group">
+                            <label>Segundo Nombre <span class="req">*</span></label>
+                            <input type="text" id="edit-segundo-nombre" required autocomplete="off" class="input-uppercase" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Primer Apellido <span class="req">*</span></label>
+                            <input type="text" id="edit-primer-apellido" required autocomplete="off" class="input-uppercase" />
+                        </div>
+                        <div class="form-group">
+                            <label>Segundo Apellido <span class="req">*</span></label>
+                            <input type="text" id="edit-segundo-apellido" required autocomplete="off" class="input-uppercase" />
+                        </div>
+                    </div>
+
+                    <!-- NACIMIENTO Y GÉNERO -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha de Nacimiento <span class="req">*</span></label>
+                            <input type="date" id="edit-fecha-nac" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Género <span class="req">*</span></label>
+                            <select id="edit-genero" required class="form-select">
+                                <option value="" disabled>Selecciona...</option>
                                 <option value="MASCULINO">Masculino</option>
                                 <option value="FEMENINO">Femenino</option>
                             </select>
                         </div>
                     </div>
+
+                    <!-- CORREOS -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Correo Personal</label>
+                            <label>Correo Personal <span class="req">*</span></label>
                             <input type="email" id="edit-correo-personal" required autocomplete="off" class="form-input-full" />
                         </div>
                         <div class="form-group">
-                            <label>Correo Institucional</label>
+                            <label>Correo Institucional <span class="req">*</span></label>
                             <input type="email" id="edit-correo-institucional" required autocomplete="off" class="form-input-full" />
                         </div>
                     </div>
-                    <div class="form-row">
-                    <div class="form-group">
-                        <label>Teléfono Móvil</label>
-                        <input type="tel" id="edit-tel-movil" autocomplete="off" />
-                    </div>
 
-                    <div class="form-group">
-                        <label>Teléfono Fijo</label>
-                        <input type="text" id="edit-tel-fijo" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Carnet</label>
-                        <input type="text" id="edit-carnet" autocomplete="off" />
-                    </div>
-                    </div>
-
-                    <div class="form-row">
-
-                    <div class="form-group">
-                        <label>Tipo DUI</label>
-
-                        <select id="edit-dui-tipo" class="form-select">
-                            <option value="PERSONAL">PERSONAL</option>
-                            <option value="RESPONSABLE">DEL RESPONSABLE</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>DUI</label>
-                        <input type="text" id="edit-dui" />
-                    </div>
-                    </div>
-                    <div class="form-group">
-                    <label>Carnet de Minoridad</label>
-                    <input type="text" id="edit-carnet-minoridad" />
-                    </div>
+                    <!-- TELÉFONOS -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Rol</label>
-                            <select id="edit-rol" class="form-select">
-                                <option value="1">Admin</option>
+                            <label>Teléfono Móvil <span class="req">*</span></label>
+                            <input type="text" id="edit-tel-movil" required autocomplete="off" maxlength="9" inputmode="numeric" />
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono Fijo <span class="opt">(opcional)</span></label>
+                            <input type="text" id="edit-tel-fijo" autocomplete="off" maxlength="9" inputmode="numeric" />
+                        </div>
+                    </div>
+
+                    <!-- DIRECCIÓN -->
+                    <div class="form-group">
+                        <label>Dirección <span class="req">*</span></label>
+                        <input type="text" id="edit-direccion" required autocomplete="off" class="form-input-full" />
+                    </div>
+
+                    <!-- DUI -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tipo de DUI <span class="req">*</span></label>
+                            <select id="edit-dui-tipo" required class="form-select">
+                                <option value="" disabled>Selecciona...</option>
+                                <option value="PERSONAL">Personal</option>
+                                <option value="RESPONSABLE">Del Responsable</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Número de DUI <span class="req">*</span></label>
+                            <input type="text" id="edit-dui" required autocomplete="off" maxlength="10" inputmode="numeric" />
+                        </div>
+                    </div>
+
+                    <!-- CARNETS -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Carnet <span class="req">*</span></label>
+                            <input type="text" id="edit-carnet" required autocomplete="off" inputmode="numeric" />
+                        </div>
+                        <div class="form-group">
+                            <label>Carnet de Minoridad <span class="opt">(opcional)</span></label>
+                            <input type="text" id="edit-carnet-minoridad" autocomplete="off" inputmode="numeric" />
+                        </div>
+                    </div>
+
+                    <!-- CONTRASEÑA Y ROL -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Contraseña <span class="opt">(dejar vacío para no cambiar)</span></label>
+                            <div style="position:relative;">
+                                <input type="password" id="edit-password" autocomplete="new-password"
+                                    placeholder="Nueva contraseña..."
+                                    class="form-input-full"
+                                    style="padding-right:44px; width:100%;" />
+                                <button type="button" id="edit-toggle-pass" tabindex="-1" style="
+                                    position:absolute; right:10px; top:50%; transform:translateY(-50%);
+                                    background:none; border:none; cursor:pointer; color:#888; padding:4px;
+                                    display:flex; align-items:center;" title="Ver/ocultar contraseña">
+                                    <span class="material-symbols-rounded" style="font-size:1.2rem;">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Rol <span class="req">*</span></label>
+                            <select id="edit-rol" required class="form-select">
+                                <option value="1">Administrador</option>
                                 <option value="2">Maestro</option>
                                 <option value="3">Estudiante</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label>Dirección</label>
-                            <input type="text" id="edit-direccion" autocomplete="off" class="form-input-full" />
-                        </div>
                     </div>
-                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:15px;">
+
+                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
                         <button type="button" id="modal-cancel" class="btn-secondary">Cancelar</button>
                         <button type="submit" class="btn-primary" style="width:auto;">
                             <span class="material-symbols-rounded">save</span> Guardar Cambios
@@ -646,39 +695,104 @@ function renderViewAdminRegistrados(container) {
 
     search.addEventListener("input", () => renderTabla(filtrar()));
 
-    // Modal
+    // Modal — abrir y poblar todos los campos
     function abrirModal(idx) {
+        const u = usuarios[idx];
+        document.getElementById("edit-index").value                = idx;
+        document.getElementById("edit-primer-nombre").value        = u.primer_nombre || "";
+        document.getElementById("edit-segundo-nombre").value       = u.segundo_nombre || "";
+        document.getElementById("edit-primer-apellido").value      = u.primer_apellido || "";
+        document.getElementById("edit-segundo-apellido").value     = u.segundo_apellido || "";
+        document.getElementById("edit-fecha-nac").value            = u.fecha_nacimiento || "";
+        document.getElementById("edit-genero").value               = u.sexo || "";
+        document.getElementById("edit-correo-personal").value      = u.correo_personal || "";
+        document.getElementById("edit-correo-institucional").value = u.correo_institucional || "";
+        // Teléfonos: formatear visualmente con guión si llegan sin él
+        const fmtTel = v => v && v.length === 8 ? v.slice(0,4) + "-" + v.slice(4) : (v || "");
+        document.getElementById("edit-tel-movil").value            = fmtTel(u.telefono_movil);
+        document.getElementById("edit-tel-fijo").value             = fmtTel(u.telefono_fijo);
+        document.getElementById("edit-direccion").value            = u.direccion || "";
+        document.getElementById("edit-dui-tipo").value             = u.dui_tipo || "";
+        // DUI: formatear con guión si llega limpio (9 dígitos)
+        const rawDui = u.dui || "";
+        document.getElementById("edit-dui").value = rawDui.length === 9
+            ? rawDui.slice(0,8) + "-" + rawDui.slice(8)
+            : rawDui;
+        document.getElementById("edit-carnet").value               = u.carnet || "";
+        document.getElementById("edit-carnet-minoridad").value     = u.carnet_minoridad || "";
+        document.getElementById("edit-password").value             = "";
+        document.getElementById("edit-rol").value                  = u.id_rol || 3;
 
-    const u = usuarios[idx];
+        // Resetear ojito al abrir
+        const passInput  = document.getElementById("edit-password");
+        const toggleBtn  = document.getElementById("edit-toggle-pass");
+        passInput.type   = "password";
+        toggleBtn.querySelector(".material-symbols-rounded").textContent = "visibility";
 
-    document.getElementById("edit-index").value = idx;
+        // Foto: mostrar la actual o el ícono por defecto
+        const editFotoPreview = document.getElementById("edit-foto-preview");
+        editFotoPreview._nuevaFoto = null; // resetear foto pendiente
+        if (u.foto_perfil) {
+            editFotoPreview.innerHTML = `<img src="${u.foto_perfil}" alt="Foto" style="width:80px;height:80px;border-radius:50%;object-fit:cover;" />`;
+        } else {
+            editFotoPreview.innerHTML = `<span class="material-symbols-rounded" style="font-size:2.5rem;color:#ccc;">account_circle</span>`;
+        }
+        document.getElementById("edit-foto-nombre").textContent = "Sin cambios";
 
-    document.getElementById("edit-primer-nombre").value = u.primer_nombre || "";
-    document.getElementById("edit-segundo-nombre").value = u.segundo_nombre || "";
-    document.getElementById("edit-primer-apellido").value = u.primer_apellido || "";
-    document.getElementById("edit-segundo-apellido").value = u.segundo_apellido || "";
+        overlay.style.display = "flex";
 
-    document.getElementById("edit-fecha-nacimiento").value = u.fecha_nacimiento || "";
-    document.getElementById("edit-sexo").value = u.sexo || "";
+        // Activar formatos en los inputs del modal
+        setupUppercase("edit-primer-nombre");
+        setupUppercase("edit-segundo-nombre");
+        setupUppercase("edit-primer-apellido");
+        setupUppercase("edit-segundo-apellido");
+        setupTelFormat("edit-tel-movil");
+        setupTelFormat("edit-tel-fijo");
+        setupDuiFormat("edit-dui");
+        setupNumericOnly("edit-carnet");
+        setupNumericOnly("edit-carnet-minoridad");
 
-    document.getElementById("edit-correo-personal").value = u.correo_personal || "";
-    document.getElementById("edit-correo-institucional").value = u.correo_institucional || "";
+        // Toggle de visibilidad de contraseña
+        toggleBtn.onclick = () => {
+            const esPassword = passInput.type === "password";
+            passInput.type = esPassword ? "text" : "password";
+            toggleBtn.querySelector(".material-symbols-rounded").textContent =
+                esPassword ? "visibility_off" : "visibility";
+        };
 
-    document.getElementById("edit-tel-movil").value = u.telefono_movil || "";
-    document.getElementById("edit-tel-fijo").value = u.telefono_fijo || "";
+        // Foto: botón subir y leer archivo
+        const btnEditFoto  = document.getElementById("btn-edit-foto-upload");
+        const editFotoInput = document.getElementById("edit-foto-input");
+        const editFotoNombre = document.getElementById("edit-foto-nombre");
 
-    document.getElementById("edit-direccion").value = u.direccion || "";
+        // Clonar para eliminar listeners anteriores
+        const btnEditFotoClone = btnEditFoto.cloneNode(true);
+        btnEditFoto.parentNode.replaceChild(btnEditFotoClone, btnEditFoto);
+        const editFotoInputClone = editFotoInput.cloneNode(true);
+        editFotoInput.parentNode.replaceChild(editFotoInputClone, editFotoInput);
 
-    document.getElementById("edit-dui").value = u.dui || "";
-    document.getElementById("edit-dui-tipo").value = u.dui_tipo || "PERSONAL";
+        btnEditFotoClone.addEventListener("click", () => editFotoInputClone.click());
 
-    document.getElementById("edit-carnet").value = u.carnet || "";
-    document.getElementById("edit-carnet-minoridad").value = u.carnet_minoridad || "";
+        editFotoInputClone.addEventListener("change", () => {
+            const file = editFotoInputClone.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                alert("La imagen no puede superar los 2 MB.");
+                editFotoInputClone.value = "";
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = e => {
+                const dataUrl = e.target.result;
+                editFotoPreview.innerHTML = `
+                <img src="${dataUrl}"alt="Nueva foto" style="width:80px;height:80px;border-radius:50%;object-fit:cover;" />`;
 
-    document.getElementById("edit-rol").value = u.id_rol || 3;
-
-    overlay.style.display = "flex";
-}
+                editFotoPreview._nuevaFoto = dataUrl;
+                editFotoNombre.textContent = file.name;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 
     function cerrarModal() { overlay.style.display = "none"; }
 
@@ -687,97 +801,83 @@ function renderViewAdminRegistrados(container) {
     overlay.addEventListener("click", e => { if (e.target === overlay) cerrarModal(); });
 
     editForm.addEventListener("submit", e => {
+        e.preventDefault();
 
-    e.preventDefault();
+        const idx     = parseInt(document.getElementById("edit-index").value);
+        const usuario = usuarios[idx];
 
-    const idx = parseInt(
-        document.getElementById("edit-index").value
-    );
+        // Validación de campos requeridos en el modal
+        const requeridos = [
+            "edit-primer-nombre", "edit-segundo-nombre",
+            "edit-primer-apellido", "edit-segundo-apellido",
+            "edit-fecha-nac", "edit-genero",
+            "edit-correo-personal", "edit-correo-institucional",
+            "edit-tel-movil", "edit-direccion",
+            "edit-dui-tipo", "edit-dui",
+            "edit-carnet", "edit-rol"
+        ];
+        let valido = true;
+        requeridos.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el || !el.value.trim()) {
+                if (el) {
+                    el.style.borderColor = "#e74c3c";
+                    el.addEventListener("input", () => el.style.borderColor = "", { once: true });
+                }
+                valido = false;
+            }
+        });
+        if (!valido) { alert("Por favor completa todos los campos obligatorios."); return; }
 
-    const usuario = usuarios[idx];
+        const datos = {
+            primer_nombre:        document.getElementById("edit-primer-nombre").value.trim(),
+            segundo_nombre:       document.getElementById("edit-segundo-nombre").value.trim(),
+            primer_apellido:      document.getElementById("edit-primer-apellido").value.trim(),
+            segundo_apellido:     document.getElementById("edit-segundo-apellido").value.trim(),
+            fecha_nacimiento:     document.getElementById("edit-fecha-nac").value,
+            sexo:                 document.getElementById("edit-genero").value,
+            correo_personal:      document.getElementById("edit-correo-personal").value.trim(),
+            correo_institucional: document.getElementById("edit-correo-institucional").value.trim(),
+            telefono_movil:       document.getElementById("edit-tel-movil").value.replace("-", "").trim(),
+            telefono_fijo:        document.getElementById("edit-tel-fijo").value.replace("-", "").trim(),
+            direccion:            document.getElementById("edit-direccion").value.trim(),
+            dui_tipo:             document.getElementById("edit-dui-tipo").value,
+            dui:                  document.getElementById("edit-dui").value.replace("-", "").trim(),
+            carnet:               document.getElementById("edit-carnet").value.trim(),
+            carnet_minoridad:     document.getElementById("edit-carnet-minoridad").value.trim(),
+            id_rol:               parseInt(document.getElementById("edit-rol").value)
+        };
 
-    console.log(usuario);
-    console.log(usuario.id_usuario);
-
-    const datos = {
-
-    primer_nombre: document.getElementById("edit-primer-nombre").value.trim(),
-
-    segundo_nombre: document.getElementById("edit-segundo-nombre").value.trim(),
-
-    primer_apellido: document.getElementById("edit-primer-apellido").value.trim(),
-
-    segundo_apellido: document.getElementById("edit-segundo-apellido").value.trim(),
-
-    fecha_nacimiento: document.getElementById("edit-fecha-nacimiento").value,
-
-    sexo: document.getElementById("edit-sexo").value,
-
-    correo_personal: document.getElementById("edit-correo-personal").value.trim(),
-
-    correo_institucional: document.getElementById("edit-correo-institucional").value.trim(),
-
-    telefono_movil: document.getElementById("edit-tel-movil").value.trim(),
-
-    telefono_fijo: document.getElementById("edit-tel-fijo").value.trim(),
-
-    direccion: document.getElementById("edit-direccion").value.trim(),
-
-    dui: document.getElementById("edit-dui").value.trim(),
-
-    dui_tipo: document.getElementById("edit-dui-tipo").value,
-
-    carnet: document.getElementById("edit-carnet").value.trim(),
-
-    carnet_minoridad: document.getElementById("edit-carnet-minoridad").value.trim(),
-
-    id_rol: parseInt(
-        document.getElementById("edit-rol").value
-    )
-
-};
-
-    fetch(`http://127.0.0.1:5000/usuarios/${usuario.id_usuario}`, {
-
-        method: "PUT",
-
-        headers: {
-            "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify(datos)
-
-    })
-
-    .then(res => res.json())
-
-    .then(data => {
-
-        if(data.success){
-
-            alert("Usuario actualizado correctamente");
-
-            cerrarModal();
-
-            location.reload();
-
-        }else{
-
-            alert(data.mensaje);
-
+        // Incluir foto si el admin subió una nueva
+        const fotoPreviewEl = document.getElementById("edit-foto-preview");
+        if (fotoPreviewEl && fotoPreviewEl._nuevaFoto) {
+            datos.foto_perfil = fotoPreviewEl._nuevaFoto;
         }
 
-    })
+        // Solo incluir contraseña si el admin escribió algo
+        const nuevaPass = document.getElementById("edit-password").value;
+        if (nuevaPass.trim()) datos.password = nuevaPass;
 
-    .catch(error => {
-
-        console.error(error);
-
-        alert("Error al actualizar usuario");
-
+        fetch(`http://127.0.0.1:5000/usuarios/${usuario.id_usuario}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(datos)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("Usuario actualizado correctamente");
+                cerrarModal();
+                location.reload();
+            } else {
+                alert(data.mensaje);
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Error al actualizar usuario");
+        });
     });
-
-});
 
     fetch("http://127.0.0.1:5000/usuarios")
     .then(res => res.json())

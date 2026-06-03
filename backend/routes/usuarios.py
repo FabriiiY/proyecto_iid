@@ -43,13 +43,14 @@ def crear_usuario():
         id_rol
         )
         VALUES(
-            %s,%s,%s,%s,
-            %s,%s,%s,%s,
-            %s,%s,%s,%s,
-            %s,%s,%s,%s,
-            %s,%s,%s,
-            CURDATE(),%s
-        )
+        %s,%s,%s,%s,
+        %s,%s,%s,%s,
+        %s,%s,%s,%s,
+        %s,%s,%s,%s,
+        %s,%s,
+        CURDATE(),
+        %s
+    )
         """
 
         valores = (
