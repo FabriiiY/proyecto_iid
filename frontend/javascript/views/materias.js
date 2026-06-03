@@ -2,16 +2,6 @@
 //  views/materias.js — Gestión de Materias (Admin & Maestro)
 // ============================================================
 
-const MATERIAS_KEY = "sami_materias_v1";
-
-// ── Helpers ──────────────────────────────────────────────────
-function getMaterias() {
-    return JSON.parse(localStorage.getItem(MATERIAS_KEY)) || [];
-}
-
-function saveMaterias(lista) {
-    localStorage.setItem(MATERIAS_KEY, JSON.stringify(lista));
-}
 
 // ── VISTA: AGREGAR MATERIA ────────────────────────────────────
 function renderViewMateriasAgregar(container) {
@@ -286,7 +276,7 @@ function renderViewMateriasVer(container) {
     const editForm= document.getElementById("edit-materia-form");
 
     // TODO: reemplazar con fetch() GET /materias
-    let materias = getMaterias();
+    let materias = [];
 
     function renderTabla(lista) {
         tbody.innerHTML = "";
@@ -307,9 +297,9 @@ function renderViewMateriasVer(container) {
                         ? `<p style="font-size:0.8rem;color:#999;margin:2px 0 0;line-height:1.3;">${m.descripcion}</p>`
                         : ""}
                 </td>
-                <td style="text-align:center;">${m.horasTeorica}</td>
-                <td style="text-align:center;">${m.horasPractica}</td>
-                <td style="text-align:center;">${m.uv}</td>
+                <td style="text-align:center;">${m.horas_teoricas}</td>
+                <td style="text-align:center;">${m.horas_practicas}</td>
+                <td style="text-align:center;">${m.unidades_valorativas}</td>
                 <td style="text-align:center;">
                     <span class="status-badge ${m.estado === "ACTIVA" ? "attended" : "pending"}">
                         ${m.estado === "ACTIVA" ? "Activa" : "Inactiva"}
@@ -317,11 +307,11 @@ function renderViewMateriasVer(container) {
                 </td>
                 <td style="text-align:center;">
                     <div style="display:flex;gap:6px;justify-content:center;">
-                        <button class="btn-icon btn-edit-materia" data-id="${m.id}" title="Editar">
+                        <button class="btn-icon btn-edit-materia" data-id="${m.id_materia}" title="Editar">
                             <span class="material-symbols-rounded">edit</span>
                         </button>
                         <button class="btn-icon ${m.estado === "ACTIVA" ? "btn-icon-danger" : "btn-icon-success"} btn-toggle-materia"
-                                data-id="${m.id}"
+                                data-id="${m.id_materia}"
                                 title="${m.estado === "ACTIVA" ? "Desactivar" : "Activar"}">
                             <span class="material-symbols-rounded">${m.estado === "ACTIVA" ? "block" : "check_circle"}</span>
                         </button>
@@ -333,20 +323,71 @@ function renderViewMateriasVer(container) {
 
         // Editar
         tbody.querySelectorAll(".btn-edit-materia").forEach(btn => {
-            btn.addEventListener("click", () => abrirModal(parseInt(btn.dataset.id)));
+        btn.addEventListener("click", () => abrirModal(parseInt(btn.dataset.id)));
         });
 
         // Toggle estado
         tbody.querySelectorAll(".btn-toggle-materia").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const id = parseInt(btn.dataset.id);
-                const idx = materias.findIndex(x => x.id === id);
-                if (idx === -1) return;
-                materias[idx].estado = materias[idx].estado === "activa" ? "inactiva" : "activa";
-                saveMaterias(materias);
+
+    btn.addEventListener("click", () => {
+
+        const id = parseInt(btn.dataset.id);
+
+        const materia = materias.find(
+            x => x.id_materia === id
+        );
+
+        if(!materia) return;
+
+        const nuevoEstado =
+            materia.estado === "ACTIVA"
+            ? "INACTIVA"
+            : "ACTIVA";
+
+        fetch(
+            `http://127.0.0.1:5000/materias/${id}/estado`,
+            {
+                method: "PUT",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    estado: nuevoEstado
+                })
+            }
+        )
+
+        .then(res => res.json())
+
+        .then(data => {
+
+            if(data.success){
+
+                materia.estado = nuevoEstado;
+
                 renderTabla(filtrar());
-            });
+
+            }else{
+
+                alert(data.mensaje);
+
+            }
+
+        })
+
+        .catch(error => {
+
+            console.error(error);
+
+            alert("Error al cambiar estado");
+
         });
+
+    });
+
+});
     }
 
     function filtrar() {
@@ -358,16 +399,17 @@ function renderViewMateriasVer(container) {
 
     // Modal
     function abrirModal(id) {
-        const m = materias.find(x => x.id === id);
+        const m = materias.find(x => x.id_materia === id);
         if (!m) return;
-        document.getElementById("edit-m-id").value          = m.id;
+        document.getElementById("edit-m-id").value = m.id_materia;
         document.getElementById("edit-m-nombre").value      = m.nombre;
-        document.getElementById("edit-m-teoricas").value    = m.horasTeorica;
-        document.getElementById("edit-m-practicas").value   = m.horasPractica;
-        document.getElementById("edit-m-uv").value          = m.uv;
+        document.getElementById("edit-m-teoricas").value    = m.horas_teoricas;
+        document.getElementById("edit-m-practicas").value   = m.horas_practicas;
+        document.getElementById("edit-m-uv").value          = m.unidades_valorativas;
         document.getElementById("edit-m-descripcion").value = m.descripcion || "";
         document.getElementById("edit-m-estado").value      = m.estado;
         modal.style.display = "flex";
+        
     }
 
     function cerrarModal() { modal.style.display = "none"; }
@@ -376,27 +418,100 @@ function renderViewMateriasVer(container) {
     document.getElementById("modal-materia-cancel").addEventListener("click", cerrarModal);
     modal.addEventListener("click", e => { if (e.target === modal) cerrarModal(); });
 
-    editForm.addEventListener("submit", e => {
-        e.preventDefault();
-        const id  = parseInt(document.getElementById("edit-m-id").value);
-        const idx = materias.findIndex(x => x.id === id);
-        if (idx === -1) return;
+   editForm.addEventListener("submit", e => {
 
-        materias[idx] = {
-            ...materias[idx],
-            nombre:        document.getElementById("edit-m-nombre").value.trim(),
-            horasTeorica:  parseInt(document.getElementById("edit-m-teoricas").value)  || 0,
-            horasPractica: parseInt(document.getElementById("edit-m-practicas").value) || 0,
-            uv:            parseInt(document.getElementById("edit-m-uv").value)         || 0,
-            descripcion:   document.getElementById("edit-m-descripcion").value.trim(),
-            estado:        document.getElementById("edit-m-estado").value
-        };
+    e.preventDefault();
 
-        // TODO: reemplazar con fetch() PUT /materias/:id
-        saveMaterias(materias);
-        cerrarModal();
-        renderTabla(filtrar());
+    const id = parseInt(
+        document.getElementById("edit-m-id").value
+    );
+
+    const datos = {
+
+        nombre: document.getElementById("edit-m-nombre").value.trim(),
+
+        horas_teoricas: parseInt(
+            document.getElementById("edit-m-teoricas").value
+        ) || 0,
+
+        horas_practicas: parseInt(
+            document.getElementById("edit-m-practicas").value
+        ) || 0,
+
+        unidades_valorativas: parseInt(
+            document.getElementById("edit-m-uv").value
+        ) || 0,
+
+        descripcion: document.getElementById("edit-m-descripcion").value.trim(),
+
+        estado: document.getElementById("edit-m-estado").value
+
+    };
+
+    fetch(`http://127.0.0.1:5000/materias/${id}`, {
+
+        method: "PUT",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify(datos)
+
+    })
+
+    .then(res => res.json())
+
+    .then(data => {
+
+        if(data.success){
+
+            alert("Materia actualizada correctamente");
+
+            cerrarModal();
+
+            location.reload();
+
+        }else{
+
+            alert(data.mensaje);
+
+        }
+
+    })
+
+    .catch(error => {
+
+        console.error(error);
+
+        alert("Error al actualizar materia");
+
     });
 
-    renderTabla(materias);
+});
+    
+
+    fetch("http://127.0.0.1:5000/materias")
+
+.then(res => res.json())
+
+.then(data => {
+
+    if(data.success){
+
+        materias = data.materias;
+
+        renderTabla(materias);
+
+    }
+
+})
+
+.catch(error => {
+
+    console.error(error);
+
+    alert("Error al cargar materias");
+
+});
 }

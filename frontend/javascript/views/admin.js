@@ -426,6 +426,20 @@ function renderViewAdminRegistrados(container) {
                     </div>
                     <div class="form-row">
                         <div class="form-group">
+                            <label>Fecha de Nacimiento</label>
+                            <input type="date" id="edit-fecha-nacimiento" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Sexo</label>
+                            <select id="edit-sexo" class="form-select">
+                                <option value="MASCULINO">Masculino</option>
+                                <option value="FEMENINO">Femenino</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
                             <label>Correo Personal</label>
                             <input type="email" id="edit-correo-personal" required autocomplete="off" class="form-input-full" />
                         </div>
@@ -435,14 +449,41 @@ function renderViewAdminRegistrados(container) {
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>Teléfono Móvil</label>
-                            <input type="tel" id="edit-tel-movil" autocomplete="off" />
-                        </div>
-                        <div class="form-group">
-                            <label>Carnet</label>
-                            <input type="text" id="edit-carnet" autocomplete="off" />
-                        </div>
+                    <div class="form-group">
+                        <label>Teléfono Móvil</label>
+                        <input type="tel" id="edit-tel-movil" autocomplete="off" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Teléfono Fijo</label>
+                        <input type="text" id="edit-tel-fijo" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Carnet</label>
+                        <input type="text" id="edit-carnet" autocomplete="off" />
+                    </div>
+                    </div>
+
+                    <div class="form-row">
+
+                    <div class="form-group">
+                        <label>Tipo DUI</label>
+
+                        <select id="edit-dui-tipo" class="form-select">
+                            <option value="PERSONAL">PERSONAL</option>
+                            <option value="RESPONSABLE">DEL RESPONSABLE</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>DUI</label>
+                        <input type="text" id="edit-dui" />
+                    </div>
+                    </div>
+                    <div class="form-group">
+                    <label>Carnet de Minoridad</label>
+                    <input type="text" id="edit-carnet-minoridad" />
                     </div>
                     <div class="form-row">
                         <div class="form-group">
@@ -607,20 +648,37 @@ function renderViewAdminRegistrados(container) {
 
     // Modal
     function abrirModal(idx) {
-        const u = usuarios[idx];
-        document.getElementById("edit-index").value             = idx;
-        document.getElementById("edit-primer-nombre").value     = u.primer_nombre || "";
-        document.getElementById("edit-segundo-nombre").value    = u.segundo_nombre || "";
-        document.getElementById("edit-primer-apellido").value   = u.primer_apellido || "";
-        document.getElementById("edit-segundo-apellido").value  = u.segundo_apellido || "";
-        document.getElementById("edit-correo-personal").value   = u.correo_personal || "";
-        document.getElementById("edit-correo-institucional").value = u.correo_institucional || "";
-        document.getElementById("edit-tel-movil").value         = u.telefono_movil || "";
-        document.getElementById("edit-carnet").value            = u.carnet || "";
-        document.getElementById("edit-rol").value               = u.id_rol || 3;
-        document.getElementById("edit-direccion").value         = u.direccion || "";
-        overlay.style.display = "flex";
-    }
+
+    const u = usuarios[idx];
+
+    document.getElementById("edit-index").value = idx;
+
+    document.getElementById("edit-primer-nombre").value = u.primer_nombre || "";
+    document.getElementById("edit-segundo-nombre").value = u.segundo_nombre || "";
+    document.getElementById("edit-primer-apellido").value = u.primer_apellido || "";
+    document.getElementById("edit-segundo-apellido").value = u.segundo_apellido || "";
+
+    document.getElementById("edit-fecha-nacimiento").value = u.fecha_nacimiento || "";
+    document.getElementById("edit-sexo").value = u.sexo || "";
+
+    document.getElementById("edit-correo-personal").value = u.correo_personal || "";
+    document.getElementById("edit-correo-institucional").value = u.correo_institucional || "";
+
+    document.getElementById("edit-tel-movil").value = u.telefono_movil || "";
+    document.getElementById("edit-tel-fijo").value = u.telefono_fijo || "";
+
+    document.getElementById("edit-direccion").value = u.direccion || "";
+
+    document.getElementById("edit-dui").value = u.dui || "";
+    document.getElementById("edit-dui-tipo").value = u.dui_tipo || "PERSONAL";
+
+    document.getElementById("edit-carnet").value = u.carnet || "";
+    document.getElementById("edit-carnet-minoridad").value = u.carnet_minoridad || "";
+
+    document.getElementById("edit-rol").value = u.id_rol || 3;
+
+    overlay.style.display = "flex";
+}
 
     function cerrarModal() { overlay.style.display = "none"; }
 
@@ -643,29 +701,41 @@ function renderViewAdminRegistrados(container) {
 
     const datos = {
 
-        primer_nombre: document.getElementById("edit-primer-nombre").value.trim(),
+    primer_nombre: document.getElementById("edit-primer-nombre").value.trim(),
 
-        segundo_nombre: document.getElementById("edit-segundo-nombre").value.trim(),
+    segundo_nombre: document.getElementById("edit-segundo-nombre").value.trim(),
 
-        primer_apellido: document.getElementById("edit-primer-apellido").value.trim(),
+    primer_apellido: document.getElementById("edit-primer-apellido").value.trim(),
 
-        segundo_apellido: document.getElementById("edit-segundo-apellido").value.trim(),
+    segundo_apellido: document.getElementById("edit-segundo-apellido").value.trim(),
 
-        correo_personal: document.getElementById("edit-correo-personal").value.trim(),
+    fecha_nacimiento: document.getElementById("edit-fecha-nacimiento").value,
 
-        correo_institucional: document.getElementById("edit-correo-institucional").value.trim(),
+    sexo: document.getElementById("edit-sexo").value,
 
-        telefono_movil: document.getElementById("edit-tel-movil").value.trim(),
+    correo_personal: document.getElementById("edit-correo-personal").value.trim(),
 
-        carnet: document.getElementById("edit-carnet").value.trim(),
+    correo_institucional: document.getElementById("edit-correo-institucional").value.trim(),
 
-        direccion: document.getElementById("edit-direccion").value.trim(),
+    telefono_movil: document.getElementById("edit-tel-movil").value.trim(),
 
-        id_rol: parseInt(
-            document.getElementById("edit-rol").value
-        )
+    telefono_fijo: document.getElementById("edit-tel-fijo").value.trim(),
 
-    };
+    direccion: document.getElementById("edit-direccion").value.trim(),
+
+    dui: document.getElementById("edit-dui").value.trim(),
+
+    dui_tipo: document.getElementById("edit-dui-tipo").value,
+
+    carnet: document.getElementById("edit-carnet").value.trim(),
+
+    carnet_minoridad: document.getElementById("edit-carnet-minoridad").value.trim(),
+
+    id_rol: parseInt(
+        document.getElementById("edit-rol").value
+    )
+
+};
 
     fetch(`http://127.0.0.1:5000/usuarios/${usuario.id_usuario}`, {
 

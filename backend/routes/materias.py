@@ -100,3 +100,105 @@ def obtener_materias():
         if conexion:
             conexion.close()
             
+@materias_bp.route("/materias/<int:id_materia>", methods=["PUT"])
+def actualizar_materia(id_materia):
+
+    data = request.get_json()
+
+    try:
+
+        conexion = get_connection()
+        cursor = conexion.cursor()
+
+        sql = """
+        UPDATE materia
+        SET
+            nombre = %s,
+            horas_teoricas = %s,
+            horas_practicas = %s,
+            unidades_valorativas = %s,
+            descripcion = %s,
+            estado = %s
+        WHERE id_materia = %s
+        """
+
+        cursor.execute(
+            sql,
+            (
+                data["nombre"],
+                data["horas_teoricas"],
+                data["horas_practicas"],
+                data["unidades_valorativas"],
+                data["descripcion"],
+                data["estado"],
+                id_materia
+            )
+        )
+
+        conexion.commit()
+
+        return jsonify({
+            "success": True,
+            "mensaje": "Materia actualizada correctamente"
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "success": False,
+            "mensaje": str(e)
+        }), 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conexion:
+            conexion.close()
+
+@materias_bp.route("/materias/<int:id_materia>/estado", methods=["PUT"])
+def cambiar_estado_materia(id_materia):
+
+    try:
+
+        data = request.get_json()
+
+        conexion = get_connection()
+        cursor = conexion.cursor()
+
+        sql = """
+        UPDATE materia
+        SET estado = %s
+        WHERE id_materia = %s
+        """
+
+        cursor.execute(
+            sql,
+            (
+                data["estado"],
+                id_materia
+            )
+        )
+
+        conexion.commit()
+
+        return jsonify({
+            "success": True,
+            "mensaje": "Estado actualizado"
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "success": False,
+            "mensaje": str(e)
+        }), 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conexion:
+            conexion.close()

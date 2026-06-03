@@ -21,30 +21,33 @@ def crear_usuario():
 
         sql = """
         INSERT INTO usuario(
-            primer_nombre,
-            segundo_nombre,
-            primer_apellido,
-            segundo_apellido,
-            fecha_nacimiento,
-            sexo,
-            correo_personal,
-            correo_institucional,
-            telefono_movil,
-            telefono_fijo,
-            direccion,
-            dui,
-            carnet,
-            carnet_minoridad,
-            password_hash,
-            estado,
-            fecha_ingreso,
-            id_rol
+        primer_nombre,
+        segundo_nombre,
+        primer_apellido,
+        segundo_apellido,
+        fecha_nacimiento,
+        sexo,
+        correo_personal,
+        correo_institucional,
+        telefono_movil,
+        telefono_fijo,
+        direccion,
+        dui,
+        dui_tipo,
+        carnet,
+        carnet_minoridad,
+        foto_perfil,
+        password_hash,
+        estado,
+        fecha_ingreso,
+        id_rol
         )
         VALUES(
             %s,%s,%s,%s,
             %s,%s,%s,%s,
             %s,%s,%s,%s,
             %s,%s,%s,%s,
+            %s,%s,%s,
             CURDATE(),%s
         )
         """
@@ -67,8 +70,14 @@ def crear_usuario():
             data["direccion"],
 
             data["dui"],
+
+            data["dui_tipo"],
+
             data["carnet"],
+
             data.get("carnet_minoridad") or None,
+
+            data.get("foto_perfil"),
 
             password_hash,
 
@@ -136,10 +145,13 @@ def obtener_usuarios():
             telefono_fijo,
             direccion,
             dui,
+            dui_tipo,
+            foto_perfil,
             carnet,
             carnet_minoridad,
             estado,
             fecha_ingreso,
+            fecha_actualizacion,
             id_rol
             FROM usuario
             ORDER BY primer_nombre
@@ -182,17 +194,23 @@ def actualizar_usuario(id_usuario):
         sql = """
         UPDATE usuario
         SET
-            primer_nombre = %s,
-            segundo_nombre = %s,
-            primer_apellido = %s,
-            segundo_apellido = %s,
-            correo_personal = %s,
-            correo_institucional = %s,
-            telefono_movil = %s,
-            carnet = %s,
-            direccion = %s,
-            id_rol = %s
-        WHERE id_usuario = %s
+            primer_nombre=%s,
+            segundo_nombre=%s,
+            primer_apellido=%s,
+            segundo_apellido=%s,
+            fecha_nacimiento=%s,
+            sexo=%s,
+            correo_personal=%s,
+            correo_institucional=%s,
+            telefono_movil=%s,
+            telefono_fijo=%s,
+            direccion=%s,
+            dui=%s,
+            dui_tipo=%s,
+            carnet=%s,
+            carnet_minoridad=%s,
+            id_rol=%s
+        WHERE id_usuario=%s
         """
 
         valores = (
@@ -200,12 +218,26 @@ def actualizar_usuario(id_usuario):
             data.get("segundo_nombre"),
             data["primer_apellido"],
             data.get("segundo_apellido"),
+
+            data["fecha_nacimiento"],
+            data["sexo"],
+
             data["correo_personal"],
             data["correo_institucional"],
+
             data["telefono_movil"],
-            data["carnet"],
+            data.get("telefono_fijo") or None,
+
             data["direccion"],
+
+            data["dui"],
+            data["dui_tipo"],
+
+            data["carnet"],
+            data.get("carnet_minoridad") or None,
+
             data["id_rol"],
+
             id_usuario
         )
 
