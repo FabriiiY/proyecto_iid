@@ -405,6 +405,26 @@ function renderViewAdminRegistrados(container) {
                 <form id="edit-form" novalidate>
                     <input type="hidden" id="edit-index" />
 
+                    <!-- FOTO DE PERFIL -->
+                    <div class="form-group" style="margin-bottom:20px;">
+                        <label>Foto de Perfil</label>
+                        <div class="foto-upload-wrapper">
+                            <div class="foto-preview" id="edit-foto-preview">
+                                <span class="material-symbols-rounded" style="font-size:2.5rem;color:#ccc;">account_circle</span>
+                            </div>
+                            <div class="foto-upload-info">
+                                <button type="button" class="btn-secondary" id="btn-edit-foto-upload">
+                                    <span class="material-symbols-rounded">upload</span> Cambiar Foto
+                                </button>
+                                <span id="edit-foto-nombre" style="font-size:0.82rem;color:#999;margin-top:4px;display:block;">
+                                    Sin cambios
+                                </span>
+                                <span style="font-size:0.78rem;color:#bbb;">JPG, PNG o WEBP · máx 2 MB</span>
+                            </div>
+                            <input type="file" id="edit-foto-input" accept="image/jpeg,image/png,image/webp" style="display:none;" />
+                        </div>
+                    </div>
+
                     <!-- NOMBRES -->
                     <div class="form-row">
                         <div class="form-group">
@@ -709,6 +729,16 @@ function renderViewAdminRegistrados(container) {
         passInput.type   = "password";
         toggleBtn.querySelector(".material-symbols-rounded").textContent = "visibility";
 
+        // Foto: mostrar la actual o el ícono por defecto
+        const editFotoPreview = document.getElementById("edit-foto-preview");
+        editFotoPreview._nuevaFoto = null; // resetear foto pendiente
+        if (u.foto_perfil) {
+            editFotoPreview.innerHTML = `<img src="${u.foto_perfil}" alt="Foto" style="width:80px;height:80px;border-radius:50%;object-fit:cover;" />`;
+        } else {
+            editFotoPreview.innerHTML = `<span class="material-symbols-rounded" style="font-size:2.5rem;color:#ccc;">account_circle</span>`;
+        }
+        document.getElementById("edit-foto-nombre").textContent = "Sin cambios";
+
         overlay.style.display = "flex";
 
         // Activar formatos en los inputs del modal
@@ -729,6 +759,37 @@ function renderViewAdminRegistrados(container) {
             toggleBtn.querySelector(".material-symbols-rounded").textContent =
                 esPassword ? "visibility_off" : "visibility";
         };
+
+        // Foto: botón subir y leer archivo
+        const btnEditFoto  = document.getElementById("btn-edit-foto-upload");
+        const editFotoInput = document.getElementById("edit-foto-input");
+        const editFotoNombre = document.getElementById("edit-foto-nombre");
+
+        // Clonar para eliminar listeners anteriores
+        const btnEditFotoClone = btnEditFoto.cloneNode(true);
+        btnEditFoto.parentNode.replaceChild(btnEditFotoClone, btnEditFoto);
+        const editFotoInputClone = editFotoInput.cloneNode(true);
+        editFotoInput.parentNode.replaceChild(editFotoInputClone, editFotoInput);
+
+        btnEditFotoClone.addEventListener("click", () => editFotoInputClone.click());
+
+        editFotoInputClone.addEventListener("change", () => {
+            const file = editFotoInputClone.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                alert("La imagen no puede superar los 2 MB.");
+                editFotoInputClone.value = "";
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = e => {
+                const dataUrl = e.target.result;
+                fotoPreviewEl.innerHTML = `<img src="${dataUrl}" alt="Nueva foto" style="width:80px;height:80px;border-radius:50%;object-fit:cover;" />`;
+                fotoPreviewEl._nuevaFoto = dataUrl;
+                editFotoNombre.textContent = file.name;
+            };
+            reader.readAsDataURL(file);
+        });
     }
 
     function cerrarModal() { overlay.style.display = "none"; }
@@ -784,6 +845,12 @@ function renderViewAdminRegistrados(container) {
             carnet_minoridad:     document.getElementById("edit-carnet-minoridad").value.trim(),
             id_rol:               parseInt(document.getElementById("edit-rol").value)
         };
+
+        // Incluir foto si el admin subió una nueva
+        const fotoPreviewEl = document.getElementById("edit-foto-preview");
+        if (fotoPreviewEl && fotoPreviewEl._nuevaFoto) {
+            datos.foto_perfil = fotoPreviewEl._nuevaFoto;
+        }
 
         // Solo incluir contraseña si el admin escribió algo
         const nuevaPass = document.getElementById("edit-password").value;

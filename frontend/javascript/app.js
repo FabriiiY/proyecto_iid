@@ -119,8 +119,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 3. SIDEBAR ITEMS SEGÚN ROL
     const navItemsEstudiante = [
-        { id: "nav-horarios",   icon: "calendar_month", label: "Mis Horarios", view: "horarios" },
-        { id: "nav-reportes",   icon: "history",        label: "Reportes",
+        { id: "nav-horarios", icon: "calendar_month", label: "Mis Horarios", view: "horarios" },
+        { id: "nav-reportes", icon: "history", label: "Reportes",
           dropdown: [
             { label: "Asistencia Diaria", href: "WIP.html" },
             { label: "Resumen Mensual",   href: "WIP.html" }
@@ -129,22 +129,91 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     const navItemsMaestro = [
-        { id: "nav-maestro-alumnos", icon: "groups", label: "Mis Alumnos", view: "maestro-alumnos" },
-        { id: "nav-materias-maestro", icon: "library_books", label: "Materias",
+        // Mis Horarios
+        { id: "nav-mis-horarios", icon: "calendar_month", label: "Mis Horarios", view: "maestro-alumnos" },
+
+        // Mis Grupos y Alumnos
+        { id: "nav-mis-grupos", icon: "groups", label: "Mis Grupos y Alumnos",
           dropdown: [
-            { label: "Agregar Materia", view: "materias-agregar" },
-            { label: "Ver Materias",    view: "materias-ver"     }
+            { label: "Crear Grupo / Asignar Estudiantes", href: "WIP.html" },
+            { label: "Ver Mis Estudiantes",               href: "WIP.html" }
+          ]
+        },
+
+        // Configurar Horario
+        { id: "nav-horario-maestro", icon: "schedule", label: "Configurar Horario",
+          dropdown: [
+            { label: "Asignar Horario de Clase", href: "WIP.html" },
+            { label: "Ver Historial",            href: "WIP.html" }
           ]
         }
     ];
 
     const navItemsAdmin = [
-        { id: "nav-admin-usuarios",    icon: "manage_accounts", label: "Admin Usuarios", view: "admin-usuarios"    },
-        { id: "nav-admin-registrados", icon: "group",           label: "Usuarios Registrados",        view: "admin-registrados" },
-        { id: "nav-materias-admin",    icon: "library_books",   label: "Materias",
+        // Gestión de Usuarios
+        { id: "nav-gestion-usuarios", icon: "manage_accounts", label: "Gestión de Usuarios",
           dropdown: [
-            { label: "Agregar Materia", view: "materias-agregar" },
-            { label: "Ver Materias",    view: "materias-ver"     }
+            { label: "Registrar Usuario",    view: "admin-usuarios"    },
+            { label: "Ver Usuarios",         view: "admin-registrados" }
+          ]
+        },
+
+        // Aulas
+        { id: "nav-aulas", icon: "door_front", label: "Aulas",
+          dropdown: [
+            { label: "Registrar Aula", href: "WIP.html" },
+            { label: "Ver Aulas",      href: "WIP.html" }
+          ]
+        },
+
+        // Carreras
+        { id: "nav-carreras", icon: "school", label: "Carreras",
+          dropdown: [
+            { label: "Registrar Carrera", href: "WIP.html" },
+            { label: "Ver Carreras",      href: "WIP.html" }
+          ]
+        },
+
+        // Ciclos y Periodos
+        { id: "nav-ciclos", icon: "date_range", label: "Ciclos y Periodos",
+          dropdown: [
+            { label: "Registrar Ciclo",   href: "WIP.html" },
+            { label: "Ver Ciclos",        href: "WIP.html" },
+            { label: "Registrar Periodo", href: "WIP.html" },
+            { label: "Ver Periodos",      href: "WIP.html" }
+          ]
+        },
+
+        // Tipo de Clase
+        { id: "nav-tipo-clase", icon: "tune", label: "Tipo de Clase",
+          dropdown: [
+            { label: "Modalidad",       href: "WIP.html" },
+            { label: "Tipo de Programa", href: "WIP.html" }
+          ]
+        },
+
+        // Materias y Clases
+        { id: "nav-materias", icon: "library_books", label: "Materias y Clases",
+          dropdown: [
+            { label: "Registrar Materia / Clase", view: "materias-agregar" },
+            { label: "Ver Materias",              view: "materias-ver"     },
+            { label: "Ver Clases",                href: "WIP.html"         }
+          ]
+        },
+
+        // Grupos de Estudiantes
+        { id: "nav-grupos", icon: "group_work", label: "Grupos de Estudiantes",
+          dropdown: [
+            { label: "Crear Grupo",  href: "WIP.html" },
+            { label: "Ver Grupos",   href: "WIP.html" }
+          ]
+        },
+
+        // Control de Horarios
+        { id: "nav-horarios-admin", icon: "schedule", label: "Control de Horarios",
+          dropdown: [
+            { label: "Asignar Horario",     href: "WIP.html" },
+            { label: "Ver Horarios Globales", href: "WIP.html" }
           ]
         }
     ];
@@ -246,13 +315,15 @@ document.addEventListener("DOMContentLoaded", () => {
         else { sidebar.classList.remove("collapsed"); cerrarDropdowns(); }
     });
 
-    // 7. LOGOUT — manejado desde el dropdown del perfil (ver sección 2)
-    // Se mantiene el botón de sidebar como fallback
-    document.getElementById("logout-btn").addEventListener("click", e => {
-        e.preventDefault();
-        localStorage.removeItem("usuarioActivo");
-        window.location.href = "../html/login-Marcacion.html";
-    });
+    // 7. LOGOUT — sidebar secondary-nav (Configuración dropdown)
+    const logoutSidebar = document.getElementById("logout-btn");
+    if (logoutSidebar) {
+        logoutSidebar.addEventListener("click", e => {
+            e.preventDefault();
+            localStorage.removeItem("usuarioActivo");
+            window.location.href = "../html/login-Marcacion.html";
+        });
+    }
 
     // 8. ROUTER — definido aquí mismo para evitar problemas de orden de carga
     const vistas = {
