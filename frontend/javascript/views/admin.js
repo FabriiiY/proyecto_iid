@@ -184,8 +184,8 @@ function renderViewAdminUsuarios(container) {
                         <label>Tipo de DUI <span class="req">*</span></label>
                         <select id="u-dui-tipo" required class="form-select">
                             <option value="" disabled selected>Selecciona...</option>
-                            <option value="PERSONAL">Personal</option>
-                            <option value="RESPONSABLE">Del Responsable</option>
+                            <option value="PERSONAL">PERSONAL</option>
+                            <option value="RESPONSABLE">DEL RESPONSABLE</option>
                         </select>
                     </div>
                     <div class="form-group">
