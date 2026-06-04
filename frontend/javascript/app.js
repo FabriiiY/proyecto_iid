@@ -18,13 +18,18 @@ document.addEventListener("DOMContentLoaded", () => {
     window.SAMI = { usuario: usuarioActivo, rol, esAdmin, esMaestro };
 
     // 2. HEADER — nombre, avatar e iniciales
-    const nombreCompleto = `${usuarioActivo.nombre} ${usuarioActivo.apellido}`;
+    const nombreCompleto = [
+        usuarioActivo.primer_nombre,
+        usuarioActivo.segundo_nombre,
+        usuarioActivo.primer_apellido,
+        usuarioActivo.segundo_apellido
+    ].filter(Boolean).join(" ");
     document.getElementById("user-name").textContent = nombreCompleto;
 
     const avatarCircle = document.getElementById("avatar-circle");
 
     // Foto guardada o inicial
-    const fotoPerfil = localStorage.getItem(`sami_foto_${usuarioActivo.correoInstitucional}`);
+    const fotoPerfil = usuarioActivo.foto_perfil;
     if (fotoPerfil) {
         avatarCircle.style.backgroundImage = `url(${fotoPerfil})`;
         avatarCircle.style.backgroundSize  = "cover";

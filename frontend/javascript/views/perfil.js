@@ -37,13 +37,34 @@ function renderViewMiPerfil(container) {
     //     .catch(() => renderPerfil(SAMI.usuario));
     //
     // Por ahora usamos directamente el usuarioActivo del localStorage:
-    renderPerfil(SAMI.usuario, container);
 
+    fetch(`http://127.0.0.1:5000/usuarios/${SAMI.usuario.id}`)
+    .then(res => res.json())
+    .then(data => {
+
+        if(data.success){
+
+            renderPerfil(data.usuario, container);
+
+        }else{
+
+            alert(data.mensaje);
+
+        }
+
+    })
+    .catch(error => {
+
+        console.error(error);
+
+        alert("Error al cargar perfil");
+
+    });
 
     // ── Función principal de render ───────────────────────────
     function renderPerfil(u, cont) {
 
-        const rolLabel  = rolesLabel[u.rol] || "Usuario";
+        const rolLabel = rolesLabel[u.id_rol] || "Usuario";
 
         // Nombre completo: intentar con campos extendidos, fallback al básico
         const nombreCompleto = [
@@ -97,8 +118,12 @@ function renderViewMiPerfil(container) {
                     <h2 class="perfil-nombre">${nombreCompleto}</h2>
                     <span class="subject-tag">${rolLabel}</span>
                     ${u.estado ? `
-                    <span class="status-badge ${u.estado === "ACTIVO" ? "attended" : "pending"}" style="margin-top:8px;">
-                        ${u.estado === "ACTIVO" ? "Activo" : "Inactivo"}
+                    <span class="status-badge ${
+                        u.estado === "ACTIVO"
+                            ? "attended"
+                            : "pending"
+                    }" style="margin-top:8px;">
+                        ${u.estado.charAt(0) + u.estado.slice(1).toLowerCase()}
                     </span>` : ""}
                 </div>
 
@@ -115,20 +140,26 @@ function renderViewMiPerfil(container) {
                                 <div><small>Nombre Completo</small><p>${nombreCompleto || "—"}</p></div>
                             </div>
 
-                            ${!SAMI.esAdmin ? `
                             <div class="perfil-dato">
                                 <span class="material-symbols-rounded">badge</span>
-                                <div><small>Carnet</small><p>${u.carnet || "—"}</p></div>
-                            </div>` : `
+                                <div>
+                                    <small>Carnet</small>
+                                    <p>${u.carnet || "—"}</p>
+                                </div>
+                            </div>
+
                             <div class="perfil-dato">
-                                <span class="material-symbols-rounded">badge</span>
-                                <div><small>Rol</small><p>${rolLabel}</p></div>
-                            </div>`}
+                                <span class="material-symbols-rounded">admin_panel_settings</span>
+                                <div>
+                                    <small>Rol</small>
+                                    <p>${rolLabel}</p>
+                                </div>
+                            </div>
 
                             ${u.fecha_nacimiento ? `
                             <div class="perfil-dato">
                                 <span class="material-symbols-rounded">cake</span>
-                                <div><small>Fecha de Nacimiento</small><p>${u.fecha_nacimiento}</p></div>
+                                <div><small>Fecha de Nacimiento</small><p>${u.fecha_nacimiento ? new Date(u.fecha_nacimiento).toLocaleDateString("es-SV"): "—"}</p></div>
                             </div>` : ""}
 
                             ${u.sexo ? `

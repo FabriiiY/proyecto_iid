@@ -951,15 +951,35 @@ function renderViewAdminRegistrados(container) {
             body: JSON.stringify(datos)
         })
         .then(res => res.json())
+.then(data => {
+
+    if (data.success) {
+
+        alert("Usuario actualizado correctamente");
+
+        cerrarModal();
+
+        fetch("http://127.0.0.1:5000/usuarios")
+        .then(res => res.json())
         .then(data => {
-            if (data.success) {
-                alert("Usuario actualizado correctamente");
-                cerrarModal();
-                location.reload();
-            } else {
-                alert(data.mensaje);
+
+            if(data.success){
+
+                usuarios = data.usuarios;
+
+                renderTabla(filtrar());
+
             }
-        })
+
+        });
+
+    } else {
+
+        alert(data.mensaje);
+
+    }
+
+})
         .catch(error => {
             console.error(error);
             alert("Error al actualizar usuario");
