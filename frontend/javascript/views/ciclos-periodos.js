@@ -59,6 +59,7 @@ function renderViewRegistrarPeriodo(container) {
                             <th>Inicio</th>
                             <th>Fin</th>
                             <th>Descripción</th>
+                            <th style="text-align:center;">Estado</th>
                             <th style="text-align:center;">Acciones</th>
                         </tr>
                     </thead>
@@ -90,9 +91,21 @@ function renderViewRegistrarPeriodo(container) {
                             ${p.descripcion || '<span style="color:#aaa; font-size:0.85rem;">Sin descripción</span>'}
                         </td>
                         <td style="text-align:center;">
-                            <button class="btn-icon btn-edit" id="btn-edit-p-${p.id_periodo}" title="Editar periodo">
-                                <span class="material-symbols-rounded">edit</span>
-                            </button>
+                            <span class="status-badge ${p.estado === 'ACTIVO' ? 'badge-activo' : 'badge-inactivo'}">${p.estado}</span>
+                        </td>
+                        <td style="text-align:center;">
+                            <div style="display:flex;gap:6px;justify-content:center;">
+                                <button class="btn-icon btn-edit" id="btn-edit-p-${p.id_periodo}" title="Editar periodo">
+                                    <span class="material-symbols-rounded">edit</span>
+                                </button>
+                                <button class="btn-icon ${p.estado === 'ACTIVO' ? 'btn-icon-danger' : 'btn-icon-success'} btn-toggle-periodo"
+                                    id="btn-toggle-p-${p.id_periodo}"
+                                    data-id="${p.id_periodo}"
+                                    data-estado="${p.estado}"
+                                    title="${p.estado === 'ACTIVO' ? 'Desactivar' : 'Activar'}">
+                                    <span class="material-symbols-rounded">${p.estado === 'ACTIVO' ? 'block' : 'check_circle'}</span>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `,
@@ -107,6 +120,27 @@ function renderViewRegistrarPeriodo(container) {
               btnEdit.addEventListener("click", () =>
                 abrirModalEditarPeriodo(p, actualizarTablaLocal),
               );
+            }
+
+            // Botón toggle estado
+            const btnToggle = container.querySelector(`#btn-toggle-p-${p.id_periodo}`);
+            if (btnToggle) {
+              btnToggle.addEventListener("click", () => {
+                const nuevoEstado = p.estado === "ACTIVO" ? "INACTIVO" : "ACTIVO";
+                const confirmar = confirm(`¿${nuevoEstado === "ACTIVO" ? "Activar" : "Desactivar"} el periodo "${p.nombre}"?`);
+                if (!confirmar) return;
+                fetch(`http://127.0.0.1:5000/periodos/${p.id_periodo}`, {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ estado: nuevoEstado })
+                })
+                .then(r => r.json())
+                .then(data => {
+                  if (data.success) actualizarTablaLocal();
+                  else alert("Error: " + (data.mensaje || data.error));
+                })
+                .catch(err => console.error(err));
+              });
             }
           });
         } else {
@@ -657,9 +691,18 @@ function renderViewVerCiclos(container) {
                             <span class="status-badge ${c.estado === 'ACTIVO' ? 'badge-activo' : 'badge-inactivo'}">${c.estado}</span>
                         </td>
                         <td style="text-align:center;">
-                            <button class="btn-icon btn-edit" data-idx="${index}" title="Editar ciclo">
-                                <span class="material-symbols-rounded">edit</span>
-                            </button>
+                            <div style="display:flex;gap:6px;justify-content:center;">
+                                <button class="btn-icon btn-edit" data-idx="${index}" title="Editar ciclo">
+                                    <span class="material-symbols-rounded">edit</span>
+                                </button>
+                                <button class="btn-icon ${c.estado === 'ACTIVO' ? 'btn-icon-danger' : 'btn-icon-success'} btn-toggle-ciclo"
+                                    data-idx="${index}"
+                                    data-id="${c.id_ciclo}"
+                                    data-estado="${c.estado}"
+                                    title="${c.estado === 'ACTIVO' ? 'Desactivar' : 'Activar'}">
+                                    <span class="material-symbols-rounded">${c.estado === 'ACTIVO' ? 'block' : 'check_circle'}</span>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `).join("");
@@ -676,6 +719,30 @@ function renderViewVerCiclos(container) {
     const modalCiclo = document.getElementById("modal-edit-ciclo");
     
     document.getElementById("tbody-ciclos").addEventListener("click", e => {
+        // Toggle estado
+        const btnToggle = e.target.closest(".btn-toggle-ciclo");
+        if (btnToggle) {
+            const idx      = btnToggle.dataset.idx;
+            const id_ciclo = btnToggle.dataset.id;
+            const c        = ciclosLocales[idx];
+            const nuevoEstado = c.estado === "ACTIVO" ? "INACTIVO" : "ACTIVO";
+            const confirmar = confirm(`¿${nuevoEstado === "ACTIVO" ? "Activar" : "Desactivar"} el ciclo "${c.nombre}"?`);
+            if (!confirmar) return;
+
+            fetch(`http://127.0.0.1:5000/ciclos/${id_ciclo}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ estado: nuevoEstado })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) cargarTablaCiclos();
+                else alert("Error: " + (data.mensaje || data.error));
+            })
+            .catch(err => console.error(err));
+            return;
+        }
+
         const btn = e.target.closest(".btn-edit");
         if (!btn) return;
         
