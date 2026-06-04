@@ -174,8 +174,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Carreras
         { id: "nav-carreras", icon: "school", label: "Carreras",
           dropdown: [
-            { label: "Registrar Carrera", href: "WIP.html" },
-            { label: "Ver Carreras",      href: "WIP.html" }
+            { label: "Registrar Carrera", view: "carrera-registrar" },
+            { label: "Ver Carreras",      view: "carrera-ver"       }
           ]
         },
 
@@ -332,21 +332,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 8. ROUTER — definido aquí mismo para evitar problemas de orden de carga
     const vistas = {
+        //Vista del estudiante
         "horarios":          () => renderViewHorarios(main),
+        //Submenú administación de usuarios
         "admin-usuarios":    () => renderViewAdminUsuarios(main),
         "admin-registrados": () => renderViewAdminRegistrados(main),
+        //Submení maestro ver alumnos creo xd
         "maestro-alumnos":   () => renderViewMaestroAlumnos(main),
+        //Submenú materias-clase
         "materias-agregar":  () => renderViewMateriasAgregar(main),
         "materias-ver":      () => renderViewMateriasVer(main),
+        //Submenú perfil
         "mi-perfil":         () => renderViewMiPerfil(main),
+        //Submenú tipo-clase
         "modalidad":         () => renderViewModalidad(main),
         "tipo-programa":     () => renderViewTipoPrograma(main),
+        //Submenú ciclo-periodos
         "periodo-registrar":    () => renderViewRegistrarPeriodo(main),
         "tipo-ciclo-registrar": () => renderViewRegistrarTipoCiclo(main),
         "ciclo-registrar":      () => renderViewRegistrarCiclo(main),
         "ciclo-ver":         () => renderViewVerCiclos(main),
+        //Submenú aulas
         "aula-registrar": () => renderViewRegistrarAula(main),
         "aula-ver":       () => renderViewVerAulas(main),
+        //Submenú carreras
+        "carrera-registrar": () => renderViewRegistrarCarrera(main),
+        "carrera-ver":       () => renderViewVerCarreras(main),
     };
 
     const main = document.getElementById("main-content");
