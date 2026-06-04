@@ -86,8 +86,9 @@ function renderViewAdminUsuarios(container) {
                 <div class="form-group" style="align-items:flex-start; margin-bottom:24px;">
                     <label>Foto de Perfil <span class="opt">(opcional)</span></label>
                     <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap; margin-top:6px;">
+                        <!-- Preview foto: 90 x 90 px cuadrado redondeado -->
                         <div id="foto-preview-circle" style="
-                        width:90px; height:90px; border-radius:50%;
+                        width:90px; height:90px; border-radius:14px;
                         background:var(--azul-sami); color:white;
                         display:flex; align-items:center; justify-content:center;
                         font-size:2rem; font-weight:700; overflow:hidden;
@@ -263,11 +264,32 @@ function renderViewAdminUsuarios(container) {
             fotoInput.value = "";
             return;
         }
+        // Recortar imagen en cuadrado perfecto antes de guardar
+        // El canvas produce un JPEG 400x400 px — tamaño óptimo para BD
         const reader = new FileReader();
         reader.onload = e => {
-            fotoBase64 = e.target.result;
-            fotoCircle.innerHTML = `<img src="${fotoBase64}" alt="Foto" style="width:100%;height:100%;object-fit:cover;" />`;
-            btnQuitarFoto.style.display = "";
+            const img = new Image();
+            img.onload = () => {
+                // Calcular recorte cuadrado centrado
+                const size   = Math.min(img.width, img.height);
+                const startX = (img.width  - size) / 2;
+                const startY = (img.height - size) / 2;
+
+                // Canvas de salida: 400 x 400 px (suficiente resolución, peso moderado)
+                const canvas = document.createElement("canvas");
+                canvas.width  = 400;
+                canvas.height = 400;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, startX, startY, size, size, 0, 0, 400, 400);
+
+                // Exportar como JPEG al 88% de calidad
+                fotoBase64 = canvas.toDataURL("image/jpeg", 0.88);
+
+                // Mostrar preview con bordes redondeados
+                fotoCircle.innerHTML = `<img src="${fotoBase64}" alt="Foto" style="width:100%;height:100%;object-fit:cover;" />`;
+                btnQuitarFoto.style.display = "";
+            };
+            img.src = e.target.result;
         };
         reader.readAsDataURL(file);
     });
@@ -585,6 +607,85 @@ function renderViewAdminRegistrados(container) {
 
 }
 
+    // ── Config de estados ────────────────────────────────────
+    const ESTADO_CFG = {
+        ACTIVO:    { label: "Activo",    badgeClass: "badge-activo",    icon: "check_circle"  },
+        INACTIVO:  { label: "Inactivo",  badgeClass: "badge-inactivo",  icon: "block"         },
+        GRADUADO:  { label: "Graduado",  badgeClass: "badge-graduado",  icon: "school"        },
+        RETIRADO:  { label: "Retirado",  badgeClass: "badge-retirado",  icon: "exit_to_app"   }
+    };
+
+    function badgeEstado(estado) {
+        const cfg = ESTADO_CFG[estado] || ESTADO_CFG.INACTIVO;
+        return `<span class="status-badge ${cfg.badgeClass}">${cfg.label}</span>`;
+    }
+
+    // ── Cambiar estado vía API ───────────────────────────────
+    function cambiarEstado(usuario, nuevoEstado) {
+        fetch(`http://127.0.0.1:5000/usuarios/${usuario.id_usuario}/estado`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ estado: nuevoEstado })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                usuario.estado = nuevoEstado;
+                renderTabla(filtrar());
+            } else {
+                alert(data.mensaje);
+            }
+        })
+        .catch(() => alert("Error al cambiar estado"));
+    }
+
+    // ── Menú de estados (solo estudiantes) ──────────────────
+    let menuEstadoAbierto = null;
+
+    function cerrarMenuEstado() {
+        if (menuEstadoAbierto) {
+            menuEstadoAbierto.remove();
+            menuEstadoAbierto = null;
+        }
+    }
+
+    document.addEventListener("click", cerrarMenuEstado);
+
+    function abrirMenuEstado(btnEl, usuario) {
+        cerrarMenuEstado();
+
+        const menu = document.createElement("div");
+        menu.className = "estado-dropdown";
+
+        const opciones = [
+            { estado: "ACTIVO",   icon: "check_circle", label: "Activo"   },
+            { estado: "INACTIVO", icon: "block",        label: "Inactivo" },
+            { estado: "GRADUADO", icon: "school",       label: "Graduado" },
+            { estado: "RETIRADO", icon: "exit_to_app",  label: "Retirado" }
+        ];
+
+        opciones.forEach(op => {
+            const item = document.createElement("button");
+            item.className = "estado-dropdown-item" +
+                (usuario.estado === op.estado ? " estado-dropdown-item--active" : "");
+            item.innerHTML = `
+                <span class="material-symbols-rounded">${op.icon}</span>
+                ${op.label}
+            `;
+            item.addEventListener("click", e => {
+                e.stopPropagation();
+                cerrarMenuEstado();
+                if (usuario.estado !== op.estado) cambiarEstado(usuario, op.estado);
+            });
+            menu.appendChild(item);
+        });
+
+        // Posicionar el menú relativo al botón
+        btnEl.style.position = "relative";
+        btnEl.appendChild(menu);
+        menuEstadoAbierto = menu;
+    }
+
     function renderTabla(lista) {
         tbody.innerHTML = "";
         if (lista.length === 0) {
@@ -596,92 +697,64 @@ function renderViewAdminRegistrados(container) {
         table.style.display    = "table";
 
         lista.forEach(u => {
-            const idx = usuarios.indexOf(u);
-            const tr  = document.createElement("tr");
+            const idx      = usuarios.indexOf(u);
+            const estado   = u.estado || "INACTIVO";
+            const esActivo = estado === "ACTIVO";
+            const esEstudiante = u.id_rol === 3;
+
+            // Botón activar/desactivar (admins y maestros)
+            const toggleIcon  = esActivo ? "block" : "check_circle";
+            const toggleClass = esActivo ? "btn-icon-danger" : "btn-icon-success";
+            const toggleTitle = esActivo ? "Desactivar cuenta" : "Activar cuenta";
+
+            const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td><strong>${nombreCompleto(u)}</strong></td>
                 <td>${u.correo_institucional}</td>
                 <td>${u.carnet}</td>
                 <td><span class="subject-tag">${ROLES[u.id_rol] || "—"}</span></td>
+                <td style="text-align:center;">${badgeEstado(estado)}</td>
                 <td style="text-align:center;">
-                    <span class="status-badge ${u.estado === "ACTIVO" ? "attended" : "pending"}">
-                        ${u.estado === "ACTIVO" ? "Activo" : "Inactivo"}
-                    </span>
-                </td>
-                <td style="text-align:center;">
-                    <div style="display:flex;gap:6px;justify-content:center;">
-                        <button class="btn-icon btn-edit" data-idx="${idx}" title="Editar">
+                    <div style="display:flex;gap:6px;justify-content:center;align-items:center;">
+                        <button class="btn-icon btn-edit" data-idx="${idx}" title="Editar usuario">
                             <span class="material-symbols-rounded">edit</span>
                         </button>
-                        <button class="btn-icon ${u.estado === "ACTIVO" ? "btn-icon-danger" : "btn-icon-success"} btn-toggle" data-idx="${idx}" title="${u.estado === "ACTIVO" ? "Deshabilitar" : "Habilitar"}">
-                            <span class="material-symbols-rounded">${u.estado === "ACTIVO" ? "block" : "check_circle"}</span>
+                        ${esEstudiante ? `
+                        <button class="btn-icon btn-menu-estado" data-idx="${idx}" title="Cambiar estado" style="font-weight:700; font-size:1rem; letter-spacing:1px;">
+                            ···
                         </button>
+                        ` : `
+                        <button class="btn-icon ${toggleClass} btn-toggle" data-idx="${idx}" title="${toggleTitle}">
+                            <span class="material-symbols-rounded">${toggleIcon}</span>
+                        </button>
+                        `}
                     </div>
                 </td>
             `;
             tbody.appendChild(tr);
         });
 
-        tbody.querySelectorAll(".btn-edit").forEach(btn => {
-            btn.addEventListener("click", () => abrirModal(parseInt(btn.dataset.idx)));
-        });
-        tbody.querySelectorAll(".btn-toggle").forEach(btn => {
+        // Listeners — editar
+        tbody.querySelectorAll(".btn-edit").forEach(btn =>
+            btn.addEventListener("click", () => abrirModal(parseInt(btn.dataset.idx)))
+        );
 
-    btn.addEventListener("click", () => {
+        // Listeners — toggle (admins y maestros)
+        tbody.querySelectorAll(".btn-toggle").forEach(btn =>
+            btn.addEventListener("click", () => {
+                const u = usuarios[parseInt(btn.dataset.idx)];
+                cambiarEstado(u, u.estado === "ACTIVO" ? "INACTIVO" : "ACTIVO");
+            })
+        );
 
-        const i = parseInt(btn.dataset.idx);
-
-        const usuario = usuarios[i];
-
-        const nuevoEstado =
-            usuario.estado === "ACTIVO"
-            ? "INACTIVO"
-            : "ACTIVO";
-
-        fetch(
-            `http://127.0.0.1:5000/usuarios/${usuario.id_usuario}/estado`,
-            {
-                method: "PUT",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-                    estado: nuevoEstado
-                })
-            }
-        )
-
-        .then(res => res.json())
-
-        .then(data => {
-
-            if(data.success){
-
-                usuario.estado = nuevoEstado;
-
-                renderTabla(filtrar());
-
-            }else{
-
-                alert(data.mensaje);
-
-            }
-
-        })
-
-        .catch(error => {
-
-            console.error(error);
-
-            alert("Error al cambiar estado");
-
-        });
-
-    });
-
-});
+        // Listeners — menú ··· (estudiantes)
+        tbody.querySelectorAll(".btn-menu-estado").forEach(btn =>
+            btn.addEventListener("click", e => {
+                e.stopPropagation();
+                const u = usuarios[parseInt(btn.dataset.idx)];
+                abrirMenuEstado(btn, u);
+            })
+        );
     }
 
     function filtrar() {
@@ -781,14 +854,28 @@ function renderViewAdminRegistrados(container) {
                 editFotoInputClone.value = "";
                 return;
             }
+            // Recortar en cuadrado — mismo proceso que en el formulario de registro
+            // Canvas de salida: 400 x 400 px JPEG al 88%
             const reader = new FileReader();
             reader.onload = e => {
-                const dataUrl = e.target.result;
-                editFotoPreview.innerHTML = `
-                <img src="${dataUrl}"alt="Nueva foto" style="width:80px;height:80px;border-radius:50%;object-fit:cover;" />`;
+                const img = new Image();
+                img.onload = () => {
+                    const size   = Math.min(img.width, img.height);
+                    const startX = (img.width  - size) / 2;
+                    const startY = (img.height - size) / 2;
 
-                editFotoPreview._nuevaFoto = dataUrl;
-                editFotoNombre.textContent = file.name;
+                    const canvas = document.createElement("canvas");
+                    canvas.width  = 400;
+                    canvas.height = 400;
+                    canvas.getContext("2d").drawImage(img, startX, startY, size, size, 0, 0, 400, 400);
+
+                    const dataUrl = canvas.toDataURL("image/jpeg", 0.88);
+                    // Preview con bordes redondeados (80 x 80 px)
+                    editFotoPreview.innerHTML = `<img src="${dataUrl}" alt="Nueva foto" style="width:80px;height:80px;border-radius:12px;object-fit:cover;" />`;
+                    editFotoPreview._nuevaFoto = dataUrl;
+                    editFotoNombre.textContent = file.name;
+                };
+                img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         });

@@ -104,11 +104,12 @@ body {
 }
 
 .user-avatar {
+    /* Avatar en top-bar: 38 x 38 px */
     width: 38px;
     height: 38px;
     background: var(--azul-sami);
     color: white;
-    border-radius: 50%;
+    border-radius: 8px;
     display: flex;
     justify-content: center;
     align-items: center;

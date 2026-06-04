@@ -242,10 +242,11 @@
 }
 
 .pd-avatar {
+    /* Foto en dropdown de perfil (top-bar): 48 x 48 px */
     width: 48px;
     height: 48px;
     min-width: 48px;
-    border-radius: 50%;
+    border-radius: 10px;
     background: var(--azul-sami);
     color: white;
     display: flex;
@@ -393,7 +394,8 @@
     position: relative;
     width: 110px;
     height: 110px;
-    border-radius: 50%;
+    /* Foto de perfil — vista Mi Perfil: 110 x 110 px */
+    border-radius: 16px;
     background: var(--azul-sami);
     color: white;
     display: flex;
@@ -423,7 +425,7 @@
     justify-content: center;
     opacity: 0;
     transition: opacity 0.2s;
-    border-radius: 50%;
+    border-radius: 16px;
 }
 
 .perfil-avatar:hover .perfil-avatar-overlay {
@@ -529,9 +531,10 @@ FOTO UPLOAD (formulario nuevo y modal edición)
 }
 
 .foto-preview {
+    /* Foto en formulario de registro / modal edición: 80 x 80 px */
     width: 80px;
     height: 80px;
-    border-radius: 50%;
+    border-radius: 12px;
     background: #f0f0f0;
     display: flex;
     align-items: center;
@@ -551,4 +554,93 @@ FOTO UPLOAD (formulario nuevo y modal edición)
     display: flex;
     flex-direction: column;
     gap: 4px;
+}
+/* ==========================================
+   BADGES DE ESTADO (4 estados)
+========================================== */
+.badge-activo {
+    background: #E8F5E9;
+    color: #2E7D32;
+}
+
+.badge-inactivo {
+    background: #FFF3E0;
+    color: #E65100;
+}
+
+.badge-graduado {
+    background: #E3F2FD;
+    color: #1565C0;
+}
+
+.badge-retirado {
+    background: #FCE4EC;
+    color: #880E4F;
+}
+
+/* ==========================================
+   BOTÓN ICONO YA ACTIVO (estado aplicado)
+========================================== */
+.btn-icon.btn-icon-active {
+    background: var(--azul-sami);
+    color: white;
+}
+
+/* ==========================================
+   MENÚ DESPLEGABLE DE ESTADO (botón ···)
+========================================== */
+.estado-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: #ffffff;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    z-index: 3000;
+    min-width: 160px;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.estado-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 12px;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--texto);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+}
+
+.estado-dropdown-item .material-symbols-rounded {
+    font-size: 1.1rem;
+    color: #888;
+    width: 20px;
+    min-width: 20px;
+}
+
+.estado-dropdown-item:hover {
+    background: #f4f6fa;
+}
+
+/* Estado ya seleccionado */
+.estado-dropdown-item--active {
+    background: #eef1f9;
+    color: var(--azul-sami);
+    font-weight: 600;
+}
+
+.estado-dropdown-item--active .material-symbols-rounded {
+    color: var(--azul-sami);
 }
