@@ -166,8 +166,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Aulas
         { id: "nav-aulas", icon: "door_front", label: "Aulas",
           dropdown: [
-            { label: "Registrar Aula", href: "WIP.html" },
-            { label: "Ver Aulas",      href: "WIP.html" }
+            { label: "Registrar Aula", view: "aula-registrar" },
+            { label: "Ver Aulas",      view: "aula-ver"       }
           ]
         },
 
@@ -345,6 +345,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "tipo-ciclo-registrar": () => renderViewRegistrarTipoCiclo(main),
         "ciclo-registrar":      () => renderViewRegistrarCiclo(main),
         "ciclo-ver":         () => renderViewVerCiclos(main),
+        "aula-registrar": () => renderViewRegistrarAula(main),
+        "aula-ver":       () => renderViewVerAulas(main),
     };
 
     const main = document.getElementById("main-content");
