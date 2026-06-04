@@ -1,496 +1,142 @@
 // ============================================================
-//  views/ciclos-periodos.js
-//  Vistas: Ciclos  y  Periodos
-//
-//  Estructura en BD:
-//
-//  CICLOS:
-//    id_ciclo | nombre VARCHAR(50) UNIQUE | anio INT
-//    fecha_inicio DATE | fecha_fin DATE | estado ENUM('ACTIVO','INACTIVO')
-//    fecha_actualizacion
-//
-//  PERIODOS:
-//    id_periodo | nombre VARCHAR(50) UNIQUE | descripcion VARCHAR(255)
-//    estado ENUM('ACTIVO','INACTIVO') | fecha_actualizacion
-//
-//  Endpoints esperados:
-//    GET    /ciclos              → { success, ciclos: [...] }
-//    POST   /ciclos              → { success, ciclo }
-//    PUT    /ciclos/:id/estado   → { success }
-//
-//    GET    /periodos            → { success, periodos: [...] }
-//    POST   /periodos            → { success, periodo }
-//    PUT    /periodos/:id/estado → { success }
+//  views/ciclos-periodos.js — Gestión de Periodos y Ciclos
 // ============================================================
 
-
-// ── Vista: REGISTRAR CICLO ────────────────────────────────────
-function renderViewRegistrarCiclo(container) {
+// ── VISTA 1: REGISTRAR PERIODO LECTIVO (Formulario + Tabla + Editar) ──
+function renderViewRegistrarPeriodo(container) {
     container.innerHTML = `
         <div class="dashboard-header">
-            <h1>
-                <span class="material-symbols-rounded">event_repeat</span>
-                Registrar Ciclo
-            </h1>
-            <p>Crea un nuevo ciclo académico con sus fechas de inicio y fin.</p>
+            <h1><span class="material-symbols-rounded">calendar_today</span> Periodos Lectivos</h1>
+            <p>Configura un nuevo año o periodo lectivo y revisa los existentes.</p>
         </div>
-
-        <!-- FORMULARIO -->
-        <div class="admin-card" style="max-width:680px;">
-            <h3>
-                <span class="material-symbols-rounded">add_circle</span>
-                Nuevo Ciclo
-            </h3>
-
-            <form id="ciclo-form" novalidate>
-                <div class="form-row">
-                    <div class="form-group" style="grid-column:span 2;">
-                        <label>Nombre del Ciclo <span class="req">*</span></label>
-                        <input
-                            type="text"
-                            id="ciclo-nombre"
-                            placeholder="Ej. CICLO I 2025"
-                            required
-                            autocomplete="off"
-                            class="input-uppercase"
-                            style="text-transform:uppercase;"
-                        />
-                    </div>
+        
+        <div class="admin-card" style="max-width:600px; margin-bottom: 30px;">
+            <h2 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--texto-oscuro);">Crear Periodo</h2>
+            <form id="form-periodo">
+                <div class="form-group">
+                    <label>Año <span class="req">*</span></label>
+                    <input type="number" id="p-anio" placeholder="Ej. 2026" required min="2000" max="2100" />
                 </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Año <span class="req">*</span></label>
-                        <input
-                            type="number"
-                            id="ciclo-anio"
-                            placeholder="Ej. 2025"
-                            min="2000"
-                            max="2099"
-                            required
-                        />
-                    </div>
-                </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label>Fecha de Inicio <span class="req">*</span></label>
-                        <input type="date" id="ciclo-fecha-inicio" required />
+                        <input type="date" id="p-fecha-inicio" required />
                     </div>
                     <div class="form-group">
                         <label>Fecha de Fin <span class="req">*</span></label>
-                        <input type="date" id="ciclo-fecha-fin" required />
+                        <input type="date" id="p-fecha-fin" required />
                     </div>
                 </div>
-
-                <div style="display:flex; justify-content:flex-end; margin-top:8px;">
-                    <button type="submit" class="btn-primary" id="ciclo-submit-btn" style="width:auto; padding:11px 28px;">
-                        <span class="material-symbols-rounded">save</span> Guardar
+                <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+                    <button type="submit" class="btn-primary">
+                        <span class="material-symbols-rounded">save</span> Guardar Periodo
                     </button>
                 </div>
             </form>
         </div>
 
-    `;
-
-    // Uppercase en tiempo real
-    const inputNombre = document.getElementById("ciclo-nombre");
-    inputNombre.addEventListener("input", function () {
-        const pos = this.selectionStart;
-        this.value = this.value.toUpperCase();
-        this.setSelectionRange(pos, pos);
-    });
-
-    const tbody    = document.getElementById("ciclo-tbody");
-    const table    = document.getElementById("ciclo-table");
-    const emptyEl  = document.getElementById("ciclo-empty");
-    const form     = document.getElementById("ciclo-form");
-    const submitBtn= document.getElementById("ciclo-submit-btn");
-
-    let ciclos = [];
-
-    function formatFecha(f) {
-        if (!f) return "—";
-        // Si viene como "2025-03-10" lo formatea a "10/03/2025"
-        const [y, m, d] = f.split("T")[0].split("-");
-        return `${d}/${m}/${y}`;
-    }
-
-    function renderTabla(lista) {
-        tbody.innerHTML = "";
-        if (!lista || lista.length === 0) {
-            emptyEl.style.display = "block";
-            table.style.display   = "none";
-            return;
-        }
-        emptyEl.style.display = "none";
-        table.style.display   = "table";
-
-        lista.forEach(item => {
-            const esActivo = item.estado === "ACTIVO";
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td><strong>${item.nombre}</strong></td>
-                <td style="text-align:center;">${item.anio}</td>
-                <td>${formatFecha(item.fecha_inicio)}</td>
-                <td>${formatFecha(item.fecha_fin)}</td>
-                <td style="text-align:center;">
-                    <span class="status-badge ${esActivo ? "badge-activo" : "badge-inactivo"}">
-                        ${esActivo ? "Activo" : "Inactivo"}
-                    </span>
-                </td>
-                <td style="text-align:center;">
-                    <button
-                        class="btn-icon ${esActivo ? "btn-icon-danger" : "btn-icon-success"} btn-ciclo-toggle"
-                        data-id="${item.id_ciclo}"
-                        data-estado="${item.estado}"
-                        title="${esActivo ? "Desactivar" : "Activar"}"
-                    >
-                        <span class="material-symbols-rounded">
-                            ${esActivo ? "block" : "check_circle"}
-                        </span>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        tbody.querySelectorAll(".btn-ciclo-toggle").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const id          = btn.dataset.id;
-                const nuevoEstado = btn.dataset.estado === "ACTIVO" ? "INACTIVO" : "ACTIVO";
-
-                fetch(`http://127.0.0.1:5000/ciclos/${id}/estado`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ estado: nuevoEstado })
-                })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        const item = ciclos.find(x => String(x.id_ciclo) === String(id));
-                        if (item) item.estado = nuevoEstado;
-                        renderTabla(ciclos);
-                    } else {
-                        alert(data.mensaje || "Error al cambiar estado");
-                    }
-                })
-                .catch(() => alert("Error al conectar con el servidor"));
-            });
-        });
-    }
-
-    // Cargar lista
-    fetch("http://127.0.0.1:5000/ciclos")
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                ciclos = data.ciclos || [];
-                renderTabla(ciclos);
-            }
-        })
-        .catch(() => {
-            emptyEl.textContent = "Error al cargar los datos.";
-            emptyEl.style.display = "block";
-        });
-
-    // Envío formulario
-    form.addEventListener("submit", e => {
-        e.preventDefault();
-
-        const nombre     = inputNombre.value.trim();
-        const anio       = document.getElementById("ciclo-anio").value.trim();
-        const fechaInicio= document.getElementById("ciclo-fecha-inicio").value;
-        const fechaFin   = document.getElementById("ciclo-fecha-fin").value;
-
-        if (!nombre || !anio || !fechaInicio || !fechaFin) {
-            alert("Todos los campos marcados con * son obligatorios.");
-            return;
-        }
-
-        if (fechaFin < fechaInicio) {
-            alert("La fecha de fin no puede ser anterior a la fecha de inicio.");
-            return;
-        }
-
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = `<span class="material-symbols-rounded">hourglass_top</span> Guardando...`;
-
-        fetch("http://127.0.0.1:5000/ciclos", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nombre, anio: parseInt(anio), fecha_inicio: fechaInicio, fecha_fin: fechaFin })
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                if (data.ciclo) ciclos.push(data.ciclo);
-                renderTabla(ciclos);
-                form.reset();
-
-                submitBtn.classList.add("success");
-                submitBtn.innerHTML = `<span class="material-symbols-rounded">check_circle</span> Guardado`;
-                setTimeout(() => {
-                    submitBtn.classList.remove("success");
-                    submitBtn.innerHTML = `<span class="material-symbols-rounded">save</span> Guardar`;
-                    submitBtn.disabled = false;
-                }, 2000);
-            } else {
-                alert(data.mensaje || data.error || "Error al guardar");
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = `<span class="material-symbols-rounded">save</span> Guardar`;
-            }
-        })
-        .catch(() => {
-            alert("Error al conectar con el servidor");
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = `<span class="material-symbols-rounded">save</span> Guardar`;
-        });
-    });
-}
-
-
-// ── Vista: VER CICLOS (sólo tabla, sin formulario) ────────────
-function renderViewVerCiclos(container) {
-    container.innerHTML = `
-        <div class="dashboard-header">
-            <h1>
-                <span class="material-symbols-rounded">date_range</span>
-                Ver Ciclos
-            </h1>
-            <p>Consulta todos los ciclos académicos registrados en el sistema.</p>
-        </div>
-
-        <div class="admin-card" style="max-width:780px;">
-            <h3>
-                <span class="material-symbols-rounded">list</span>
-                Ciclos registrados
-            </h3>
+        <div class="admin-card">
+            <h2 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--texto-oscuro);">Periodos Registrados</h2>
             <div class="students-table-wrapper">
-                <table class="students-table" id="vciclo-table" style="display:none;">
+                <table class="students-table">
                     <thead>
                         <tr>
-                            <th>Nombre</th>
-                            <th style="text-align:center;">Año</th>
-                            <th>Inicio</th>
-                            <th>Fin</th>
+                            <th>ID</th>
+                            <th>Año</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
                             <th style="text-align:center;">Estado</th>
+                            <th style="text-align:center;">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="vciclo-tbody"></tbody>
+                    <tbody id="tbody-periodos">
+                        <tr><td colspan="6" style="text-align:center; color:#888;">Cargando periodos...</td></tr>
+                    </tbody>
                 </table>
-                <div id="vciclo-empty" class="empty-state">No hay ciclos registrados todavía.</div>
+            </div>
+        </div>
+
+        <div id="modal-edit-periodo" class="modal-overlay" style="display:none;">
+            <div class="modal-card" style="max-width:500px;">
+                <div class="modal-header">
+                    <h3><span class="material-symbols-rounded">edit</span> Editar Periodo</h3>
+                    <button type="button" class="modal-close-btn" id="btn-cerrar-modal-periodo">
+                        <span class="material-symbols-rounded">close</span>
+                    </button>
+                </div>
+                <form id="form-edit-periodo">
+                    <input type="hidden" id="edit-p-id" />
+                    <div class="form-group">
+                        <label>Año <span class="req">*</span></label>
+                        <input type="number" id="edit-p-anio" required min="2000" max="2100" />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha de Inicio <span class="req">*</span></label>
+                            <input type="date" id="edit-p-inicio" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Fin <span class="req">*</span></label>
+                            <input type="date" id="edit-p-fin" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado <span class="req">*</span></label>
+                        <select id="edit-p-estado" class="form-select" required>
+                            <option value="ACTIVO">ACTIVO</option>
+                            <option value="INACTIVO">INACTIVO</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                        <button type="button" class="btn-secondary" id="btn-cancelar-modal-periodo">Cancelar</button>
+                        <button type="submit" class="btn-primary" style="width:auto;">Guardar Cambios</button>
+                    </div>
+                </form>
             </div>
         </div>
     `;
 
-    const tbody   = document.getElementById("vciclo-tbody");
-    const table   = document.getElementById("vciclo-table");
-    const emptyEl = document.getElementById("vciclo-empty");
+    let periodosLocales = [];
 
-    function formatFecha(f) {
-        if (!f) return "—";
-        const [y, m, d] = f.split("T")[0].split("-");
-        return `${d}/${m}/${y}`;
-    }
-
-    fetch("http://127.0.0.1:5000/ciclos")
-        .then(r => r.json())
+    const cargarTablaPeriodos = () => {
+        fetch("http://127.0.0.1:5000/periodos")
+        .then(res => res.json())
         .then(data => {
-            const lista = data.ciclos || [];
-            if (!lista.length) {
-                emptyEl.style.display = "block";
-                table.style.display   = "none";
-                return;
-            }
-            emptyEl.style.display = "none";
-            table.style.display   = "table";
-
-            lista.forEach(item => {
-                const esActivo = item.estado === "ACTIVO";
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td><strong>${item.nombre}</strong></td>
-                    <td style="text-align:center;">${item.anio}</td>
-                    <td>${formatFecha(item.fecha_inicio)}</td>
-                    <td>${formatFecha(item.fecha_fin)}</td>
-                    <td style="text-align:center;">
-                        <span class="status-badge ${esActivo ? "badge-activo" : "badge-inactivo"}">
-                            ${esActivo ? "Activo" : "Inactivo"}
-                        </span>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        })
-        .catch(() => {
-            emptyEl.textContent = "Error al cargar los datos.";
-            emptyEl.style.display = "block";
-        });
-}
-
-
-// ── Vista: REGISTRAR PERIODO ──────────────────────────────────
-function renderViewRegistrarPeriodo(container) {
-    container.innerHTML = `
-        <div class="dashboard-header">
-            <h1>
-                <span class="material-symbols-rounded">calendar_clock</span>
-                Registrar Periodo
-            </h1>
-            <p>Define los periodos académicos disponibles en el sistema (Parcial 1, Final, Extraordinario, etc.)</p>
-        </div>
-
-        <!-- FORMULARIO -->
-        <div class="admin-card" style="max-width:680px;">
-            <h3>
-                <span class="material-symbols-rounded">add_circle</span>
-                Nuevo Periodo
-            </h3>
-
-            <form id="periodo-form" novalidate>
-                <div class="form-row">
-                    <div class="form-group" style="grid-column:span 2;">
-                        <label>Nombre del Periodo <span class="req">*</span></label>
-                        <input
-                            type="text"
-                            id="periodo-nombre"
-                            placeholder="Ej. PARCIAL I"
-                            required
-                            autocomplete="off"
-                            class="input-uppercase"
-                            style="text-transform:uppercase;"
-                        />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Descripción <span class="opt">(opcional)</span></label>
-                    <textarea
-                        id="periodo-descripcion"
-                        class="materia-textarea"
-                        placeholder="Breve descripción del periodo..."
-                        rows="2"
-                    ></textarea>
-                </div>
-                <div style="display:flex; justify-content:flex-end; margin-top:8px;">
-                    <button type="submit" class="btn-primary" id="periodo-submit-btn" style="width:auto; padding:11px 28px;">
-                        <span class="material-symbols-rounded">save</span> Guardar
-                    </button>
-                </div>
-            </form>
-        </div>
-    `;
-
-    // Uppercase en tiempo real
-    const inputNombre = document.getElementById("periodo-nombre");
-    inputNombre.addEventListener("input", function () {
-        const pos = this.selectionStart;
-        this.value = this.value.toUpperCase();
-        this.setSelectionRange(pos, pos);
-    });
-
-    const tbody    = document.getElementById("periodo-tbody");
-    const table    = document.getElementById("periodo-table");
-    const emptyEl  = document.getElementById("periodo-empty");
-    const form     = document.getElementById("periodo-form");
-    const submitBtn= document.getElementById("periodo-submit-btn");
-
-    let periodos = [];
-
-    function renderTabla(lista) {
-        tbody.innerHTML = "";
-        if (!lista || lista.length === 0) {
-            emptyEl.style.display = "block";
-            table.style.display   = "none";
-            return;
-        }
-        emptyEl.style.display = "none";
-        table.style.display   = "table";
-
-        lista.forEach(item => {
-            const esActivo = item.estado === "ACTIVO";
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td><strong>${item.nombre}</strong></td>
-                <td style="color:#888; font-size:0.87rem;">${item.descripcion || "—"}</td>
-                <td style="text-align:center;">
-                    <span class="status-badge ${esActivo ? "badge-activo" : "badge-inactivo"}">
-                        ${esActivo ? "Activo" : "Inactivo"}
-                    </span>
-                </td>
-                <td style="text-align:center;">
-                    <button
-                        class="btn-icon ${esActivo ? "btn-icon-danger" : "btn-icon-success"} btn-periodo-toggle"
-                        data-id="${item.id_periodo}"
-                        data-estado="${item.estado}"
-                        title="${esActivo ? "Desactivar" : "Activar"}"
-                    >
-                        <span class="material-symbols-rounded">
-                            ${esActivo ? "block" : "check_circle"}
-                        </span>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        tbody.querySelectorAll(".btn-periodo-toggle").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const id          = btn.dataset.id;
-                const nuevoEstado = btn.dataset.estado === "ACTIVO" ? "INACTIVO" : "ACTIVO";
-
-                fetch(`http://127.0.0.1:5000/periodos/${id}/estado`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ estado: nuevoEstado })
-                })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        const item = periodos.find(x => String(x.id_periodo) === String(id));
-                        if (item) item.estado = nuevoEstado;
-                        renderTabla(periodos);
-                    } else {
-                        alert(data.mensaje || "Error al cambiar estado");
-                    }
-                })
-                .catch(() => alert("Error al conectar con el servidor"));
-            });
-        });
-    }
-
-    // Cargar lista
-    fetch("http://127.0.0.1:5000/periodos")
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                periodos = data.periodos || [];
-                renderTabla(periodos);
+            const tbody = document.getElementById("tbody-periodos");
+            if (data.success && data.periodos && data.periodos.length > 0) {
+                periodosLocales = data.periodos;
+                tbody.innerHTML = periodosLocales.map((p, index) => `
+                    <tr>
+                        <td>${p.id_periodo}</td>
+                        <td><strong>${p.anio}</strong></td>
+                        <td>${p.fecha_inicio}</td>
+                        <td>${p.fecha_fin}</td>
+                        <td style="text-align:center;">
+                            <span class="status-badge ${p.estado === 'ACTIVO' ? 'badge-activo' : 'badge-inactivo'}">${p.estado}</span>
+                        </td>
+                        <td style="text-align:center;">
+                            <button class="btn-icon btn-edit" data-idx="${index}" title="Editar periodo">
+                                <span class="material-symbols-rounded">edit</span>
+                            </button>
+                        </td>
+                    </tr>
+                `).join("");
+            } else {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No hay periodos registrados.</td></tr>`;
             }
         })
-        .catch(() => {
-            emptyEl.textContent = "Error al cargar los datos.";
-            emptyEl.style.display = "block";
-        });
+        .catch(err => console.error(err));
+    };
 
-    // Envío formulario
-    form.addEventListener("submit", e => {
+    cargarTablaPeriodos();
+
+    // ── GUARDAR NUEVO PERIODO ──
+    document.getElementById("form-periodo").addEventListener("submit", function (e) {
         e.preventDefault();
-
-        const nombre = inputNombre.value.trim();
-        if (!nombre) {
-            inputNombre.style.borderColor = "#e74c3c";
-            inputNombre.addEventListener("input", () => inputNombre.style.borderColor = "", { once: true });
-            alert("El nombre es obligatorio.");
-            return;
-        }
-
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = `<span class="material-symbols-rounded">hourglass_top</span> Guardando...`;
-
         const payload = {
-            nombre,
-            descripcion: document.getElementById("periodo-descripcion").value.trim() || null
+            anio: parseInt(document.getElementById("p-anio").value),
+            fecha_inicio: document.getElementById("p-fecha-inicio").value,
+            fecha_fin: document.getElementById("p-fecha-fin").value
         };
 
         fetch("http://127.0.0.1:5000/periodos", {
@@ -498,100 +144,556 @@ function renderViewRegistrarPeriodo(container) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         })
-        .then(r => r.json())
+        .then(res => res.json())
         .then(data => {
             if (data.success) {
-                if (data.periodo) periodos.push(data.periodo);
-                renderTabla(periodos);
-                form.reset();
-
-                submitBtn.classList.add("success");
-                submitBtn.innerHTML = `<span class="material-symbols-rounded">check_circle</span> Guardado`;
-                setTimeout(() => {
-                    submitBtn.classList.remove("success");
-                    submitBtn.innerHTML = `<span class="material-symbols-rounded">save</span> Guardar`;
-                    submitBtn.disabled = false;
-                }, 2000);
+                alert("¡Periodo lectivo guardado exitosamente!");
+                document.getElementById("form-periodo").reset();
+                cargarTablaPeriodos();
             } else {
-                alert(data.mensaje || data.error || "Error al guardar");
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = `<span class="material-symbols-rounded">save</span> Guardar`;
+                alert("Error: " + (data.mensaje || data.error));
             }
+        }).catch(err => console.error(err));
+    });
+
+    // ── ABRIR MODAL EDITAR (Delegación de eventos) ──
+    const modalPeriodo = document.getElementById("modal-edit-periodo");
+    
+    document.getElementById("tbody-periodos").addEventListener("click", e => {
+        const btn = e.target.closest(".btn-edit");
+        if (!btn) return;
+        
+        const idx = btn.dataset.idx;
+        const p = periodosLocales[idx];
+        
+        document.getElementById("edit-p-id").value = p.id_periodo;
+        document.getElementById("edit-p-anio").value = p.anio;
+        document.getElementById("edit-p-inicio").value = p.fecha_inicio;
+        document.getElementById("edit-p-fin").value = p.fecha_fin;
+        document.getElementById("edit-p-estado").value = p.estado || 'ACTIVO';
+        
+        modalPeriodo.style.display = "flex";
+    });
+
+    // ── CERRAR MODAL ──
+    const cerrarModal = () => modalPeriodo.style.display = "none";
+    document.getElementById("btn-cerrar-modal-periodo").addEventListener("click", cerrarModal);
+    document.getElementById("btn-cancelar-modal-periodo").addEventListener("click", cerrarModal);
+
+    // ── GUARDAR EDICIÓN (PUT) ──
+    document.getElementById("form-edit-periodo").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const id_periodo = document.getElementById("edit-p-id").value;
+        const payload = {
+            anio: parseInt(document.getElementById("edit-p-anio").value),
+            fecha_inicio: document.getElementById("edit-p-inicio").value,
+            fecha_fin: document.getElementById("edit-p-fin").value,
+            estado: document.getElementById("edit-p-estado").value
+        };
+
+        fetch(`http://127.0.0.1:5000/periodos/${id_periodo}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
         })
-        .catch(() => {
-            alert("Error al conectar con el servidor");
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = `<span class="material-symbols-rounded">save</span> Guardar`;
-        });
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("¡Periodo actualizado correctamente!");
+                cerrarModal();
+                cargarTablaPeriodos();
+            } else {
+                alert("Error: " + (data.mensaje || data.error));
+            }
+        }).catch(err => console.error(err));
     });
 }
 
-
-// ── Vista: VER PERIODOS (sólo tabla) ─────────────────────────
-function renderViewVerPeriodos(container) {
+// ── VISTA 2: REGISTRAR TIPO DE CICLO (Formulario + Tabla + Editar) ──
+function renderViewRegistrarTipoCiclo(container) {
     container.innerHTML = `
         <div class="dashboard-header">
-            <h1>
-                <span class="material-symbols-rounded">view_timeline</span>
-                Ver Periodos
-            </h1>
-            <p>Consulta todos los periodos académicos registrados en el sistema.</p>
+            <h1><span class="material-symbols-rounded">category</span> Tipos de Ciclo</h1>
+            <p>Gestiona las modalidades académicas (Ordinario, Extraordinario, etc.)</p>
+        </div>
+        
+        <div class="admin-card" style="max-width:600px; margin-bottom: 30px;">
+            <h2 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--texto-oscuro);">Crear Tipo de Ciclo</h2>
+            <form id="form-tipo-ciclo">
+                <div class="form-group">
+                    <label>Nombre del Tipo <span class="req">*</span></label>
+                    <input type="text" id="tc-nombre" placeholder="Ej. ORDINARIO" required style="text-transform:uppercase;" />
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="tc-descripcion" placeholder="Detalles opcionales..." rows="3"></textarea>
+                </div>
+                <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+                    <button type="submit" class="btn-primary">
+                        <span class="material-symbols-rounded">save</span> Guardar Tipo
+                    </button>
+                </div>
+            </form>
         </div>
 
-        <div class="admin-card" style="max-width:680px;">
-            <h3>
-                <span class="material-symbols-rounded">list</span>
-                Periodos registrados
-            </h3>
+        <div class="admin-card">
+            <h2 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--texto-oscuro);">Tipos Registrados</h2>
             <div class="students-table-wrapper">
-                <table class="students-table" id="vperiodo-table" style="display:none;">
+                <table class="students-table">
                     <thead>
                         <tr>
-                            <th>Nombre</th>
+                            <th>ID</th>
+                            <th>Nombre Modalidad</th>
                             <th>Descripción</th>
                             <th style="text-align:center;">Estado</th>
+                            <th style="text-align:center;">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="vperiodo-tbody"></tbody>
+                    <tbody id="tbody-tipos">
+                        <tr><td colspan="5" style="text-align:center; color:#888;">Cargando modalidades...</td></tr>
+                    </tbody>
                 </table>
-                <div id="vperiodo-empty" class="empty-state">No hay periodos registrados todavía.</div>
+            </div>
+        </div>
+
+        <div id="modal-edit-tipo" class="modal-overlay" style="display:none;">
+            <div class="modal-card" style="max-width:500px;">
+                <div class="modal-header">
+                    <h3><span class="material-symbols-rounded">edit</span> Editar Tipo de Ciclo</h3>
+                    <button type="button" class="modal-close-btn" id="btn-cerrar-modal-tipo">
+                        <span class="material-symbols-rounded">close</span>
+                    </button>
+                </div>
+                <form id="form-edit-tipo">
+                    <input type="hidden" id="edit-tc-id" />
+                    <div class="form-group">
+                        <label>Nombre del Tipo <span class="req">*</span></label>
+                        <input type="text" id="edit-tc-nombre" required style="text-transform:uppercase;" />
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="edit-tc-descripcion" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado <span class="req">*</span></label>
+                        <select id="edit-tc-estado" class="form-select" required>
+                            <option value="ACTIVO">ACTIVO</option>
+                            <option value="INACTIVO">INACTIVO</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                        <button type="button" class="btn-secondary" id="btn-cancelar-modal-tipo">Cancelar</button>
+                        <button type="submit" class="btn-primary" style="width:auto;">Guardar Cambios</button>
+                    </div>
+                </form>
             </div>
         </div>
     `;
 
-    const tbody   = document.getElementById("vperiodo-tbody");
-    const table   = document.getElementById("vperiodo-table");
-    const emptyEl = document.getElementById("vperiodo-empty");
+    document.getElementById("tc-nombre").addEventListener("input", function() { this.value = this.value.toUpperCase(); });
+    document.getElementById("edit-tc-nombre").addEventListener("input", function() { this.value = this.value.toUpperCase(); });
 
-    fetch("http://127.0.0.1:5000/periodos")
+    let tiposLocales = [];
+
+    const cargarTablaTipos = () => {
+        fetch("http://127.0.0.1:5000/tipos_ciclo")
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById("tbody-tipos");
+            if (data.success && data.tipos && data.tipos.length > 0) {
+                tiposLocales = data.tipos;
+                tbody.innerHTML = tiposLocales.map((t, index) => `
+                    <tr>
+                        <td>${t.id_tipo_ciclo}</td>
+                        <td><strong>${t.nombre}</strong></td>
+                        <td>${t.descripcion || '—'}</td>
+                        <td style="text-align:center;">
+                            <span class="status-badge ${t.estado === 'ACTIVO' ? 'badge-activo' : 'badge-inactivo'}">${t.estado}</span>
+                        </td>
+                        <td style="text-align:center;">
+                            <button class="btn-icon btn-edit" data-idx="${index}" title="Editar tipo">
+                                <span class="material-symbols-rounded">edit</span>
+                            </button>
+                        </td>
+                    </tr>
+                `).join("");
+            } else {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No hay tipos de ciclo registrados.</td></tr>`;
+            }
+        })
+        .catch(err => console.error(err));
+    };
+
+    cargarTablaTipos();
+
+    // ── GUARDAR NUEVO TIPO ──
+    document.getElementById("form-tipo-ciclo").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const payload = {
+            nombre: document.getElementById("tc-nombre").value.trim(),
+            descripcion: document.getElementById("tc-descripcion").value.trim()
+        };
+
+        fetch("http://127.0.0.1:5000/tipos_ciclo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("¡Tipo de ciclo guardado exitosamente!");
+                document.getElementById("form-tipo-ciclo").reset();
+                cargarTablaTipos(); 
+            } else {
+                alert("Error: " + (data.mensaje || data.error));
+            }
+        }).catch(err => console.error(err));
+    });
+
+    // ── ABRIR MODAL EDITAR ──
+    const modalTipo = document.getElementById("modal-edit-tipo");
+    
+    document.getElementById("tbody-tipos").addEventListener("click", e => {
+        const btn = e.target.closest(".btn-edit");
+        if (!btn) return;
+        
+        const idx = btn.dataset.idx;
+        const t = tiposLocales[idx];
+        
+        document.getElementById("edit-tc-id").value = t.id_tipo_ciclo;
+        document.getElementById("edit-tc-nombre").value = t.nombre;
+        document.getElementById("edit-tc-descripcion").value = t.descripcion || "";
+        document.getElementById("edit-tc-estado").value = t.estado || 'ACTIVO';
+        
+        modalTipo.style.display = "flex";
+    });
+
+    const cerrarModalTipo = () => modalTipo.style.display = "none";
+    document.getElementById("btn-cerrar-modal-tipo").addEventListener("click", cerrarModalTipo);
+    document.getElementById("btn-cancelar-modal-tipo").addEventListener("click", cerrarModalTipo);
+
+    // ── GUARDAR EDICIÓN (PUT) ──
+    document.getElementById("form-edit-tipo").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const id_tipo = document.getElementById("edit-tc-id").value;
+        const payload = {
+            nombre: document.getElementById("edit-tc-nombre").value.trim(),
+            descripcion: document.getElementById("edit-tc-descripcion").value.trim(),
+            estado: document.getElementById("edit-tc-estado").value
+        };
+
+        fetch(`http://127.0.0.1:5000/tipos_ciclo/${id_tipo}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("¡Tipo de ciclo actualizado correctamente!");
+                cerrarModalTipo();
+                cargarTablaTipos();
+            } else {
+                alert("Error: " + (data.mensaje || data.error));
+            }
+        }).catch(err => console.error(err));
+    });
+}
+
+// ── VISTA 3: REGISTRAR CICLO ────────────────────────────────
+function renderViewRegistrarCiclo(container) {
+    container.innerHTML = `
+        <div class="dashboard-header">
+            <h1><span class="material-symbols-rounded">event_repeat</span> Registrar Ciclo</h1>
+            <p>Abre un nuevo ciclo vinculándolo a su Periodo Lectivo y a su Tipo.</p>
+        </div>
+        <div class="admin-card" style="max-width:800px;">
+            <form id="form-ciclo">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nombre del Ciclo <span class="req">*</span></label>
+                        <input type="text" id="c-nombre" placeholder="Ej. Ciclo 1" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Número de Ciclo <span class="req">*</span></label>
+                        <input type="number" id="c-numero" placeholder="Ej. 1 o 2" required min="1" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Periodo Lectivo (Año) <span class="req">*</span></label>
+                        <select id="c-periodo" required class="form-select">
+                            <option value="" disabled selected>Cargando periodos...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Ciclo <span class="req">*</span></label>
+                        <select id="c-tipo" required class="form-select">
+                            <option value="" disabled selected>Cargando tipos...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fecha de Inicio <span class="req">*</span></label>
+                        <input type="date" id="c-fecha-inicio" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Fin <span class="req">*</span></label>
+                        <input type="date" id="c-fecha-fin" required />
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+                    <button type="submit" class="btn-primary">
+                        <span class="material-symbols-rounded">save</span> Guardar Ciclo
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    cargarSelectsCiclo('c-periodo', 'c-tipo');
+
+    document.getElementById("form-ciclo").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const payload = {
+            nombre: document.getElementById("c-nombre").value.trim(),
+            numero_ciclo: parseInt(document.getElementById("c-numero").value),
+            fecha_inicio: document.getElementById("c-fecha-inicio").value,
+            fecha_fin: document.getElementById("c-fecha-fin").value,
+            id_periodo: parseInt(document.getElementById("c-periodo").value),
+            id_tipo_ciclo: parseInt(document.getElementById("c-tipo").value)
+        };
+
+        fetch("http://127.0.0.1:5000/ciclos", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("¡Ciclo guardado exitosamente!");
+                document.getElementById("form-ciclo").reset();
+            } else {
+                alert("Error: " + (data.mensaje || data.error));
+            }
+        })
+        .catch(err => console.error(err));
+    });
+}
+
+// ── VISTA 4: VER REGISTROS Y EDITAR CICLOS ──────────────────
+function renderViewVerCiclos(container) {
+    container.innerHTML = `
+        <div class="dashboard-header">
+            <h1><span class="material-symbols-rounded">format_list_bulleted</span> Ciclos Registrados</h1>
+            <p>Historial y control de ciclos académicos completos creados en el sistema.</p>
+        </div>
+        <div class="admin-card">
+            <div class="students-table-wrapper">
+                <table class="students-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre Ciclo</th>
+                            <th>N° Ciclo</th>
+                            <th>Fechas de Vigencia</th>
+                            <th style="text-align:center;">Estado</th>
+                            <th style="text-align:center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-ciclos">
+                        <tr><td colspan="5" style="text-align:center; color:#888;">Cargando ciclos...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="modal-edit-ciclo" class="modal-overlay" style="display:none;">
+            <div class="modal-card" style="max-width:700px;">
+                <div class="modal-header">
+                    <h3><span class="material-symbols-rounded">edit</span> Editar Ciclo</h3>
+                    <button type="button" class="modal-close-btn" id="btn-cerrar-modal-ciclo">
+                        <span class="material-symbols-rounded">close</span>
+                    </button>
+                </div>
+                <form id="form-edit-ciclo">
+                    <input type="hidden" id="edit-c-id" />
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre del Ciclo <span class="req">*</span></label>
+                            <input type="text" id="edit-c-nombre" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Número de Ciclo <span class="req">*</span></label>
+                            <input type="number" id="edit-c-numero" required min="1" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Periodo Lectivo <span class="req">*</span></label>
+                            <select id="edit-c-periodo" required class="form-select"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Ciclo <span class="req">*</span></label>
+                            <select id="edit-c-tipo" required class="form-select"></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha de Inicio <span class="req">*</span></label>
+                            <input type="date" id="edit-c-inicio" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Fin <span class="req">*</span></label>
+                            <input type="date" id="edit-c-fin" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado <span class="req">*</span></label>
+                        <select id="edit-c-estado" class="form-select" required>
+                            <option value="ACTIVO">ACTIVO</option>
+                            <option value="INACTIVO">INACTIVO</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                        <button type="button" class="btn-secondary" id="btn-cancelar-modal-ciclo">Cancelar</button>
+                        <button type="submit" class="btn-primary" style="width:auto;">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+
+    let ciclosLocales = [];
+
+    // Pre-cargar los selects del modal de edición
+    cargarSelectsCiclo('edit-c-periodo', 'edit-c-tipo');
+
+    const cargarTablaCiclos = () => {
+        fetch("http://127.0.0.1:5000/ciclos")
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById("tbody-ciclos");
+            if (data.success && data.ciclos && data.ciclos.length > 0) {
+                ciclosLocales = data.ciclos;
+                tbody.innerHTML = ciclosLocales.map((c, index) => `
+                    <tr>
+                        <td><strong>${c.nombre}</strong></td>
+                        <td>Ciclo ${c.numero_ciclo}</td>
+                        <td>${c.fecha_inicio} al ${c.fecha_fin}</td>
+                        <td style="text-align:center;">
+                            <span class="status-badge ${c.estado === 'ACTIVO' ? 'badge-activo' : 'badge-inactivo'}">${c.estado}</span>
+                        </td>
+                        <td style="text-align:center;">
+                            <button class="btn-icon btn-edit" data-idx="${index}" title="Editar ciclo">
+                                <span class="material-symbols-rounded">edit</span>
+                            </button>
+                        </td>
+                    </tr>
+                `).join("");
+            } else {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No hay ciclos registrados.</td></tr>`;
+            }
+        })
+        .catch(err => console.error(err));
+    };
+
+    cargarTablaCiclos();
+
+    // ── ABRIR MODAL EDITAR ──
+    const modalCiclo = document.getElementById("modal-edit-ciclo");
+    
+    document.getElementById("tbody-ciclos").addEventListener("click", e => {
+        const btn = e.target.closest(".btn-edit");
+        if (!btn) return;
+        
+        const idx = btn.dataset.idx;
+        const c = ciclosLocales[idx];
+        
+        document.getElementById("edit-c-id").value = c.id_ciclo;
+        document.getElementById("edit-c-nombre").value = c.nombre;
+        document.getElementById("edit-c-numero").value = c.numero_ciclo;
+        document.getElementById("edit-c-inicio").value = c.fecha_inicio;
+        document.getElementById("edit-c-fin").value = c.fecha_fin;
+        document.getElementById("edit-c-estado").value = c.estado || 'ACTIVO';
+        
+        // Seleccionar los valores correspondientes en los dropdowns
+        document.getElementById("edit-c-periodo").value = c.id_periodo;
+        document.getElementById("edit-c-tipo").value = c.id_tipo_ciclo;
+        
+        modalCiclo.style.display = "flex";
+    });
+
+    const cerrarModalCiclo = () => modalCiclo.style.display = "none";
+    document.getElementById("btn-cerrar-modal-ciclo").addEventListener("click", cerrarModalCiclo);
+    document.getElementById("btn-cancelar-modal-ciclo").addEventListener("click", cerrarModalCiclo);
+
+    // ── GUARDAR EDICIÓN (PUT) ──
+    document.getElementById("form-edit-ciclo").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const id_ciclo = document.getElementById("edit-c-id").value;
+        const payload = {
+            nombre: document.getElementById("edit-c-nombre").value.trim(),
+            numero_ciclo: parseInt(document.getElementById("edit-c-numero").value),
+            fecha_inicio: document.getElementById("edit-c-inicio").value,
+            fecha_fin: document.getElementById("edit-c-fin").value,
+            id_periodo: parseInt(document.getElementById("edit-c-periodo").value),
+            id_tipo_ciclo: parseInt(document.getElementById("edit-c-tipo").value),
+            estado: document.getElementById("edit-c-estado").value
+        };
+
+        fetch(`http://127.0.0.1:5000/ciclos/${id_ciclo}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("¡Ciclo actualizado correctamente!");
+                cerrarModalCiclo();
+                cargarTablaCiclos();
+            } else {
+                alert("Error: " + (data.mensaje || data.error));
+            }
+        }).catch(err => console.error(err));
+    });
+}
+
+// ── FUNCIÓN GLOBAL PARA LLENAR LOS SELECTS ──────────────────
+function cargarSelectsCiclo(idSelectPeriodo, idSelectTipo) {
+    const selPeriodo = document.getElementById(idSelectPeriodo);
+    const selTipo = document.getElementById(idSelectTipo);
+
+    if (selPeriodo) {
+        fetch("http://127.0.0.1:5000/periodos")
         .then(r => r.json())
         .then(data => {
-            const lista = data.periodos || [];
-            if (!lista.length) {
-                emptyEl.style.display = "block";
-                table.style.display   = "none";
-                return;
+            selPeriodo.innerHTML = '<option value="" disabled selected>Selecciona un periodo...</option>';
+            if (data.success && data.periodos) {
+                data.periodos.forEach(p => {
+                    selPeriodo.innerHTML += `<option value="${p.id_periodo}">${p.anio} (${p.fecha_inicio} a ${p.fecha_fin})</option>`;
+                });
             }
-            emptyEl.style.display = "none";
-            table.style.display   = "table";
+        }).catch(e => console.error(e));
+    }
 
-            lista.forEach(item => {
-                const esActivo = item.estado === "ACTIVO";
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td><strong>${item.nombre}</strong></td>
-                    <td style="color:#888; font-size:0.87rem;">${item.descripcion || "—"}</td>
-                    <td style="text-align:center;">
-                        <span class="status-badge ${esActivo ? "badge-activo" : "badge-inactivo"}">
-                            ${esActivo ? "Activo" : "Inactivo"}
-                        </span>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        })
-        .catch(() => {
-            emptyEl.textContent = "Error al cargar los datos.";
-            emptyEl.style.display = "block";
-        });
+    if (selTipo) {
+        fetch("http://127.0.0.1:5000/tipos_ciclo")
+        .then(r => r.json())
+        .then(data => {
+            selTipo.innerHTML = '<option value="" disabled selected>Selecciona un tipo...</option>';
+            if (data.success && data.tipos) {
+                data.tipos.forEach(t => {
+                    selTipo.innerHTML += `<option value="${t.id_tipo_ciclo}">${t.nombre}</option>`;
+                });
+            }
+        }).catch(e => console.error(e));
+    }
 }

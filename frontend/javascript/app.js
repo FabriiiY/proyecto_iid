@@ -182,10 +182,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Ciclos y Periodos
         { id: "nav-ciclos", icon: "date_range", label: "Ciclos y Periodos",
           dropdown: [
-            { label: "Registrar Ciclo",   view: "ciclo-registrar"  },
-            { label: "Ver Ciclos",        view: "ciclo-ver"        },
-            { label: "Registrar Periodo", view: "periodo-registrar"},
-            { label: "Ver Periodos",      view: "periodo-ver"      }
+            { label: "Registrar Periodo",    view: "periodo-registrar"  },
+            { label: "Registrar Tipo Ciclo", view: "tipo-ciclo-registrar"},
+            { label: "Registrar Ciclo",      view: "ciclo-registrar"    },
+            { label: "Ver Registros",        view: "ciclo-ver"          }
           ]
         },
 
@@ -341,10 +341,10 @@ document.addEventListener("DOMContentLoaded", () => {
         "mi-perfil":         () => renderViewMiPerfil(main),
         "modalidad":         () => renderViewModalidad(main),
         "tipo-programa":     () => renderViewTipoPrograma(main),
-        "ciclo-registrar":   () => renderViewRegistrarCiclo(main),
+        "periodo-registrar":    () => renderViewRegistrarPeriodo(main),
+        "tipo-ciclo-registrar": () => renderViewRegistrarTipoCiclo(main),
+        "ciclo-registrar":      () => renderViewRegistrarCiclo(main),
         "ciclo-ver":         () => renderViewVerCiclos(main),
-        "periodo-registrar": () => renderViewRegistrarPeriodo(main),
-        "periodo-ver":       () => renderViewVerPeriodos(main)
     };
 
     const main = document.getElementById("main-content");
