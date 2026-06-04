@@ -2,21 +2,33 @@
 //  views/ciclos-periodos.js — Gestión de Periodos y Ciclos
 // ============================================================
 
-// ── VISTA 1: REGISTRAR PERIODO LECTIVO (Formulario + Tabla + Editar) ──
 function renderViewRegistrarPeriodo(container) {
-    container.innerHTML = `
+  container.innerHTML = `
         <div class="dashboard-header">
             <h1><span class="material-symbols-rounded">calendar_today</span> Periodos Lectivos</h1>
             <p>Configura un nuevo año o periodo lectivo y revisa los existentes.</p>
         </div>
         
-        <div class="admin-card" style="max-width:600px; margin-bottom: 30px;">
-            <h2 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--texto-oscuro);">Crear Periodo</h2>
-            <form id="form-periodo">
+        <div class="admin-card" style="max-width:800px; margin-bottom: 30px;">
+            <h3><span class="material-symbols-rounded">add_circle</span> Crear Periodo</h3>
+            <form id="form-periodo" novalidate>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nombre del Periodo <span class="req">*</span></label>
+                        <input type="text" id="p-nombre" placeholder="Ej. Año Lectivo 2026" required autocomplete="off" class="input-uppercase" />
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción <span class="opt">(opcional)</span></label>
+                        <input type="text" id="p-descripcion" placeholder="Detalles opcionales" autocomplete="off" class="form-input-full" />
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label>Año <span class="req">*</span></label>
                     <input type="number" id="p-anio" placeholder="Ej. 2026" required min="2000" max="2100" />
                 </div>
+                
                 <div class="form-row">
                     <div class="form-group">
                         <label>Fecha de Inicio <span class="req">*</span></label>
@@ -27,8 +39,9 @@ function renderViewRegistrarPeriodo(container) {
                         <input type="date" id="p-fecha-fin" required />
                     </div>
                 </div>
-                <div style="display:flex; justify-content:flex-end; margin-top:20px;">
-                    <button type="submit" class="btn-primary">
+
+                <div style="display:flex; justify-content:flex-end; margin-top:15px;">
+                    <button type="submit" class="btn-primary" style="width:auto; padding:12px 30px;">
                         <span class="material-symbols-rounded">save</span> Guardar Periodo
                     </button>
                 </div>
@@ -36,177 +49,201 @@ function renderViewRegistrarPeriodo(container) {
         </div>
 
         <div class="admin-card">
-            <h2 style="margin-top:0; margin-bottom:15px; font-size:1.1rem; color:var(--texto-oscuro);">Periodos Registrados</h2>
             <div class="students-table-wrapper">
-                <table class="students-table">
+                <table class="students-table" id="tabla-periodos">
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Nombre</th>
                             <th>Año</th>
-                            <th>Fecha Inicio</th>
-                            <th>Fecha Fin</th>
-                            <th style="text-align:center;">Estado</th>
+                            <th>Inicio</th>
+                            <th>Fin</th>
+                            <th>Descripción</th>
                             <th style="text-align:center;">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="tbody-periodos">
-                        <tr><td colspan="6" style="text-align:center; color:#888;">Cargando periodos...</td></tr>
+                    <tbody>
+                        <tr><td colspan="7" style="text-align:center; color:#999;">Cargando periodos...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
-
-        <div id="modal-edit-periodo" class="modal-overlay" style="display:none;">
-            <div class="modal-card" style="max-width:500px;">
-                <div class="modal-header">
-                    <h3><span class="material-symbols-rounded">edit</span> Editar Periodo</h3>
-                    <button type="button" class="modal-close-btn" id="btn-cerrar-modal-periodo">
-                        <span class="material-symbols-rounded">close</span>
-                    </button>
-                </div>
-                <form id="form-edit-periodo">
-                    <input type="hidden" id="edit-p-id" />
-                    <div class="form-group">
-                        <label>Año <span class="req">*</span></label>
-                        <input type="number" id="edit-p-anio" required min="2000" max="2100" />
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Fecha de Inicio <span class="req">*</span></label>
-                            <input type="date" id="edit-p-inicio" required />
-                        </div>
-                        <div class="form-group">
-                            <label>Fecha de Fin <span class="req">*</span></label>
-                            <input type="date" id="edit-p-fin" required />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Estado <span class="req">*</span></label>
-                        <select id="edit-p-estado" class="form-select" required>
-                            <option value="ACTIVO">ACTIVO</option>
-                            <option value="INACTIVO">INACTIVO</option>
-                        </select>
-                    </div>
-                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
-                        <button type="button" class="btn-secondary" id="btn-cancelar-modal-periodo">Cancelar</button>
-                        <button type="submit" class="btn-primary" style="width:auto;">Guardar Cambios</button>
-                    </div>
-                </form>
-            </div>
-        </div>
     `;
 
-    let periodosLocales = [];
+  const tbody = container.querySelector("#tabla-periodos tbody");
 
-    const cargarTablaPeriodos = () => {
-        fetch("http://127.0.0.1:5000/periodos")
-        .then(res => res.json())
-        .then(data => {
-            const tbody = document.getElementById("tbody-periodos");
-            if (data.success && data.periodos && data.periodos.length > 0) {
-                periodosLocales = data.periodos;
-                tbody.innerHTML = periodosLocales.map((p, index) => `
+  function actualizarTablaLocal() {
+    fetch("http://127.0.0.1:5000/periodos")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && data.periodos && data.periodos.length > 0) {
+          tbody.innerHTML = data.periodos
+            .map(
+              (p) => `
                     <tr>
-                        <td>${p.id_periodo}</td>
-                        <td><strong>${p.anio}</strong></td>
+                        <td><b>#${p.id_periodo}</b></td>
+                        <td>${p.nombre || "—"}</td>
+                        <td>${p.anio}</td>
                         <td>${p.fecha_inicio}</td>
                         <td>${p.fecha_fin}</td>
-                        <td style="text-align:center;">
-                            <span class="status-badge ${p.estado === 'ACTIVO' ? 'badge-activo' : 'badge-inactivo'}">${p.estado}</span>
+                        <td style="max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${p.descripcion || ""}">
+                            ${p.descripcion || '<span style="color:#aaa; font-size:0.85rem;">Sin descripción</span>'}
                         </td>
                         <td style="text-align:center;">
-                            <button class="btn-icon btn-edit" data-idx="${index}" title="Editar periodo">
+                            <button class="btn-icon btn-edit" id="btn-edit-p-${p.id_periodo}" title="Editar periodo">
                                 <span class="material-symbols-rounded">edit</span>
                             </button>
                         </td>
                     </tr>
-                `).join("");
-            } else {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No hay periodos registrados.</td></tr>`;
+                `,
+            )
+            .join("");
+
+          data.periodos.forEach((p) => {
+            const btnEdit = container.querySelector(
+              `#btn-edit-p-${p.id_periodo}`,
+            );
+            if (btnEdit) {
+              btnEdit.addEventListener("click", () =>
+                abrirModalEditarPeriodo(p, actualizarTablaLocal),
+              );
             }
-        })
-        .catch(err => console.error(err));
+          });
+        } else {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#999;">No hay periodos registrados.</td></tr>`;
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#e74c3c;">Error al cargar periodos desde la API</td></tr>`;
+      });
+  }
+
+  actualizarTablaLocal();
+
+  const form = container.querySelector("#form-periodo");
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const datos = {
+      nombre: document.getElementById("p-nombre").value,
+      descripcion: document.getElementById("p-descripcion").value,
+      anio: parseInt(document.getElementById("p-anio").value),
+      fecha_inicio: document.getElementById("p-fecha-inicio").value,
+      fecha_fin: document.getElementById("p-fecha-fin").value,
     };
 
-    cargarTablaPeriodos();
+    fetch("http://127.0.0.1:5000/periodos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datos),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alert("Periodo lectivo creado exitosamente.");
+          form.reset();
+          actualizarTablaLocal();
+        } else {
+          alert("Error al crear periodo: " + (data.mensaje || data.error));
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("No se pudo conectar con el servidor Backend.");
+      });
+  });
 
-    // ── GUARDAR NUEVO PERIODO ──
-    document.getElementById("form-periodo").addEventListener("submit", function (e) {
+  // ── FUNCIÓN PARA ABRIR MODAL Y EDITAR PERIODO ──
+  function abrirModalEditarPeriodo(p, alTerminarDeActualizar) {
+    let modal = document.getElementById("modal-editar-periodo");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "modal-editar-periodo";
+      modal.className = "modal-overlay";
+      document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+        <div class="modal-card" style="max-width:600px;">
+            <div class="modal-header">
+                <h3><span class="material-symbols-rounded">edit</span> Editar Periodo #${p.id_periodo}</h3>
+                <button class="modal-close-btn" onclick="document.getElementById('modal-editar-periodo').style.display='none'">
+                    <span class="material-symbols-rounded">close</span>
+                </button>
+            </div>
+            
+            <form id="form-edit-periodo" novalidate>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nombre del Periodo <span class="req">*</span></label>
+                        <input type="text" id="edit-p-nombre" value="${p.nombre || ""}" required class="input-uppercase" />
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <input type="text" id="edit-p-descripcion" value="${p.descripcion || ""}" class="form-input-full" />
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Año <span class="req">*</span></label>
+                    <input type="number" id="edit-p-anio" value="${p.anio}" required min="2000" max="2100" />
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Fecha de Inicio <span class="req">*</span></label>
+                        <input type="date" id="edit-p-fecha-inicio" value="${p.fecha_inicio}" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Fin <span class="req">*</span></label>
+                        <input type="date" id="edit-p-fecha-fin" value="${p.fecha_fin}" required />
+                    </div>
+                </div>
+                
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button type="button" class="btn-secondary" onclick="document.getElementById('modal-editar-periodo').style.display='none'">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="width:auto;">
+                        <span class="material-symbols-rounded">save</span> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    modal.style.display = "flex";
+
+    document
+      .getElementById("form-edit-periodo")
+      .addEventListener("submit", function (e) {
         e.preventDefault();
-        const payload = {
-            anio: parseInt(document.getElementById("p-anio").value),
-            fecha_inicio: document.getElementById("p-fecha-inicio").value,
-            fecha_fin: document.getElementById("p-fecha-fin").value
+
+        const datosActualizados = {
+          nombre: document.getElementById("edit-p-nombre").value,
+          descripcion: document.getElementById("edit-p-descripcion").value,
+          anio: parseInt(document.getElementById("edit-p-anio").value),
+          fecha_inicio: document.getElementById("edit-p-fecha-inicio").value,
+          fecha_fin: document.getElementById("edit-p-fecha-fin").value,
         };
 
-        fetch("http://127.0.0.1:5000/periodos", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
+        fetch(`http://127.0.0.1:5000/periodos/${p.id_periodo}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(datosActualizados),
         })
-        .then(res => res.json())
-        .then(data => {
+          .then((res) => res.json())
+          .then((data) => {
             if (data.success) {
-                alert("¡Periodo lectivo guardado exitosamente!");
-                document.getElementById("form-periodo").reset();
-                cargarTablaPeriodos();
+              alert("Periodo actualizado correctamente");
+              modal.style.display = "none";
+              if (alTerminarDeActualizar) alTerminarDeActualizar();
             } else {
-                alert("Error: " + (data.mensaje || data.error));
+              alert("Error al actualizar: " + (data.mensaje || data.error));
             }
-        }).catch(err => console.error(err));
-    });
-
-    // ── ABRIR MODAL EDITAR (Delegación de eventos) ──
-    const modalPeriodo = document.getElementById("modal-edit-periodo");
-    
-    document.getElementById("tbody-periodos").addEventListener("click", e => {
-        const btn = e.target.closest(".btn-edit");
-        if (!btn) return;
-        
-        const idx = btn.dataset.idx;
-        const p = periodosLocales[idx];
-        
-        document.getElementById("edit-p-id").value = p.id_periodo;
-        document.getElementById("edit-p-anio").value = p.anio;
-        document.getElementById("edit-p-inicio").value = p.fecha_inicio;
-        document.getElementById("edit-p-fin").value = p.fecha_fin;
-        document.getElementById("edit-p-estado").value = p.estado || 'ACTIVO';
-        
-        modalPeriodo.style.display = "flex";
-    });
-
-    // ── CERRAR MODAL ──
-    const cerrarModal = () => modalPeriodo.style.display = "none";
-    document.getElementById("btn-cerrar-modal-periodo").addEventListener("click", cerrarModal);
-    document.getElementById("btn-cancelar-modal-periodo").addEventListener("click", cerrarModal);
-
-    // ── GUARDAR EDICIÓN (PUT) ──
-    document.getElementById("form-edit-periodo").addEventListener("submit", function (e) {
-        e.preventDefault();
-        const id_periodo = document.getElementById("edit-p-id").value;
-        const payload = {
-            anio: parseInt(document.getElementById("edit-p-anio").value),
-            fecha_inicio: document.getElementById("edit-p-inicio").value,
-            fecha_fin: document.getElementById("edit-p-fin").value,
-            estado: document.getElementById("edit-p-estado").value
-        };
-
-        fetch(`http://127.0.0.1:5000/periodos/${id_periodo}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                alert("¡Periodo actualizado correctamente!");
-                cerrarModal();
-                cargarTablaPeriodos();
-            } else {
-                alert("Error: " + (data.mensaje || data.error));
-            }
-        }).catch(err => console.error(err));
-    });
+          })
+          .catch((err) => console.error(err));
+      });
+  }
 }
 
 // ── VISTA 2: REGISTRAR TIPO DE CICLO (Formulario + Tabla + Editar) ──
