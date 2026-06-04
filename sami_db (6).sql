@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 04, 2026 at 09:09 PM
+-- Generation Time: Jun 04, 2026 at 11:49 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -296,7 +296,8 @@ CREATE TABLE `periodo_lectivo` (
 --
 
 INSERT INTO `periodo_lectivo` (`id_periodo`, `nombre`, `descripcion`, `anio`, `fecha_inicio`, `fecha_fin`, `estado`, `fecha_actualizacion`) VALUES
-(1, 'PERIODO ORDINARIO', 'Periodo ordinario 2026', '2026', '2026-01-01', '2026-12-31', 'ACTIVO', '2026-06-04 12:55:33');
+(1, 'PERIODO ORDINARIO', 'Periodo ordinario 2026', '2026', '2026-01-01', '2026-12-31', 'ACTIVO', '2026-06-04 12:55:33'),
+(2, 'AÑO lectivo 2000', 'año lectivo del año 2000', '2000', '2026-06-23', '2026-07-11', 'ACTIVO', '2026-06-04 15:19:58');
 
 -- --------------------------------------------------------
 
@@ -358,7 +359,8 @@ CREATE TABLE `tipo_ciclo` (
 
 INSERT INTO `tipo_ciclo` (`id_tipo_ciclo`, `nombre`, `descripcion`, `estado`, `fecha_actualizacion`) VALUES
 (1, 'ORDINARIO', NULL, 'ACTIVO', '2026-05-30 15:48:46'),
-(2, 'EXTRAORDINARIO', NULL, 'ACTIVO', '2026-05-30 15:48:46');
+(2, 'EXTRAORDINARIO', NULL, 'ACTIVO', '2026-05-30 15:48:46'),
+(3, 'CICLO DE PRUEBA', 'ciclo de prueba', 'ACTIVO', '2026-06-04 15:43:17');
 
 -- --------------------------------------------------------
 
@@ -672,7 +674,7 @@ ALTER TABLE `notificacion`
 -- AUTO_INCREMENT for table `periodo_lectivo`
 --
 ALTER TABLE `periodo_lectivo`
-  MODIFY `id_periodo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_periodo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `reporte`
@@ -690,7 +692,7 @@ ALTER TABLE `rol`
 -- AUTO_INCREMENT for table `tipo_ciclo`
 --
 ALTER TABLE `tipo_ciclo`
-  MODIFY `id_tipo_ciclo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_tipo_ciclo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `tipo_programa`

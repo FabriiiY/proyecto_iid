@@ -84,8 +84,8 @@ function renderViewRegistrarPeriodo(container) {
                         <td><b>#${p.id_periodo}</b></td>
                         <td>${p.nombre || "—"}</td>
                         <td>${p.anio}</td>
-                        <td>${p.fecha_inicio}</td>
-                        <td>${p.fecha_fin}</td>
+                        <td>${formatearFecha(p.fecha_inicio)}</td>
+                        <td>${formatearFecha(p.fecha_fin)}</td>
                         <td style="max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${p.descripcion || ""}">
                             ${p.descripcion || '<span style="color:#aaa; font-size:0.85rem;">Sin descripción</span>'}
                         </td>
@@ -118,6 +118,24 @@ function renderViewRegistrarPeriodo(container) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#e74c3c;">Error al cargar periodos desde la API</td></tr>`;
       });
   }
+
+  function formatearFecha(fecha) {
+
+    const f = new Date(fecha);
+
+    const dia = String(f.getUTCDate()).padStart(2, "0");
+    const mes = String(f.getUTCMonth() + 1).padStart(2, "0");
+    const anio = f.getUTCFullYear();
+
+    return `${dia}/${mes}/${anio}`;
+}
+
+function fechaParaInput(fecha) {
+
+    if (!fecha) return "";
+
+    return fecha.substring(0, 10);
+}
 
   actualizarTablaLocal();
 
@@ -153,6 +171,17 @@ function renderViewRegistrarPeriodo(container) {
         alert("No se pudo conectar con el servidor Backend.");
       });
   });
+
+  function fechaParaInput(fecha) {
+
+    const f = new Date(fecha);
+
+    const anio = f.getUTCFullYear();
+    const mes = String(f.getUTCMonth() + 1).padStart(2, "0");
+    const dia = String(f.getUTCDate()).padStart(2, "0");
+
+    return `${anio}-${mes}-${dia}`;
+}
 
   // ── FUNCIÓN PARA ABRIR MODAL Y EDITAR PERIODO ──
   function abrirModalEditarPeriodo(p, alTerminarDeActualizar) {
@@ -193,11 +222,11 @@ function renderViewRegistrarPeriodo(container) {
                 <div class="form-row">
                     <div class="form-group">
                         <label>Fecha de Inicio <span class="req">*</span></label>
-                        <input type="date" id="edit-p-fecha-inicio" value="${p.fecha_inicio}" required />
+                        <input type="date" id="edit-p-fecha-inicio" value="${fechaParaInput(p.fecha_inicio)}" required />
                     </div>
                     <div class="form-group">
                         <label>Fecha de Fin <span class="req">*</span></label>
-                        <input type="date" id="edit-p-fecha-fin" value="${p.fecha_fin}" required />
+                        <input type="date" id="edit-p-fecha-fin" value="${fechaParaInput(p.fecha_fin)}" required />
                     </div>
                 </div>
                 
@@ -333,7 +362,7 @@ function renderViewRegistrarTipoCiclo(container) {
     let tiposLocales = [];
 
     const cargarTablaTipos = () => {
-        fetch("http://127.0.0.1:5000/tipos_ciclo")
+        fetch("http://127.0.0.1:5000/tipos-ciclo")
         .then(res => res.json())
         .then(data => {
             const tbody = document.getElementById("tbody-tipos");
@@ -371,7 +400,7 @@ function renderViewRegistrarTipoCiclo(container) {
             descripcion: document.getElementById("tc-descripcion").value.trim()
         };
 
-        fetch("http://127.0.0.1:5000/tipos_ciclo", {
+        fetch("http://127.0.0.1:5000/tipos-ciclo", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -420,7 +449,7 @@ function renderViewRegistrarTipoCiclo(container) {
             estado: document.getElementById("edit-tc-estado").value
         };
 
-        fetch(`http://127.0.0.1:5000/tipos_ciclo/${id_tipo}`, {
+        fetch(`http://127.0.0.1:5000/tipos-ciclo/${id_tipo}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -722,7 +751,7 @@ function cargarSelectsCiclo(idSelectPeriodo, idSelectTipo) {
     }
 
     if (selTipo) {
-        fetch("http://127.0.0.1:5000/tipos_ciclo")
+        fetch("http://127.0.0.1:5000/tipos-ciclo")
         .then(r => r.json())
         .then(data => {
             selTipo.innerHTML = '<option value="" disabled selected>Selecciona un tipo...</option>';
