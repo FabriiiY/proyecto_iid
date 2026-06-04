@@ -187,8 +187,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Tipo de Clase
         { id: "nav-tipo-clase", icon: "tune", label: "Tipo de Clase",
           dropdown: [
-            { label: "Modalidad",       href: "WIP.html" },
-            { label: "Tipo de Programa", href: "WIP.html" }
+            { label: "Modalidad",        view: "modalidad"      },
+            { label: "Tipo de Programa", view: "tipo-programa"  }
           ]
         },
 
@@ -333,7 +333,9 @@ document.addEventListener("DOMContentLoaded", () => {
         "maestro-alumnos":   () => renderViewMaestroAlumnos(main),
         "materias-agregar":  () => renderViewMateriasAgregar(main),
         "materias-ver":      () => renderViewMateriasVer(main),
-        "mi-perfil":         () => renderViewMiPerfil(main)
+        "mi-perfil":         () => renderViewMiPerfil(main),
+        "modalidad":         () => renderViewModalidad(main),
+        "tipo-programa":     () => renderViewTipoPrograma(main)
     };
 
     const main = document.getElementById("main-content");
