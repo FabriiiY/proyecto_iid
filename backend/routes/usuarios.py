@@ -161,7 +161,14 @@ def obtener_usuarios():
         cursor.execute(sql)
 
         usuarios = cursor.fetchall()
+        
+        for usuario in usuarios:
 
+            if usuario["fecha_nacimiento"]:
+                usuario["fecha_nacimiento"] = (
+                usuario["fecha_nacimiento"].strftime("%Y-%m-%d")
+            )
+        
         return jsonify({
             "success": True,
             "usuarios": usuarios
@@ -210,6 +217,7 @@ def actualizar_usuario(id_usuario):
             dui_tipo=%s,
             carnet=%s,
             carnet_minoridad=%s,
+            foto_perfil=%s,
             id_rol=%s
         WHERE id_usuario=%s
         """
@@ -236,6 +244,8 @@ def actualizar_usuario(id_usuario):
 
             data["carnet"],
             data.get("carnet_minoridad") or None,
+            
+            data.get("foto_perfil"),
 
             data["id_rol"],
 
@@ -309,3 +319,46 @@ def cambiar_estado_usuario(id_usuario):
         if conexion:
             conexion.close()
             
+@usuarios_bp.route("/usuarios/<int:id_usuario>", methods=["GET"])
+def obtener_usuario(id_usuario):
+
+    try:
+
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        sql = """
+        SELECT *
+        FROM usuario
+        WHERE id_usuario = %s
+        """
+
+        cursor.execute(sql, (id_usuario,))
+
+        usuario = cursor.fetchone()
+
+        if not usuario:
+            return jsonify({
+                "success": False,
+                "mensaje": "Usuario no encontrado"
+            }), 404
+
+        return jsonify({
+            "success": True,
+            "usuario": usuario
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "success": False,
+            "mensaje": str(e)
+        }), 500
+
+    finally:
+
+        if cursor:
+            cursor.close()
+
+        if conexion:
+            conexion.close()

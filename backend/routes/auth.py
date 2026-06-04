@@ -20,10 +20,15 @@ def login():
         SELECT
             id_usuario,
             primer_nombre,
+            segundo_nombre,
             primer_apellido,
+            segundo_apellido,
             correo_institucional,
             password_hash,
-            id_rol
+            id_rol,
+            foto_perfil,
+            carnet,
+            estado
         FROM usuario
         WHERE correo_institucional = %s
         """
@@ -47,13 +52,26 @@ def login():
             }), 401
 
         return jsonify({
-            "success": True,
-            "usuario": {
-                "id": usuario["id_usuario"],
-                "nombre": usuario["primer_nombre"],
-                "apellido": usuario["primer_apellido"],
-                "correo": usuario["correo_institucional"],
-                "rol": usuario["id_rol"]
+        "success": True,
+        "usuario": {
+            "id": usuario["id_usuario"],
+
+            "nombre": usuario["primer_nombre"],
+            "apellido": usuario["primer_apellido"],
+
+            "primer_nombre": usuario["primer_nombre"],
+            "segundo_nombre": usuario["segundo_nombre"],
+
+            "primer_apellido": usuario["primer_apellido"],
+            "segundo_apellido": usuario["segundo_apellido"],
+
+            "correo": usuario["correo_institucional"],
+
+            "rol": usuario["id_rol"],
+
+            "foto_perfil": usuario["foto_perfil"],
+            "carnet": usuario["carnet"],
+            "estado": usuario["estado"]
             }
         })
 
