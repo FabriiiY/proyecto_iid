@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 05, 2026 at 03:33 AM
+-- Generation Time: Jun 05, 2026 at 09:42 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -58,6 +58,14 @@ CREATE TABLE `aula` (
   `estado` enum('ACTIVO','INACTIVO') NOT NULL DEFAULT 'ACTIVO',
   `fecha_actualizacion` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `aula`
+--
+
+INSERT INTO `aula` (`id_aula`, `codigo_aula`, `edificio`, `nivel`, `descripcion`, `capacidad`, `estado`, `fecha_actualizacion`) VALUES
+(1, 'A-101', 'A', 1, 'Prueba de aula', 30, 'INACTIVO', '2026-06-04 22:50:27'),
+(2, 'C-202', 'C', 3, 'Pruebaaa dos', 30, 'ACTIVO', '2026-06-04 22:51:08');
 
 -- --------------------------------------------------------
 
@@ -120,8 +128,9 @@ CREATE TABLE `ciclo` (
 --
 
 INSERT INTO `ciclo` (`id_ciclo`, `nombre`, `numero_ciclo`, `fecha_inicio`, `fecha_fin`, `estado`, `fecha_actualizacion`, `id_periodo`, `id_tipo_ciclo`) VALUES
-(1, 'Ciclo 1', 1, '2026-01-15', '2026-06-15', 'ACTIVO', '2026-05-30 16:20:52', 1, 1),
-(2, 'Ciclo 2', 2, '2026-07-01', '2026-12-01', 'ACTIVO', '2026-05-30 16:20:52', 1, 1);
+(1, 'Ciclo 1', 1, '2026-01-15', '2026-06-15', 'ACTIVO', '2026-06-04 22:59:21', 1, 1),
+(2, 'Ciclo 2', 2, '2026-07-01', '2026-12-01', 'ACTIVO', '2026-05-30 16:20:52', 1, 1),
+(3, 'CICLO 2 - 2000 prueba', 2, '2000-01-02', '2000-12-02', 'ACTIVO', '2026-06-05 01:37:29', 2, 2);
 
 -- --------------------------------------------------------
 
@@ -602,7 +611,7 @@ ALTER TABLE `asistencia`
 -- AUTO_INCREMENT for table `aula`
 --
 ALTER TABLE `aula`
-  MODIFY `id_aula` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_aula` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `carrera`
@@ -620,7 +629,7 @@ ALTER TABLE `carrera_materia`
 -- AUTO_INCREMENT for table `ciclo`
 --
 ALTER TABLE `ciclo`
-  MODIFY `id_ciclo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_ciclo` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `clase`
