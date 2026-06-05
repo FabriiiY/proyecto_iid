@@ -10,6 +10,7 @@ from routes.tipos_ciclo import tipos_ciclo_bp
 from routes.aulas import aulas_bp
 from routes.ciclos import ciclo_bp
 from routes.materias import materias_bp
+from routes.carrera import carrera_bp
 
 
 app = Flask(__name__)
@@ -25,6 +26,7 @@ app.register_blueprint(periodos_bp)
 app.register_blueprint(tipos_ciclo_bp)
 app.register_blueprint(aulas_bp)
 app.register_blueprint(ciclo_bp)
+app.register_blueprint(carrera_bp)
 
 
 @app.route("/")
