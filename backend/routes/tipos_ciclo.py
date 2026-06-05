@@ -6,6 +6,9 @@ tipos_ciclo_bp = Blueprint("tipos_ciclo", __name__)
 @tipos_ciclo_bp.route("/tipos-ciclo", methods=["GET"])
 def obtener_tipos_ciclo():
 
+    conexion = None
+    cursor = None
+    
     try:
 
         conexion = get_connection()
@@ -32,12 +35,17 @@ def obtener_tipos_ciclo():
         }), 500
 
     finally:
+        if cursor:
+            cursor.close()
 
-        cursor.close()
-        conexion.close()
+        if conexion:
+            conexion.close()
         
 @tipos_ciclo_bp.route("/tipos-ciclo", methods=["POST"])
 def crear_tipo_ciclo():
+    
+    conexion = None
+    cursor = None
 
     data = request.get_json()
 
@@ -88,13 +96,17 @@ def crear_tipo_ciclo():
         }), 500
 
     finally:
+        if cursor:
+            cursor.close()
 
-        cursor.close()
-        conexion.close()
+        if conexion:
+            conexion.close()
 
 @tipos_ciclo_bp.route("/tipos-ciclo/<int:id_tipo_ciclo>", methods=["PUT"])
 def actualizar_tipo_ciclo(id_tipo_ciclo):
 
+    conexion = None
+    cursor = None
     data = request.get_json()
 
     try:
@@ -122,5 +134,8 @@ def actualizar_tipo_ciclo(id_tipo_ciclo):
         return jsonify({"success": False, "error": str(e)}), 500
 
     finally:
-        cursor.close()
-        conexion.close()
+        if cursor:
+            cursor.close()
+
+        if conexion:
+            conexion.close()

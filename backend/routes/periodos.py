@@ -9,6 +9,9 @@ periodos_bp = Blueprint("periodos", __name__)
 
 @periodos_bp.route("/periodos", methods=["GET"])
 def obtener_periodos():
+    
+    conexion = None
+    cursor = None
 
     try:
 
@@ -36,9 +39,11 @@ def obtener_periodos():
         }), 500
 
     finally:
+        if cursor:
+            cursor.close()
 
-        cursor.close()
-        conexion.close()
+        if conexion:
+            conexion.close()
 
 
 # =====================================================
@@ -47,6 +52,9 @@ def obtener_periodos():
 
 @periodos_bp.route("/periodos", methods=["POST"])
 def crear_periodo():
+    
+    conexion = None
+    cursor = None
 
     data = request.get_json()
 
@@ -107,8 +115,11 @@ def crear_periodo():
 
     finally:
 
-        cursor.close()
-        conexion.close()
+        if cursor:
+            cursor.close()
+
+        if conexion:
+            conexion.close()
 
 
 # =====================================================
@@ -118,6 +129,9 @@ def crear_periodo():
 @periodos_bp.route("/periodos/<int:id_periodo>", methods=["PUT"])
 def actualizar_periodo(id_periodo):
 
+    conexion = None
+    cursor = None
+    
     data = request.get_json()
 
     try:
@@ -160,9 +174,11 @@ def actualizar_periodo(id_periodo):
         }), 500
 
     finally:
+        if cursor:
+            cursor.close()
 
-        cursor.close()
-        conexion.close()
+        if conexion:
+            conexion.close()
 
 
 # =====================================================
@@ -172,6 +188,8 @@ def actualizar_periodo(id_periodo):
 @periodos_bp.route("/periodos/<int:id_periodo>/estado", methods=["PUT"])
 def cambiar_estado_periodo(id_periodo):
 
+    conexion = None
+    cursor = None
     data = request.get_json()
 
     try:
@@ -203,6 +221,8 @@ def cambiar_estado_periodo(id_periodo):
         }), 500
 
     finally:
+        if cursor:
+            cursor.close()
 
-        cursor.close()
-        conexion.close()
+        if conexion:
+            conexion.close()

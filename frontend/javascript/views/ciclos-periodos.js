@@ -153,23 +153,6 @@ function renderViewRegistrarPeriodo(container) {
       });
   }
 
-  function formatearFecha(fecha) {
-
-    const f = new Date(fecha);
-
-    const dia = String(f.getUTCDate()).padStart(2, "0");
-    const mes = String(f.getUTCMonth() + 1).padStart(2, "0");
-    const anio = f.getUTCFullYear();
-
-    return `${dia}/${mes}/${anio}`;
-}
-
-function fechaParaInput(fecha) {
-
-    if (!fecha) return "";
-
-    return fecha.substring(0, 10);
-}
 
   actualizarTablaLocal();
 
@@ -206,19 +189,9 @@ function fechaParaInput(fecha) {
       });
   });
 
-  function fechaParaInput(fecha) {
-
-    const f = new Date(fecha);
-
-    const anio = f.getUTCFullYear();
-    const mes = String(f.getUTCMonth() + 1).padStart(2, "0");
-    const dia = String(f.getUTCDate()).padStart(2, "0");
-
-    return `${anio}-${mes}-${dia}`;
-}
 
   // ── FUNCIÓN PARA ABRIR MODAL Y EDITAR PERIODO ──
-  function abrirModalEditarPeriodo(p, alTerminarDeActualizar) {
+function abrirModalEditarPeriodo(p, alTerminarDeActualizar) {
     let modal = document.getElementById("modal-editar-periodo");
     if (!modal) {
       modal = document.createElement("div");
@@ -287,26 +260,53 @@ function fechaParaInput(fecha) {
           anio: parseInt(document.getElementById("edit-p-anio").value),
           fecha_inicio: document.getElementById("edit-p-fecha-inicio").value,
           fecha_fin: document.getElementById("edit-p-fecha-fin").value,
+          estado: p.estado
         };
 
-        fetch(`http://127.0.0.1:5000/periodos/${p.id_periodo}/estado`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ estado: nuevoEstado })
-    })
+        
+        fetch(`http://127.0.0.1:5000/periodos/${p.id_periodo}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(datosActualizados)
+        })
           .then((res) => res.json())
+          
           .then((data) => {
+            console.log(data);
+
             if (data.success) {
-              alert("Periodo actualizado correctamente");
-              modal.style.display = "none";
-              if (alTerminarDeActualizar) alTerminarDeActualizar();
+                alert("Periodo actualizado correctamente");
+                modal.style.display = "none";
+                if (alTerminarDeActualizar) alTerminarDeActualizar();
             } else {
-              alert("Error al actualizar: " + (data.mensaje || data.error));
+                alert("Error: " + (data.error || data.mensaje));
             }
-          })
+        })
           .catch((err) => console.error(err));
       });
-  }
+}
+}
+
+function formatearFecha(fecha) {
+
+    const f = new Date(fecha);
+
+    const dia = String(f.getUTCDate()).padStart(2, "0");
+    const mes = String(f.getUTCMonth() + 1).padStart(2, "0");
+    const anio = f.getUTCFullYear();
+
+    return `${dia}/${mes}/${anio}`;
+}
+
+function fechaParaInput(fecha) {
+
+    const f = new Date(fecha);
+
+    const anio = f.getUTCFullYear();
+    const mes = String(f.getUTCMonth() + 1).padStart(2, "0");
+    const dia = String(f.getUTCDate()).padStart(2, "0");
+
+    return `${anio}-${mes}-${dia}`;
 }
 
 // ── VISTA 2: REGISTRAR TIPO DE CICLO (Formulario + Tabla + Editar) ──
@@ -589,6 +589,7 @@ function renderViewRegistrarCiclo(container) {
 }
 
 // ── VISTA 4: VER REGISTROS Y EDITAR CICLOS ──────────────────
+
 function renderViewVerCiclos(container) {
     container.innerHTML = `
         <div class="dashboard-header">
@@ -686,7 +687,11 @@ function renderViewVerCiclos(container) {
                     <tr>
                         <td><strong>${c.nombre}</strong></td>
                         <td>Ciclo ${c.numero_ciclo}</td>
-                        <td>${c.fecha_inicio} al ${c.fecha_fin}</td>
+                        <td>
+                            ${c.fecha_inicio.split("-").reverse().join("/")}
+                            al
+                            ${c.fecha_fin.split("-").reverse().join("/")}
+                        </td>
                         <td style="text-align:center;">
                             <span class="status-badge ${c.estado === 'ACTIVO' ? 'badge-activo' : 'badge-inactivo'}">${c.estado}</span>
                         </td>
@@ -752,15 +757,20 @@ function renderViewVerCiclos(container) {
         document.getElementById("edit-c-id").value = c.id_ciclo;
         document.getElementById("edit-c-nombre").value = c.nombre;
         document.getElementById("edit-c-numero").value = c.numero_ciclo;
-        document.getElementById("edit-c-inicio").value = c.fecha_inicio;
-        document.getElementById("edit-c-fin").value = c.fecha_fin;
+        document.getElementById("edit-c-inicio").value = fechaParaInput(c.fecha_inicio);
+        document.getElementById("edit-c-fin").value = fechaParaInput(c.fecha_fin);
         document.getElementById("edit-c-estado").value = c.estado || 'ACTIVO';
         
         // Seleccionar los valores correspondientes en los dropdowns
-        document.getElementById("edit-c-periodo").value = c.id_periodo;
-        document.getElementById("edit-c-tipo").value = c.id_tipo_ciclo;
-        
+        setTimeout(() => {
+
+            document.getElementById("edit-c-periodo").value = c.id_periodo;
+            document.getElementById("edit-c-tipo").value = c.id_tipo_ciclo;
+
+        }, 300);
         modalCiclo.style.display = "flex";
+
+
     });
 
     const cerrarModalCiclo = () => modalCiclo.style.display = "none";
@@ -768,36 +778,60 @@ function renderViewVerCiclos(container) {
     document.getElementById("btn-cancelar-modal-ciclo").addEventListener("click", cerrarModalCiclo);
 
     // ── GUARDAR EDICIÓN (PUT) ──
-    document.getElementById("form-edit-ciclo").addEventListener("submit", function (e) {
-        e.preventDefault();
-        const id_ciclo = document.getElementById("edit-c-id").value;
-        const payload = {
-            nombre: document.getElementById("edit-c-nombre").value.trim(),
-            numero_ciclo: parseInt(document.getElementById("edit-c-numero").value),
-            fecha_inicio: document.getElementById("edit-c-inicio").value,
-            fecha_fin: document.getElementById("edit-c-fin").value,
-            id_periodo: parseInt(document.getElementById("edit-c-periodo").value),
-            id_tipo_ciclo: parseInt(document.getElementById("edit-c-tipo").value),
-            estado: document.getElementById("edit-c-estado").value 
-        };
+    // ── GUARDAR EDICIÓN (PUT) ──
+document.getElementById("form-edit-ciclo").addEventListener("submit", function (e) {
 
-        fetch(`http://127.0.0.1:5000/ciclos/${id_ciclo}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                alert("¡Ciclo actualizado correctamente!");
-                cerrarModalCiclo();
-                cargarTablaCiclos();
-            } else {
-                alert("Error: " + (data.mensaje || data.error));
-            }
-        }).catch(err => console.error(err));
+    e.preventDefault();
+
+    console.log("FORMULARIO ENVIADO");
+
+    const id_ciclo = document.getElementById("edit-c-id").value;
+
+    const payload = {
+        nombre: document.getElementById("edit-c-nombre").value.trim(),
+        numero_ciclo: parseInt(document.getElementById("edit-c-numero").value),
+        fecha_inicio: document.getElementById("edit-c-inicio").value,
+        fecha_fin: document.getElementById("edit-c-fin").value,
+        id_periodo: parseInt(document.getElementById("edit-c-periodo").value),
+        id_tipo_ciclo: parseInt(document.getElementById("edit-c-tipo").value),
+        estado: document.getElementById("edit-c-estado").value
+    };
+
+    console.log("PAYLOAD:");
+    console.log(payload);
+
+    fetch(`http://127.0.0.1:5000/ciclos/${id_ciclo}`, {
+    method: "PUT",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+})
+.then(res => {
+    console.log("STATUS:", res.status);
+    return res.text();
+})
+.then(texto => {
+    console.log("RESPUESTA CRUDA:", texto);
+
+    const data = JSON.parse(texto);
+
+    console.log("RESPUESTA JSON:", data);
+
+    if (data.success) {
+        alert("¡Ciclo actualizado correctamente!");
+        cerrarModalCiclo();
+        cargarTablaCiclos();
+    } else {
+        alert("Error: " + (data.error || data.mensaje));
+    }
+})
+.catch(err => {
+    console.error("ERROR FETCH:", err);
+});
     });
 }
+
 
 // ── FUNCIÓN GLOBAL PARA LLENAR LOS SELECTS ──────────────────
 function cargarSelectsCiclo(idSelectPeriodo, idSelectTipo) {
@@ -810,9 +844,15 @@ function cargarSelectsCiclo(idSelectPeriodo, idSelectTipo) {
         .then(data => {
             selPeriodo.innerHTML = '<option value="" disabled selected>Selecciona un periodo...</option>';
             if (data.success && data.periodos) {
-                data.periodos.forEach(p => {
-                    selPeriodo.innerHTML += `<option value="${p.id_periodo}">${p.anio} (${p.fecha_inicio} a ${p.fecha_fin})</option>`;
-                });
+                 data.periodos.forEach(p => {
+
+                selPeriodo.innerHTML += `
+                    <option value="${p.id_periodo}">
+                        ${p.nombre} ${p.anio}
+                        (${formatearFecha(p.fecha_inicio)} - ${formatearFecha(p.fecha_fin)})
+                    </option>
+                `;
+});
             }
         }).catch(e => console.error(e));
     }
