@@ -209,8 +209,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Grupos de Estudiantes
         { id: "nav-grupos", icon: "group_work", label: "Grupos de Estudiantes",
           dropdown: [
-            { label: "Crear Grupo",  href: "WIP.html" },
-            { label: "Ver Grupos",   href: "WIP.html" }
+            { label: "Crear Grupo", view: "grupo-registrar" },
+            { label: "Ver Grupos",  view: "grupo-ver"       }
           ]
         },
 
@@ -358,6 +358,9 @@ document.addEventListener("DOMContentLoaded", () => {
         //Submenú carreras
         "carrera-registrar": () => renderViewRegistrarCarrera(main),
         "carrera-ver":       () => renderViewVerCarreras(main),
+        //Submenú grupos
+        "grupo-registrar": () => renderViewRegistrarGrupo(main),
+        "grupo-ver":       () => renderViewVerGrupos(main),
     };
 
     const main = document.getElementById("main-content");
