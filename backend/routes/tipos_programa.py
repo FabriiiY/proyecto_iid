@@ -32,9 +32,10 @@ def obtener_tipo_programa():
         }), 500
 
     finally:
-
-        cursor.close()
-        conexion.close()
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
 
 @tipo_programa_bp.route("/tipos-programa", methods=["POST"])
 def crear_tipo_programa():
@@ -92,9 +93,10 @@ def crear_tipo_programa():
         }), 500
 
     finally:
-
-        cursor.close()
-        conexion.close()
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()
 
 @tipo_programa_bp.route("/tipos-programa/<int:id_tipo_programa>/estado", methods=["PUT"])
 def cambiar_estado_tipo_programa(id_tipo_programa):
@@ -130,6 +132,7 @@ def cambiar_estado_tipo_programa(id_tipo_programa):
         }), 500
 
     finally:
-
-        cursor.close()
-        conexion.close()
+        if cursor:
+            cursor.close()
+        if conexion:
+            conexion.close()

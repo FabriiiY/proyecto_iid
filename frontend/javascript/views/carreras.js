@@ -89,12 +89,12 @@ function renderViewRegistrarCarrera(container) {
     // BACKEND: GET /tipo_programas → { success: true, tipo_programas: [...] }
     const selectTipo = document.getElementById("c-tipo-programa");
 
-    fetch("http://127.0.0.1:5000/tipo_programas")
+    fetch("http://127.0.0.1:5000/tipos-programa")
         .then(res => res.json())
         .then(data => {
             selectTipo.innerHTML = `<option value="" disabled selected>Selecciona un tipo...</option>`;
-            if (data.success && data.tipo_programas.length > 0) {
-                data.tipo_programas.forEach(tp => {
+            if (data.success && data.tipos.length > 0) {
+                data.tipos.forEach(tp => {
                     const opt = document.createElement("option");
                     opt.value       = tp.id_tipo_programa;
                     opt.textContent = tp.nombre;
@@ -492,10 +492,10 @@ function renderViewVerCarreras(container) {
     // BACKEND: GET /tipo_programas → { success: true, tipo_programas: [{ id_tipo_programa, nombre }] }
     // El select necesita el catálogo antes de que el usuario abra el modal de edición.
     function cargarTiposProgramaYLuego(callback) {
-        fetch("http://127.0.0.1:5000/tipo_programas")
+        fetch("http://127.0.0.1:5000/tipos-programa")
             .then(res => res.json())
             .then(data => {
-                if (data.success) tiposProgramaCatalogo = data.tipo_programas;
+                if (data.success) tiposProgramaCatalogo = data.tipos;
                 callback();
             })
             .catch(() => callback()); // si falla el catálogo, igual cargamos la tabla

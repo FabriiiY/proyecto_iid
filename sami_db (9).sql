@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 05, 2026 at 09:42 AM
+-- Generation Time: Jun 06, 2026 at 01:29 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -64,7 +64,7 @@ CREATE TABLE `aula` (
 --
 
 INSERT INTO `aula` (`id_aula`, `codigo_aula`, `edificio`, `nivel`, `descripcion`, `capacidad`, `estado`, `fecha_actualizacion`) VALUES
-(1, 'A-101', 'A', 1, 'Prueba de aula', 30, 'INACTIVO', '2026-06-04 22:50:27'),
+(1, 'A-101', 'A', 1, 'Prueba de aula', 30, 'ACTIVO', '2026-06-05 16:16:37'),
 (2, 'C-202', 'C', 3, 'Pruebaaa dos', 30, 'ACTIVO', '2026-06-04 22:51:08');
 
 -- --------------------------------------------------------
@@ -88,8 +88,9 @@ CREATE TABLE `carrera` (
 --
 
 INSERT INTO `carrera` (`id_carrera`, `codigo_carrera`, `nombre`, `descripcion`, `estado`, `fecha_actualizacion`, `id_tipo_programa`) VALUES
-(1, 'IID', 'Tecnico en Ingenieria en Informatica Inteligente', NULL, 'ACTIVO', '2026-05-30 15:53:05', 1),
-(2, 'MID', 'Tecnico en Ingenieria en Manufactura Inteligente', NULL, 'ACTIVO', '2026-05-30 15:53:05', 1);
+(1, 'IID', 'Tecnico en Ingenieria en Informatica Inteligente', 'Los mas god', 'ACTIVO', '2026-06-05 17:23:09', 3),
+(2, 'MID', 'Tecnico en Ingenieria en Manufactura Inteligente', 'Unos randis', 'ACTIVO', '2026-06-05 17:24:57', 3),
+(3, 'PRU-001', 'PRUEBA CARRERA UNO', 'Prueba de carrera', 'ACTIVO', '2026-06-05 17:23:41', 2);
 
 -- --------------------------------------------------------
 
@@ -617,7 +618,7 @@ ALTER TABLE `aula`
 -- AUTO_INCREMENT for table `carrera`
 --
 ALTER TABLE `carrera`
-  MODIFY `id_carrera` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_carrera` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `carrera_materia`
