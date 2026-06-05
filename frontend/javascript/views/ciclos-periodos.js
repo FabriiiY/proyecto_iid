@@ -129,11 +129,11 @@ function renderViewRegistrarPeriodo(container) {
                 const nuevoEstado = p.estado === "ACTIVO" ? "INACTIVO" : "ACTIVO";
                 const confirmar = confirm(`¿${nuevoEstado === "ACTIVO" ? "Activar" : "Desactivar"} el periodo "${p.nombre}"?`);
                 if (!confirmar) return;
-                fetch(`http://127.0.0.1:5000/periodos/${p.id_periodo}`, {
-                  method: "PUT",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ estado: nuevoEstado })
-                })
+                fetch(`http://127.0.0.1:5000/periodos/${p.id_periodo}/estado`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ estado: nuevoEstado })
+            })
                 .then(r => r.json())
                 .then(data => {
                   if (data.success) actualizarTablaLocal();
@@ -289,11 +289,11 @@ function fechaParaInput(fecha) {
           fecha_fin: document.getElementById("edit-p-fecha-fin").value,
         };
 
-        fetch(`http://127.0.0.1:5000/periodos/${p.id_periodo}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(datosActualizados),
-        })
+        fetch(`http://127.0.0.1:5000/periodos/${p.id_periodo}/estado`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estado: nuevoEstado })
+    })
           .then((res) => res.json())
           .then((data) => {
             if (data.success) {
@@ -778,7 +778,7 @@ function renderViewVerCiclos(container) {
             fecha_fin: document.getElementById("edit-c-fin").value,
             id_periodo: parseInt(document.getElementById("edit-c-periodo").value),
             id_tipo_ciclo: parseInt(document.getElementById("edit-c-tipo").value),
-            estado: document.getElementById("edit-c-estado").value
+            estado: document.getElementById("edit-c-estado").value 
         };
 
         fetch(`http://127.0.0.1:5000/ciclos/${id_ciclo}`, {

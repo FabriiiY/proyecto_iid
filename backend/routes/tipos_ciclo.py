@@ -92,42 +92,35 @@ def crear_tipo_ciclo():
         cursor.close()
         conexion.close()
 
-@tipos_ciclo_bp.route("/tipos-ciclo/<int:id_tipo_ciclo>/estado", methods=["PUT"])
-def cambiar_estado_tipo_ciclo(id_tipo_ciclo):
+@tipos_ciclo_bp.route("/tipos-ciclo/<int:id_tipo_ciclo>", methods=["PUT"])
+def actualizar_tipo_ciclo(id_tipo_ciclo):
 
     data = request.get_json()
 
     try:
-
         conexion = get_connection()
         cursor = conexion.cursor()
 
         cursor.execute("""
             UPDATE tipo_ciclo
-            SET estado = %s
+            SET nombre = %s,
+                descripcion = %s,
+                estado = %s
             WHERE id_tipo_ciclo = %s
-        """,
-        (
+        """, (
+            data["nombre"],
+            data.get("descripcion"),
             data["estado"],
             id_tipo_ciclo
         ))
 
         conexion.commit()
 
-        return jsonify({
-            "success": True
-        })
+        return jsonify({"success": True})
 
     except Exception as e:
-
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+        return jsonify({"success": False, "error": str(e)}), 500
 
     finally:
-
         cursor.close()
         conexion.close()
-        
-

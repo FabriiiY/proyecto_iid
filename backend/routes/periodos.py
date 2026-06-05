@@ -132,7 +132,8 @@ def actualizar_periodo(id_periodo):
                 descripcion = %s,
                 anio = %s,
                 fecha_inicio = %s,
-                fecha_fin = %s
+                fecha_fin = %s,
+                estado = %s
             WHERE id_periodo = %s
         """,
         (
@@ -141,6 +142,7 @@ def actualizar_periodo(id_periodo):
             data["anio"],
             data["fecha_inicio"],
             data["fecha_fin"],
+            data["estado"],
             id_periodo
         ))
 
