@@ -96,7 +96,32 @@ def crear_modalidad():
 
         cursor.close()
         conexion.close()
-        
+
+@modalidades_bp.route("/modalidades/activas", methods=["GET"])
+def obtener_modalidades_activas():
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT id_modalidad, nombre, descripcion
+            FROM modalidad
+            WHERE estado = 'ACTIVO'
+            ORDER BY nombre
+        """)
+
+        modalidades = cursor.fetchall()
+
+        return jsonify({"success": True, "modalidades": modalidades})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conexion.close()
+
 @modalidades_bp.route("/modalidades/<int:id_modalidad>/estado", methods=["PUT"])
 def cambiar_estado_modalidad(id_modalidad):
 

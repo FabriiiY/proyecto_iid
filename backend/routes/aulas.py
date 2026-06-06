@@ -90,6 +90,30 @@ def crear_aula():
         cursor.close()
         conexion.close()
         
+@aulas_bp.route("/aulas/activas", methods=["GET"])
+def obtener_aulas_activas():
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT id_aula, codigo_aula, edificio, nivel, capacidad
+            FROM aula
+            WHERE estado = 'ACTIVO'
+            ORDER BY edificio, codigo_aula
+        """)
+
+        aulas = cursor.fetchall()
+
+        return jsonify({"success": True, "aulas": aulas})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conexion.close()
         
 @aulas_bp.route("/aulas/<int:id_aula>", methods=["PUT"])
 def actualizar_aula(id_aula):

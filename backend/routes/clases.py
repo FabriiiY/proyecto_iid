@@ -95,6 +95,41 @@ def crear_clase():
     finally:
         if cursor:   cursor.close()
         if conexion: conexion.close()
+
+@clase_bp.route("/clases/activas", methods=["GET"])
+def obtener_clases_activas():
+
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT
+                cl.*,
+                m.nombre AS materia_nombre,
+                CONCAT(u.primer_nombre, ' ', u.primer_apellido) AS docente_nombre
+            FROM clase cl
+            INNER JOIN materia m ON cl.id_materia = m.id_materia
+            INNER JOIN usuario u ON cl.id_docente = u.id_usuario
+            WHERE cl.estado = 'ACTIVO'
+            ORDER BY m.nombre ASC
+        """)
+
+        clases = cursor.fetchall()
+
+        return jsonify({"success": True, "clases": clases})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
+
+
 # ─────────────────────────────────────────────
 # PUT: actualizar clase o solo estado
 # ─────────────────────────────────────────────

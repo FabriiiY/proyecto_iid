@@ -129,8 +129,8 @@ function renderViewRegistrarInscripcion(container) {
             });
     }
 
-    cargarSelect("ins-estudiante", "estudiantes", "id_usuario", "nombre_completo", "Error al cargar estudiantes", null);
-    cargarSelect("ins-grupo",      "grupos",      "id_grupo",   "nombre_grupo",    "Error al cargar grupos",      null);
+    cargarSelect("ins-estudiante", "estudiantes",   "id_usuario", "nombre_completo", "Error al cargar estudiantes", null);
+    cargarSelect("ins-grupo",      "grupos/activos", "id_grupo",   "nombre_grupo",    "Error al cargar grupos",      null);
 
     // ── Registrador: fusiona admins (rol 1) + docentes (rol 2) ─
     // BACKEND: GET /admins   → { success: true, admins:   [{ id_usuario, nombre_completo }] }

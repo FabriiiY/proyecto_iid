@@ -186,17 +186,17 @@ function renderViewAsignarHorario(container) {
             });
     }
 
-    cargarSelect("h-clase",     "clases",      "id_clase",
+    cargarSelect("h-clase",     "clases/activas",      "id_clase",
         c => (c.materia_nombre && c.docente_nombre)
             ? `${c.materia_nombre} — ${c.tipo_clase} — ${c.docente_nombre}`
             : `Clase #${c.id_clase}`,
         "Error al cargar clases"
     );
-    cargarSelect("h-aula",      "aulas",       "id_aula",
+    cargarSelect("h-aula",      "aulas/activas",      "id_aula",
         a => `${a.codigo_aula} — Edif. ${a.edificio}`,
         "Error al cargar aulas"
     );
-    cargarSelect("h-modalidad", "modalidades", "id_modalidad", "nombre", "Error al cargar modalidades");
+    cargarSelect("h-modalidad", "modalidades/activas", "id_modalidad", "nombre", "Error al cargar modalidades");
 
     // ── Validación cruzada hora fin > hora inicio ─────────────
     document.getElementById("h-hora-fin").addEventListener("change", () => {
@@ -501,7 +501,15 @@ function renderViewVerHorariosGlobales(container) {
     // ── Formatear fecha corta ─────────────────────────────────
     function fmtFecha(d) {
         if (!d) return "—";
-        const [y, m, day] = d.split("-");
+        if (d.includes("-") && d.length === 10) {
+            const [y, m, day] = d.split("-");
+            return `${day}/${m}/${y}`;
+        }
+        const fecha = new Date(d);
+        if (isNaN(fecha)) return d;
+        const day = String(fecha.getUTCDate()).padStart(2, "0");
+        const m   = String(fecha.getUTCMonth() + 1).padStart(2, "0");
+        const y   = fecha.getUTCFullYear();
         return `${day}/${m}/${y}`;
     }
 
@@ -732,19 +740,19 @@ function renderViewVerHorariosGlobales(container) {
     function cargarCatalogos() {
         return Promise.all([
             // BACKEND: GET /clases → con JOIN para tener materia_nombre, tipo_clase, docente_nombre
-            fetch("http://127.0.0.1:5000/clases")
+            fetch("http://127.0.0.1:5000/clases/activas")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoClases = d.clases || []; })
                 .catch(() => {}),
 
             // BACKEND: GET /aulas → { success: true, aulas: [{ id_aula, codigo_aula, edificio }] }
-            fetch("http://127.0.0.1:5000/aulas")
+            fetch("http://127.0.0.1:5000/aulas/activas")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoAulas = d.aulas || []; })
                 .catch(() => {}),
 
             // BACKEND: GET /modalidades → { success: true, modalidades: [{ id_modalidad, nombre }] }
-            fetch("http://127.0.0.1:5000/modalidades")
+            fetch("http://127.0.0.1:5000/modalidades/activas")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoMods = d.modalidades || []; })
                 .catch(() => {})
