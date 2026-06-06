@@ -1,5 +1,7 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
+#esto es nuevo para correos w
+from flask_mail import Mail
 
 from routes.auth import auth_bp
 from routes.usuarios import usuarios_bp
@@ -17,10 +19,23 @@ from routes.carrera_materia import carrera_materia_bp
 from routes.clase_grupo import clase_grupo_bp
 from routes.horarios import horarios_bp
 from routes.inscripciones import inscripciones_bp
+#esto es nuevo para correos
+from routes.activacion import activacion_bp
 
 app = Flask(__name__)
 
 CORS(app)
+
+# ── Configuración Flask-Mail (Mailtrap) ──
+app.config["MAIL_SERVER"]   = "sandbox.smtp.mailtrap.io"
+app.config["MAIL_PORT"]     = 2525
+app.config["MAIL_USERNAME"] = "8e5d80c1d6392a"
+app.config["MAIL_PASSWORD"] = "e83615a6f852b8"  # ← el que aparece en Mailtrap
+app.config["MAIL_USE_TLS"]  = True
+app.config["MAIL_USE_SSL"]  = False
+
+mail = Mail(app)
+#termina aca
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(usuarios_bp)
@@ -38,13 +53,12 @@ app.register_blueprint(carrera_materia_bp)
 app.register_blueprint(clase_grupo_bp)
 app.register_blueprint(horarios_bp)
 app.register_blueprint(inscripciones_bp)
+app.register_blueprint(activacion_bp)
 
 
 @app.route("/")
 def inicio():
-    return jsonify({
-        "mensaje": "Backend SAMI funcionando"
-    })
+    return jsonify({"mensaje": "Backend SAMI funcionando"})
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -9,7 +9,7 @@ def login():
 
     data = request.get_json()
 
-    correo = data.get("correo")
+    correo = data.get("correo").strip().lower()
     password = data.get("password")
 
     try:
@@ -35,21 +35,16 @@ def login():
 
         cursor.execute(sql, (correo,))
         usuario = cursor.fetchone()
-
+        
         if not usuario:
-            return jsonify({
-                "success": False,
-                "mensaje": "Usuario no encontrado"
-            }), 401
+            return jsonify({"success": False, "mensaje": "VERIFICA QUE TU CORREO Y/O CONTRASEÑA SEAN VALIDOS"})
 
-        if not check_password_hash(
-            usuario["password_hash"],
-            password
-        ):
-            return jsonify({
-                "success": False,
-                "mensaje": "Contraseña incorrecta"
-            }), 401
+        if usuario["estado"] != "ACTIVO":
+            return jsonify({"success": False, "mensaje": "Tu cuenta no está activa. Contacta al administrador."})
+
+        if not check_password_hash(usuario["password_hash"], password):
+            return jsonify({"success": False, "mensaje": "VERIFICA QUE TU CORREO Y/O CONTRASEÑA SEAN VALIDOS"})
+
 
         return jsonify({
         "success": True,

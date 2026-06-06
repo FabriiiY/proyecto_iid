@@ -214,7 +214,7 @@ def actualizar_horario(id_horario):
 
     try:
         conexion = get_connection()
-        cursor = conexion.cursor()
+        cursor = conexion.cursor(dictionary=True, buffered=True)
 
         # SOLO estado
         if len(data) == 1 and "estado" in data:
@@ -224,6 +224,83 @@ def actualizar_horario(id_horario):
 
         # Edición completa
         else:
+            # 1. Verificar que la misma clase no tenga otro horario en ese día y franja
+            cursor.execute("""
+                SELECT id_horario FROM horario
+                WHERE id_clase    = (SELECT id_clase FROM horario WHERE id_horario = %s)
+                  AND dia_semana  = %s
+                  AND estado      = 'ACTIVO'
+                  AND fecha_inicio <= %s
+                  AND fecha_fin   >= %s
+                  AND hora_inicio <  %s
+                  AND hora_fin    >  %s
+                  AND id_horario != %s
+            """, (
+                id_horario, data["dia_semana"],
+                data["fecha_fin"], data["fecha_inicio"],
+                data["hora_fin"], data["hora_inicio"],
+                id_horario
+            ))
+
+            if cursor.fetchone():
+                return jsonify({
+                    "success": False,
+                    "error": "Esa clase ya tiene otro horario en ese día y franja horaria."
+                })
+
+            # 2. Verificar que el aula no esté ocupada por otra clase
+            cursor.execute("""
+                SELECT id_horario FROM horario
+                WHERE id_aula    = %s
+                  AND dia_semana = %s
+                  AND estado     = 'ACTIVO'
+                  AND fecha_inicio <= %s
+                  AND fecha_fin   >= %s
+                  AND hora_inicio <  %s
+                  AND hora_fin    >  %s
+                  AND id_horario != %s
+            """, (
+                data["id_aula"], data["dia_semana"],
+                data["fecha_fin"], data["fecha_inicio"],
+                data["hora_fin"], data["hora_inicio"],
+                id_horario
+            ))
+
+            if cursor.fetchone():
+                return jsonify({
+                    "success": False,
+                    "error": "El aula ya está ocupada por otra clase en ese día y franja horaria."
+                })
+
+            # 3. Verificar que el docente no tenga otra clase en ese mismo rango
+            cursor.execute("""
+                SELECT h.id_horario FROM horario h
+                INNER JOIN clase cl ON h.id_clase = cl.id_clase
+                WHERE cl.id_docente = (
+                    SELECT cl2.id_docente FROM horario h2
+                    INNER JOIN clase cl2 ON h2.id_clase = cl2.id_clase
+                    WHERE h2.id_horario = %s
+                )
+                  AND h.dia_semana  = %s
+                  AND h.estado      = 'ACTIVO'
+                  AND h.fecha_inicio <= %s
+                  AND h.fecha_fin   >= %s
+                  AND h.hora_inicio <  %s
+                  AND h.hora_fin    >  %s
+                  AND h.id_horario != %s
+            """, (
+                id_horario, data["dia_semana"],
+                data["fecha_fin"], data["fecha_inicio"],
+                data["hora_fin"], data["hora_inicio"],
+                id_horario
+            ))
+
+            if cursor.fetchone():
+                return jsonify({
+                    "success": False,
+                    "error": "El docente ya tiene otra clase en ese día y franja horaria."
+                })
+
             cursor.execute("""
                 UPDATE horario
                 SET
@@ -255,12 +332,11 @@ def actualizar_horario(id_horario):
         return jsonify({"success": True})
 
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": False, "error": str(e)})
 
     finally:
         if cursor:   cursor.close()
         if conexion: conexion.close()
-
 
 # ─────────────────────────────────────────────
 # GET: aulas activas (para select)

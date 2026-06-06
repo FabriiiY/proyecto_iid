@@ -719,6 +719,11 @@ function renderViewAdminRegistrados(container) {
                         <button class="btn-icon btn-edit" data-idx="${idx}" title="Editar usuario">
                             <span class="material-symbols-rounded">edit</span>
                         </button>
+                        ${u.estado === "INACTIVO" ? `
+                        <button class="btn-icon btn-icon-info btn-enviar-activacion" data-idx="${idx}" title="Enviar correo de activación">
+                            <span class="material-symbols-rounded">mail</span>
+                        </button>
+                        ` : ""}
                         ${esEstudiante ? `
                         <button class="btn-icon btn-menu-estado" data-idx="${idx}" title="Cambiar estado" style="font-weight:700; font-size:1rem; letter-spacing:1px;">
                             ···
@@ -732,7 +737,7 @@ function renderViewAdminRegistrados(container) {
                 </td>
             `;
             tbody.appendChild(tr);
-        });
+            });
 
         // Listeners — editar
         tbody.querySelectorAll(".btn-edit").forEach(btn =>
@@ -755,7 +760,36 @@ function renderViewAdminRegistrados(container) {
                 abrirMenuEstado(btn, u);
             })
         );
+
+
+        // Listeners — enviar activación
+        tbody.querySelectorAll(".btn-enviar-activacion").forEach(btn =>
+            btn.addEventListener("click", () => {
+                const u = usuarios[parseInt(btn.dataset.idx)];
+                if (!u.correo_institucional) {
+                    alert("El usuario no tiene correo institucional.");
+                    return;
+                }
+                if (!confirm(`¿Enviar correo de activación a ${u.correo_institucional}?`)) return;
+
+                fetch(`http://127.0.0.1:5000/usuarios/${u.id_usuario}/enviar-activacion`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Correo de activación enviado correctamente.");
+                    } else {
+                        alert(data.error || "No se pudo enviar el correo.");
+                    }
+                })
+                .catch(() => alert("Error al conectar con el servidor."));
+            })
+        );
     }
+
+
 
     function filtrar() {
         const q = search.value.toLowerCase().trim();

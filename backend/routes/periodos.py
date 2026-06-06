@@ -63,25 +63,24 @@ def crear_periodo():
         conexion = get_connection()
         cursor = conexion.cursor(dictionary=True)
 
+        # ── Verificar solapamiento de fechas ──
+        cursor.execute("""
+            SELECT id_periodo FROM periodo_lectivo
+            WHERE fecha_inicio <= %s
+              AND fecha_fin    >= %s
+        """, (data["fecha_fin"], data["fecha_inicio"]))
+
+        if cursor.fetchone():
+            return jsonify({
+                "success": False,
+                "error": "Ya existe un periodo lectivo en ese rango de fechas."
+            })
+
         cursor.execute("""
             INSERT INTO periodo_lectivo
-            (
-                nombre,
-                descripcion,
-                anio,
-                fecha_inicio,
-                fecha_fin
-            )
-            VALUES
-            (
-                %s,
-                %s,
-                %s,
-                %s,
-                %s
-            )
-        """,
-        (
+            (nombre, descripcion, anio, fecha_inicio, fecha_fin)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (
             data["nombre"],
             data.get("descripcion"),
             data["anio"],
@@ -107,20 +106,14 @@ def crear_periodo():
         })
 
     except Exception as e:
-
         return jsonify({
             "success": False,
             "error": str(e)
-        }), 500
+        })
 
     finally:
-
-        if cursor:
-            cursor.close()
-
-        if conexion:
-            conexion.close()
-
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
 
 # =====================================================
 # EDITAR PERIODO
@@ -137,7 +130,21 @@ def actualizar_periodo(id_periodo):
     try:
 
         conexion = get_connection()
-        cursor = conexion.cursor()
+        cursor = conexion.cursor(dictionary=True)
+
+        # ── Verificar solapamiento excluyendo el registro actual ──
+        cursor.execute("""
+            SELECT id_periodo FROM periodo_lectivo
+            WHERE fecha_inicio <= %s
+              AND fecha_fin    >= %s
+              AND id_periodo   != %s
+        """, (data["fecha_fin"], data["fecha_inicio"], id_periodo))
+
+        if cursor.fetchone():
+            return jsonify({
+                "success": False,
+                "error": "Ya existe un periodo lectivo en ese rango de fechas."
+            })
 
         cursor.execute("""
             UPDATE periodo_lectivo
@@ -149,8 +156,7 @@ def actualizar_periodo(id_periodo):
                 fecha_fin = %s,
                 estado = %s
             WHERE id_periodo = %s
-        """,
-        (
+        """, (
             data["nombre"],
             data.get("descripcion"),
             data["anio"],
@@ -162,24 +168,17 @@ def actualizar_periodo(id_periodo):
 
         conexion.commit()
 
-        return jsonify({
-            "success": True
-        })
+        return jsonify({"success": True})
 
     except Exception as e:
-
         return jsonify({
             "success": False,
             "error": str(e)
         }), 500
 
     finally:
-        if cursor:
-            cursor.close()
-
-        if conexion:
-            conexion.close()
-
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
 
 # =====================================================
 # CAMBIAR ESTADO

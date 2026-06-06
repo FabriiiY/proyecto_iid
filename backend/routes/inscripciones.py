@@ -59,7 +59,7 @@ def crear_inscripcion():
 
     try:
         conexion = get_connection()
-        cursor = conexion.cursor(dictionary=True)
+        cursor = conexion.cursor(dictionary=True, buffered=True)
 
         # Verificar que el estudiante no esté ya inscrito en ese grupo
         cursor.execute("""
@@ -71,6 +71,25 @@ def crear_inscripcion():
             return jsonify({
                 "success": False,
                 "error": "El estudiante ya está inscrito en ese grupo."
+            })
+
+        # Verificar que el grupo no haya excedido su límite
+        cursor.execute("""
+            SELECT g.limite_estudiantes,
+                   COUNT(i.id_inscripcion) AS total_inscritos
+            FROM grupo g
+            LEFT JOIN inscripcion i ON g.id_grupo = i.id_grupo
+                AND i.estado = 'ACTIVA'
+            WHERE g.id_grupo = %s
+            GROUP BY g.id_grupo
+        """, (data["id_grupo"],))
+
+        grupo = cursor.fetchone()
+
+        if grupo and grupo["total_inscritos"] >= grupo["limite_estudiantes"]:
+            return jsonify({
+                "success": False,
+                "error": f"El grupo ha alcanzado su límite de {grupo['limite_estudiantes']} estudiantes."
             })
 
         cursor.execute("""
@@ -91,12 +110,11 @@ def crear_inscripcion():
         return jsonify({"success": True})
 
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": False, "error": str(e)})
 
     finally:
         if cursor:   cursor.close()
         if conexion: conexion.close()
-
 
 # ─────────────────────────────────────────────
 # PUT: actualizar inscripción

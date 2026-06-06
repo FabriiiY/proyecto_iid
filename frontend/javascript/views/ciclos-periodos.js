@@ -783,8 +783,6 @@ document.getElementById("form-edit-ciclo").addEventListener("submit", function (
 
     e.preventDefault();
 
-    console.log("FORMULARIO ENVIADO");
-
     const id_ciclo = document.getElementById("edit-c-id").value;
 
     const payload = {
@@ -796,28 +794,15 @@ document.getElementById("form-edit-ciclo").addEventListener("submit", function (
         id_tipo_ciclo: parseInt(document.getElementById("edit-c-tipo").value),
         estado: document.getElementById("edit-c-estado").value
     };
-
-    console.log("PAYLOAD:");
-    console.log(payload);
+    
 
     fetch(`http://127.0.0.1:5000/ciclos/${id_ciclo}`, {
     method: "PUT",
-    headers: {
-        "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
 })
-.then(res => {
-    console.log("STATUS:", res.status);
-    return res.text();
-})
-.then(texto => {
-    console.log("RESPUESTA CRUDA:", texto);
-
-    const data = JSON.parse(texto);
-
-    console.log("RESPUESTA JSON:", data);
-
+.then(res => res.json())
+.then(data => {
     if (data.success) {
         alert("¡Ciclo actualizado correctamente!");
         cerrarModalCiclo();
@@ -826,9 +811,7 @@ document.getElementById("form-edit-ciclo").addEventListener("submit", function (
         alert("Error: " + (data.error || data.mensaje));
     }
 })
-.catch(err => {
-    console.error("ERROR FETCH:", err);
-});
+.catch(() => alert("Error al conectar con el servidor."));
     });
 }
 

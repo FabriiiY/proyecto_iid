@@ -9,8 +9,36 @@ usuarios_bp = Blueprint("usuarios", __name__)
 def crear_usuario():
 
     data = request.get_json()
+    
+    conexion = None  
+    cursor = None   
 
     try:
+
+        #verificar que el correo sea @ algo que exita de momento @gmail.com o hotmail.com o @outlook.com para personal y @itca.edu.sv o @gmail.com para institucional xd
+        # ── Validar correos ──
+        correo_personal      = data["correo_personal"].strip().lower()
+        correo_institucional = data["correo_institucional"].strip().lower()
+        
+        data["correo_personal"]      = correo_personal
+        data["correo_institucional"] = correo_institucional
+
+        dominios_personales      = ["@gmail.com", "@hotmail.com", "@outlook.com"]
+        dominios_institucionales = ["@itca.edu.sv", "@gmail.com"]
+
+        if not any(correo_personal.endswith(d) for d in dominios_personales):
+            return jsonify({
+                "success": False,
+                "mensaje": "El correo personal debe ser Gmail, Hotmail u Outlook."
+            })
+
+        if not any(correo_institucional.endswith(d) for d in dominios_institucionales):
+            return jsonify({
+                "success": False,
+                "mensaje": "El correo institucional debe ser @itca.edu.sv o @gmail.com."
+            })
+        
+        #aca termina :v
 
         password_hash = generate_password_hash(
             data["password"]
@@ -82,7 +110,7 @@ def crear_usuario():
 
             password_hash,
 
-            "ACTIVO",
+            "INACTIVO",
 
             data["id_rol"]
         )
@@ -114,7 +142,7 @@ def crear_usuario():
         return jsonify({
             "success": False,
             "mensaje": mensaje
-        }), 500
+        })
 
     finally:
         if cursor:
@@ -193,8 +221,36 @@ def obtener_usuarios():
 def actualizar_usuario(id_usuario):
 
     data = request.get_json()
+    
+    conexion = None  
+    cursor = None   
 
     try:
+
+        #verificar que el correo sea @ algo que exita de momento @gmail.com o hotmail.com o @outlook.com para personal y @itca.edu.sv o @gmail.com para institucional xd
+        # ── Validar correos ──
+        correo_personal      = data["correo_personal"].strip().lower()
+        correo_institucional = data["correo_institucional"].strip().lower()
+        
+        data["correo_personal"]      = correo_personal
+        data["correo_institucional"] = correo_institucional
+
+        dominios_personales      = ["@gmail.com", "@hotmail.com", "@outlook.com"]
+        dominios_institucionales = ["@itca.edu.sv", "@gmail.com"]
+
+        if not any(correo_personal.endswith(d) for d in dominios_personales):
+            return jsonify({
+                "success": False,
+                "mensaje": "El correo personal debe ser Gmail, Hotmail u Outlook."
+            })
+
+        if not any(correo_institucional.endswith(d) for d in dominios_institucionales):
+            return jsonify({
+                "success": False,
+                "mensaje": "El correo institucional debe ser @itca.edu.sv o @gmail.com."
+            })
+            
+        #hasta aca xd
 
         conexion = get_connection()
         cursor = conexion.cursor()
@@ -227,33 +283,23 @@ def actualizar_usuario(id_usuario):
             data.get("segundo_nombre"),
             data["primer_apellido"],
             data.get("segundo_apellido"),
-
             data["fecha_nacimiento"],
             data["sexo"],
-
             data["correo_personal"],
             data["correo_institucional"],
-
             data["telefono_movil"],
             data.get("telefono_fijo") or None,
-
             data["direccion"],
-
             data["dui"],
             data["dui_tipo"],
-
             data["carnet"],
             data.get("carnet_minoridad") or None,
-            
             data.get("foto_perfil"),
-
             data["id_rol"],
-
             id_usuario
         )
 
         cursor.execute(sql, valores)
-
         conexion.commit()
 
         return jsonify({
@@ -262,17 +308,27 @@ def actualizar_usuario(id_usuario):
         })
 
     except Exception as e:
+        error = str(e)
+
+        if "dui" in error.lower():
+            mensaje = "El DUI ya está registrado en otro usuario."
+        elif "carnet" in error.lower():
+            mensaje = "El carnet ya está registrado en otro usuario."
+        elif "correo_institucional" in error.lower():
+            mensaje = "El correo institucional ya está registrado en otro usuario."
+        else:
+            mensaje = "Ocurrió un error al actualizar el usuario."
 
         return jsonify({
             "success": False,
-            "mensaje": str(e)
-        }), 500
+            "mensaje": mensaje
+        })
 
     finally:
-
-        cursor.close()
-        conexion.close()
+        if cursor:   cursor.close()
+        if conexion: conexion.close()      
         
+
 @usuarios_bp.route("/usuarios/<int:id_usuario>/estado", methods=["PUT"])
 def cambiar_estado_usuario(id_usuario):
 

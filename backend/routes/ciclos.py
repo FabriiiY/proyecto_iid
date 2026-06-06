@@ -67,29 +67,31 @@ def crear_ciclo():
     try:
 
         conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True, buffered=True)
+
+        # Verificar solapamiento de fechas dentro del mismo periodo
+        cursor.execute("""
+            SELECT id_ciclo FROM ciclo
+            WHERE id_periodo   = %s
+              AND fecha_inicio <= %s
+              AND fecha_fin    >= %s
+        """, (data["id_periodo"], data["fecha_fin"], data["fecha_inicio"]))
+
+        if cursor.fetchone():
+            return jsonify({
+                "success": False,
+                "error": "Ya existe un ciclo en ese rango de fechas para ese periodo lectivo."
+            })
+            
+        # Cerrar cursor de verificación y abrir uno normal para el INSERT
+        cursor.close()
         cursor = conexion.cursor()
 
         cursor.execute("""
             INSERT INTO ciclo
-            (
-                nombre,
-                numero_ciclo,
-                fecha_inicio,
-                fecha_fin,
-                id_periodo,
-                id_tipo_ciclo
-            )
-            VALUES
-            (
-                %s,
-                %s,
-                %s,
-                %s,
-                %s,
-                %s
-            )
-        """,
-        (
+            (nombre, numero_ciclo, fecha_inicio, fecha_fin, id_periodo, id_tipo_ciclo)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (
             data["nombre"],
             data["numero_ciclo"],
             data["fecha_inicio"],
@@ -100,24 +102,16 @@ def crear_ciclo():
 
         conexion.commit()
 
-        return jsonify({
-            "success": True
-        })
+        return jsonify({"success": True})
 
     except Exception as e:
-
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+        return jsonify({"success": False, "error": str(e)})
 
     finally:
-        if cursor:
-            cursor.close()
-
-        if conexion:
-            conexion.close()
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
         
+
 @ciclo_bp.route("/ciclos/<int:id_ciclo>", methods=["PUT"])
 def actualizar_ciclo(id_ciclo):
     
@@ -129,7 +123,7 @@ def actualizar_ciclo(id_ciclo):
     try:
 
         conexion = get_connection()
-        cursor = conexion.cursor()
+        cursor = conexion.cursor(dictionary=True, buffered=True)
 
         if len(data) == 1 and "estado" in data:
 
@@ -137,28 +131,41 @@ def actualizar_ciclo(id_ciclo):
                 UPDATE ciclo
                 SET estado = %s
                 WHERE id_ciclo = %s
-            """,
-            (
-                data["estado"],
-                id_ciclo
-            ))
+            """, (data["estado"], id_ciclo))
 
         else:
-            print("ENTRÓ A UPDATE COMPLETO")
+
+            # Verificar solapamiento excluyendo el registro actual
+            cursor.execute("""
+                SELECT id_ciclo FROM ciclo
+                WHERE id_periodo   = %s
+                  AND fecha_inicio <= %s
+                  AND fecha_fin    >= %s
+                  AND id_ciclo    != %s
+            """, (data["id_periodo"], data["fecha_fin"], data["fecha_inicio"], id_ciclo))
+
+            if cursor.fetchone():
+                return jsonify({
+                    "success": False,
+                    "error": "Ya existe un ciclo en ese rango de fechas para ese periodo lectivo."
+                })
+                
+            # Cerrar cursor de verificación y abrir uno normal para el UPDATE
+            cursor.close()
+            cursor = conexion.cursor()
 
             cursor.execute("""
                 UPDATE ciclo
                 SET
-                    nombre = %s,
-                    numero_ciclo = %s,
-                    fecha_inicio = %s,
-                    fecha_fin = %s,
-                    id_periodo = %s,
+                    nombre        = %s,
+                    numero_ciclo  = %s,
+                    fecha_inicio  = %s,
+                    fecha_fin     = %s,
+                    id_periodo    = %s,
                     id_tipo_ciclo = %s,
-                    estado = %s
+                    estado        = %s
                 WHERE id_ciclo = %s
-            """,
-            (
+            """, (
                 data["nombre"],
                 data["numero_ciclo"],
                 data["fecha_inicio"],
@@ -171,25 +178,15 @@ def actualizar_ciclo(id_ciclo):
 
         conexion.commit()
 
-        return jsonify({
-            "success": True
-        })
+        return jsonify({"success": True})
 
     except Exception as e:
-
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+        return jsonify({"success": False, "error": str(e)})
 
     finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()         
 
-        if cursor:
-            cursor.close()
-
-        if conexion:
-            conexion.close()
-            
 # ─────────────────────────────────────────────
 # GET: ciclos activos (para selects/combos)
 # ─────────────────────────────────────────────

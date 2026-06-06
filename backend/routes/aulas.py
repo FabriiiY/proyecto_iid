@@ -40,6 +40,8 @@ def obtener_aulas():
 def crear_aula():
 
     data = request.get_json()
+    conexion = None
+    cursor = None
 
     try:
 
@@ -79,16 +81,21 @@ def crear_aula():
         })
 
     except Exception as e:
+        error = str(e)
+
+        if "codigo_aula" in error.lower():
+            mensaje = "El código de aula ya está registrado."
+        else:
+            mensaje = "Ocurrió un error al registrar el aula."
 
         return jsonify({
             "success": False,
-            "error": str(e)
-        }), 500
+            "mensaje": mensaje
+        })
 
     finally:
-
-        cursor.close()
-        conexion.close()
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
         
 @aulas_bp.route("/aulas/activas", methods=["GET"])
 def obtener_aulas_activas():
