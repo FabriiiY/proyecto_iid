@@ -71,7 +71,7 @@ function renderViewAsignarClaseGrupo(container) {
     // BACKEND: GET /grupos    → { success, grupos:    [{ id_grupo, nombre_grupo }] }
     // BACKEND: GET /clases    → { success, clases:    [{ id_clase, tipo_clase, estado, id_materia, id_docente }] }
     Promise.all([
-        fetch("http://127.0.0.1:5000/grupos").then(r => r.json()),
+        fetch("http://127.0.0.1:5000/grupos/activos").then(r => r.json()),
         fetch("http://127.0.0.1:5000/clases").then(r => r.json()),
         fetch("http://127.0.0.1:5000/materias").then(r => r.json()),
         fetch("http://127.0.0.1:5000/docentes").then(r => r.json())
@@ -322,7 +322,7 @@ function renderViewVerClasesGrupo(container) {
 
         lista.forEach(item => {
             const idx      = asignaciones.indexOf(item);
-            const esActivo = !!item.activo;
+            const esActivo = item.estado === "ACTIVO";
             const clase    = datosClase(item.id_clase);
 
             const toggleIcon  = esActivo ? "block"           : "check_circle";
@@ -379,15 +379,16 @@ function renderViewVerClasesGrupo(container) {
     function cambiarEstado(item) {
         // BACKEND: PUT /clase-grupo/:id/estado → { success: true }
         // Requiere campo `activo` TINYINT(1) en la tabla clase_grupo
+        const nuevoEstado = item.estado === "ACTIVO" ? "INACTIVO" : "ACTIVO";
         fetch(`http://127.0.0.1:5000/clase-grupo/${item.id_clase_grupo}/estado`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ activo: item.activo ? 0 : 1 })
+            body: JSON.stringify({ estado: nuevoEstado })
         })
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                item.activo = item.activo ? 0 : 1;
+                item.estado = nuevoEstado;
                 renderTabla(filtrar());
             } else {
                 alert(data.error || data.mensaje || "No se pudo cambiar el estado.");

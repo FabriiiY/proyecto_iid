@@ -858,7 +858,7 @@ function cargarSelectsCiclo(idSelectPeriodo, idSelectTipo) {
     }
 
     if (selTipo) {
-        fetch("http://127.0.0.1:5000/tipos-ciclo/activos") 
+        fetch("http://127.0.0.1:5000/tipos-ciclo/activos")
         .then(r => r.json())
         .then(data => {
             selTipo.innerHTML = '<option value="" disabled selected>Selecciona un tipo...</option>';
