@@ -213,7 +213,9 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: "nav-grupos", icon: "group_work", label: "Grupos de Estudiantes",
           dropdown: [
             { label: "Crear Grupo", view: "grupo-registrar" },
-            { label: "Ver Grupos",  view: "grupo-ver"       }
+            { label: "Ver Grupos",  view: "grupo-ver"       },
+            { label: "Clase del Grupo",     view: "grupo-clase-asignar" },
+            { label: "Ver Clases de Grupo", view: "grupo-clase-ver"     }
           ]
         },
 
@@ -368,6 +370,8 @@ document.addEventListener("DOMContentLoaded", () => {
         //Submenú grupos
         "grupo-registrar": () => renderViewRegistrarGrupo(main),
         "grupo-ver":       () => renderViewVerGrupos(main),
+        "grupo-clase-asignar": () => renderViewAsignarClaseGrupo(main),
+        "grupo-clase-ver":     () => renderViewVerClasesGrupo(main),
     };
 
     const main = document.getElementById("main-content");
