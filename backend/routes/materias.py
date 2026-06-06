@@ -99,7 +99,43 @@ def obtener_materias():
 
         if conexion:
             conexion.close()
-            
+
+# ─────────────────────────────────────────────
+# GET: materias activas (para selects)
+# DEBE ir ANTES de /materias/<int:id_materia>
+# ─────────────────────────────────────────────
+@materias_bp.route("/materias/activas", methods=["GET"])
+def obtener_materias_activas():
+
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT id_materia, nombre
+            FROM materia
+            WHERE estado = 'ACTIVA'
+            ORDER BY nombre ASC
+        """)
+
+        materias = cursor.fetchall()
+
+        return jsonify({
+            "success": True,
+            "materias": materias
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
+
+
 @materias_bp.route("/materias/<int:id_materia>", methods=["PUT"])
 def actualizar_materia(id_materia):
 
@@ -156,6 +192,7 @@ def actualizar_materia(id_materia):
 
         if conexion:
             conexion.close()
+
 
 @materias_bp.route("/materias/<int:id_materia>/estado", methods=["PUT"])
 def cambiar_estado_materia(id_materia):

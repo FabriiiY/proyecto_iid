@@ -89,8 +89,8 @@ function renderViewAsignarMateriaCarrera(container) {
             });
     }
 
-    cargarSelect("cm-carrera", "carreras", "id_carrera", "nombre", "Error al cargar carreras");
-    cargarSelect("cm-materia", "materias", "id_materia", "nombre", "Error al cargar materias");
+    cargarSelect("cm-carrera", "carreras/activas", "id_carrera", "nombre", "Error al cargar carreras");
+    cargarSelect("cm-materia", "materias/activas", "id_materia", "nombre", "Error al cargar materias");
 
     // ── Envío del formulario ──────────────────────────────────
     const form = document.getElementById("add-cm-form");
