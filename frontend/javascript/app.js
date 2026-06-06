@@ -175,7 +175,9 @@ document.addEventListener("DOMContentLoaded", () => {
         { id: "nav-carreras", icon: "school", label: "Carreras",
           dropdown: [
             { label: "Registrar Carrera", view: "carrera-registrar" },
-            { label: "Ver Carreras",      view: "carrera-ver"       }
+            { label: "Ver Carreras",      view: "carrera-ver"       },
+            { label: "Asignar Materia",        view: "carrera-mat-asignar" },
+            { label: "Materias de Carrera",view: "carrera-mat-ver"     }
           ]
         },
 
@@ -200,9 +202,10 @@ document.addEventListener("DOMContentLoaded", () => {
         // Materias y Clases
         { id: "nav-materias", icon: "library_books", label: "Materias y Clases",
           dropdown: [
-            { label: "Registrar Materia / Clase", view: "materias-agregar" },
+            { label: "Registrar Materia",         view: "materias-agregar" },
             { label: "Ver Materias",              view: "materias-ver"     },
-            { label: "Ver Clases",                href: "WIP.html"         }
+            { label: "Registrar Clase",           view: "clase-registrar"  },
+            { label: "Ver Clases",                view: "clase-ver"        }
           ]
         },
 
@@ -342,6 +345,8 @@ document.addEventListener("DOMContentLoaded", () => {
         //Submenú materias-clase
         "materias-agregar":  () => renderViewMateriasAgregar(main),
         "materias-ver":      () => renderViewMateriasVer(main),
+        "clase-registrar":   () => renderViewRegistrarClase(main),
+        "clase-ver":         () => renderViewVerClases(main),
         //Submenú perfil
         "mi-perfil":         () => renderViewMiPerfil(main),
         //Submenú tipo-clase
@@ -358,6 +363,8 @@ document.addEventListener("DOMContentLoaded", () => {
         //Submenú carreras
         "carrera-registrar": () => renderViewRegistrarCarrera(main),
         "carrera-ver":       () => renderViewVerCarreras(main),
+        "carrera-mat-asignar":  () => renderViewAsignarMateriaCarrera(main),
+        "carrera-mat-ver":      () => renderViewVerMateriasCarrera(main),
         //Submenú grupos
         "grupo-registrar": () => renderViewRegistrarGrupo(main),
         "grupo-ver":       () => renderViewVerGrupos(main),
