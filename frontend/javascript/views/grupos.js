@@ -117,8 +117,8 @@ function renderViewRegistrarGrupo(container) {
             });
     }
 
-    cargarSelect("g-ciclo",   "ciclos",   "id_ciclo",   "nombre", "Error al cargar ciclos");
-    cargarSelect("g-carrera", "carreras", "id_carrera", "nombre", "Error al cargar carreras");
+    cargarSelect("g-ciclo",   "ciclos/activos",   "id_ciclo",   "nombre", "Error al cargar ciclos");
+    cargarSelect("g-carrera", "carreras/activas", "id_carrera", "nombre", "Error al cargar carreras");
 
     // ── Envío del formulario ──────────────────────────────────
     const form = document.getElementById("add-grupo-form");
@@ -522,13 +522,13 @@ function renderViewVerGrupos(container) {
     function cargarCatalogos() {
         return Promise.all([
             // BACKEND: GET /ciclos → { success: true, ciclos: [{ id_ciclo, nombre }] }
-            fetch("http://127.0.0.1:5000/ciclos")
+            fetch("http://127.0.0.1:5000/ciclos/activos")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoCiclos = d.ciclos; })
                 .catch(() => {}),
 
             // BACKEND: GET /carreras → { success: true, carreras: [{ id_carrera, nombre }] }
-            fetch("http://127.0.0.1:5000/carreras")
+            fetch("http://127.0.0.1:5000/carreras/activas")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoCarreras = d.carreras; })
                 .catch(() => {})

@@ -136,3 +136,34 @@ def cambiar_estado_tipo_programa(id_tipo_programa):
             cursor.close()
         if conexion:
             conexion.close()
+            
+@tipo_programa_bp.route("/tipos-programa/activos", methods=["GET"])
+def obtener_tipos_programa_activos():
+
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT *
+            FROM tipo_programa
+            WHERE estado = 'ACTIVO'
+            ORDER BY nombre
+        """)
+
+        tipos = cursor.fetchall()
+
+        return jsonify({
+            "success": True,
+            "tipos": tipos
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()

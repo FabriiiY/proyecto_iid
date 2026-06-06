@@ -162,3 +162,36 @@ def actualizar_carrera(id_carrera):
             cursor.close()
         if conexion:
             conexion.close()
+            
+@carrera_bp.route("/carreras/activas", methods=["GET"])
+def obtener_carreras_activas():
+
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT c.*, tp.nombre AS tipo_programa_nombre
+            FROM carrera c
+            INNER JOIN tipo_programa tp
+                ON c.id_tipo_programa = tp.id_tipo_programa
+            WHERE c.estado = 'ACTIVO'
+            ORDER BY c.nombre ASC
+        """)
+
+        carreras = cursor.fetchall()
+
+        return jsonify({
+            "success": True,
+            "carreras": carreras
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
