@@ -89,7 +89,7 @@ function renderViewRegistrarCarrera(container) {
     // BACKEND: GET /tipo_programas → { success: true, tipo_programas: [...] }
     const selectTipo = document.getElementById("c-tipo-programa");
 
-    fetch("http://127.0.0.1:5000/tipos-programa")
+    fetch("http://127.0.0.1:5000/tipos-programa/activos")
         .then(res => res.json())
         .then(data => {
             selectTipo.innerHTML = `<option value="" disabled selected>Selecciona un tipo...</option>`;
@@ -492,7 +492,7 @@ function renderViewVerCarreras(container) {
     // BACKEND: GET /tipo_programas → { success: true, tipo_programas: [{ id_tipo_programa, nombre }] }
     // El select necesita el catálogo antes de que el usuario abra el modal de edición.
     function cargarTiposProgramaYLuego(callback) {
-        fetch("http://127.0.0.1:5000/tipos-programa")
+        fetch("http://127.0.0.1:5000/tipos-programa/activos")
             .then(res => res.json())
             .then(data => {
                 if (data.success) tiposProgramaCatalogo = data.tipos;

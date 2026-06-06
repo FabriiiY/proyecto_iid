@@ -839,7 +839,7 @@ function cargarSelectsCiclo(idSelectPeriodo, idSelectTipo) {
     const selTipo = document.getElementById(idSelectTipo);
 
     if (selPeriodo) {
-        fetch("http://127.0.0.1:5000/periodos")
+        fetch("http://127.0.0.1:5000/periodos/activos")
         .then(r => r.json())
         .then(data => {
             selPeriodo.innerHTML = '<option value="" disabled selected>Selecciona un periodo...</option>';
@@ -858,7 +858,7 @@ function cargarSelectsCiclo(idSelectPeriodo, idSelectTipo) {
     }
 
     if (selTipo) {
-        fetch("http://127.0.0.1:5000/tipos-ciclo")
+        fetch("http://127.0.0.1:5000/tipos-ciclo/activos") 
         .then(r => r.json())
         .then(data => {
             selTipo.innerHTML = '<option value="" disabled selected>Selecciona un tipo...</option>';

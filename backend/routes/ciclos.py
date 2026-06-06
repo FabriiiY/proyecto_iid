@@ -189,3 +189,50 @@ def actualizar_ciclo(id_ciclo):
 
         if conexion:
             conexion.close()
+            
+# ─────────────────────────────────────────────
+# GET: ciclos activos (para selects/combos)
+# ─────────────────────────────────────────────
+@ciclo_bp.route("/ciclos/activos", methods=["GET"])
+def obtener_ciclos_activos():
+
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT
+                c.*,
+                p.anio,
+                tc.nombre AS tipo_ciclo_nombre
+            FROM ciclo c
+            INNER JOIN periodo_lectivo p
+                ON c.id_periodo = p.id_periodo
+            INNER JOIN tipo_ciclo tc
+                ON c.id_tipo_ciclo = tc.id_tipo_ciclo
+            WHERE c.estado = 'ACTIVO'
+            ORDER BY c.fecha_inicio DESC
+        """)
+
+        ciclos = cursor.fetchall()
+        for ciclo in ciclos:
+            if ciclo["fecha_inicio"]:
+                ciclo["fecha_inicio"] = ciclo["fecha_inicio"].strftime("%Y-%m-%d")
+            if ciclo["fecha_fin"]:
+                ciclo["fecha_fin"] = ciclo["fecha_fin"].strftime("%Y-%m-%d")
+
+        return jsonify({
+            "success": True,
+            "ciclos": ciclos
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
+        
