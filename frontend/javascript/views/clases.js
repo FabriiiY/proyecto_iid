@@ -87,8 +87,8 @@ function renderViewRegistrarClase(container) {
             });
     }
 
-    cargarSelect("cl-materia", "materias", "id_materia", "nombre",         "Error al cargar materias");
-    cargarSelect("cl-docente", "docentes", "id_usuario", "nombre_completo","Error al cargar docentes");
+    cargarSelect("cl-materia", "materias/activas", "id_materia", "nombre",         "Error al cargar materias");
+    cargarSelect("cl-docente", "docentes",         "id_usuario", "nombre_completo","Error al cargar docentes");
 
     // ── Envío del formulario ──────────────────────────────────
     const form = document.getElementById("add-clase-form");
@@ -478,6 +478,7 @@ function renderViewVerClases(container) {
         })
         .then(res => res.json())
         .then(data => {
+            console.log("Respuesta del servidor:", data);
             if (data.success) {
                 alert("Clase actualizada correctamente.");
                 cerrarModal();
@@ -496,7 +497,7 @@ function renderViewVerClases(container) {
     function cargarCatalogos() {
         return Promise.all([
             // BACKEND: GET /materias → { success: true, materias: [{ id_materia, nombre }] }
-            fetch("http://127.0.0.1:5000/materias")
+            fetch("http://127.0.0.1:5000/materias/activas")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoMaterias = d.materias; })
                 .catch(() => {}),
