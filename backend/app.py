@@ -14,6 +14,7 @@ from routes.carrera import carrera_bp
 from routes.grupos import grupo_bp
 from routes.clases import clase_bp
 from routes.carrera_materia import carrera_materia_bp
+from routes.clase_grupo import clase_grupo_bp
 
 app = Flask(__name__)
 
@@ -32,6 +33,7 @@ app.register_blueprint(carrera_bp)
 app.register_blueprint(grupo_bp)
 app.register_blueprint(clase_bp)
 app.register_blueprint(carrera_materia_bp)
+app.register_blueprint(clase_grupo_bp)
 
 
 @app.route("/")

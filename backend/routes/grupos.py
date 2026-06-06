@@ -3,6 +3,42 @@ from database import get_connection
 
 grupo_bp = Blueprint("grupo", __name__)
 
+@grupo_bp.route("/grupos/activos", methods=["GET"])
+def obtener_grupos_activos():
+
+    conexion = None
+    cursor = None
+
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT
+                g.*,
+                c.nombre  AS ciclo_nombre,
+                ca.nombre AS carrera_nombre
+            FROM grupo g
+            INNER JOIN ciclo   c  ON g.id_ciclo  = c.id_ciclo
+            INNER JOIN carrera ca ON g.id_carrera = ca.id_carrera
+            WHERE g.estado = 'ACTIVO'
+            ORDER BY g.nombre_grupo ASC
+        """)
+
+        grupos = cursor.fetchall()
+
+        return jsonify({
+            "success": True,
+            "grupos": grupos
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
+
 # ─────────────────────────────────────────────
 # GET: todos los grupos
 # ─────────────────────────────────────────────
