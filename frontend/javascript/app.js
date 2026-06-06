@@ -163,6 +163,14 @@ document.addEventListener("DOMContentLoaded", () => {
           ]
         },
 
+        // Inscripciones
+        { id: "nav-inscripciones", icon: "how_to_reg", label: "Inscripción",
+          dropdown: [
+            { label: "Registrar Inscripción",  view: "inscripcion-registrar" },
+            { label: "Ver Inscripciones",      view: "inscripcion-ver"       }
+          ]
+        },
+
         // Aulas
         { id: "nav-aulas", icon: "door_front", label: "Aulas",
           dropdown: [
@@ -222,8 +230,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Control de Horarios
         { id: "nav-horarios-admin", icon: "schedule", label: "Control de Horarios",
           dropdown: [
-            { label: "Asignar Horario",     href: "WIP.html" },
-            { label: "Ver Horarios Globales", href: "WIP.html" }
+            { label: "Asignar Horario",       view: "horario-asignar"    },
+            { label: "Ver Horarios Globales", view: "horario-ver-global" }
           ]
         }
     ];
@@ -372,6 +380,12 @@ document.addEventListener("DOMContentLoaded", () => {
         "grupo-ver":       () => renderViewVerGrupos(main),
         "grupo-clase-asignar": () => renderViewAsignarClaseGrupo(main),
         "grupo-clase-ver":     () => renderViewVerClasesGrupo(main),
+        //Submenú inscripciones
+        "inscripcion-registrar": () => renderViewRegistrarInscripcion(main),
+        "inscripcion-ver":       () => renderViewVerInscripciones(main),
+        //Submenú control de horarios
+        "horario-asignar":   () => renderViewAsignarHorario(main),
+        "horario-ver-global":() => renderViewVerHorariosGlobales(main),
     };
 
     const main = document.getElementById("main-content");
