@@ -2,6 +2,23 @@
 //  views/grupos-clase.js — Vistas de Clase del Grupo (Admin)
 // ============================================================
 
+// La tabla `clase` no tiene nombre propio.
+// La etiqueta legible se construye como:
+//   "[Materia] — [Tipo] (Doc: [Docente])"
+// usando los catálogos de /materias y /docentes.
+
+
+// ── HELPER: etiqueta legible para una clase ──────────────────
+// Recibe el objeto clase y los catálogos ya cargados.
+function etiquetaClase(clase, catalogoMaterias, catalogoDocentes) {
+    const mat = catalogoMaterias.find(m => m.id_materia === clase.id_materia);
+    const doc = catalogoDocentes.find(d => d.id_usuario === clase.id_docente);
+    const nombreMat = mat ? mat.nombre          : `Materia #${clase.id_materia}`;
+    const nombreDoc = doc ? doc.nombre_completo : `Docente #${clase.id_docente}`;
+    const tipo      = clase.tipo_clase === "TEORIA" ? "Teoría" : "Práctica";
+    return `${nombreMat} — ${tipo} (${nombreDoc})`;
+}
+
 
 // ── VISTA: ASIGNAR CLASE A GRUPO ─────────────────────────────
 function renderViewAsignarClaseGrupo(container) {
@@ -27,8 +44,8 @@ function renderViewAsignarClaseGrupo(container) {
 
                 <!-- ── CLASE ── -->
                 <div class="form-group" style="margin-top:16px;">
-                    <!-- BACKEND: GET /clases → { success: true, clases: [{ id_clase, nombre_clase }] }
-                         Filtrar solo estado = 'ACTIVO' -->
+                    <!-- BACKEND: GET /clases → { success: true, clases: [{ id_clase, tipo_clase, estado, id_materia, id_docente }] }
+                         La etiqueta se construye con /materias y /docentes porque clase no tiene nombre propio. -->
                     <label>Clase <span class="req">*</span></label>
                     <select id="cg-clase" required class="form-select">
                         <option value="" disabled selected>Cargando clases...</option>
@@ -45,33 +62,60 @@ function renderViewAsignarClaseGrupo(container) {
         </div>
     `;
 
-    // ── Cargar selects ────────────────────────────────────────
-    function cargarSelect(selectId, endpoint, campoId, campoLabel, textoError) {
-        const select = document.getElementById(selectId);
-        fetch(`http://127.0.0.1:5000/${endpoint}`)
-            .then(res => res.json())
-            .then(data => {
-                const key   = Object.keys(data).find(k => Array.isArray(data[k]));
-                const lista = key ? data[key] : [];
-                if (data.success && lista.length > 0) {
-                    select.innerHTML = `<option value="" disabled selected>Selecciona una opción...</option>`;
-                    lista.forEach(item => {
-                        const opt = document.createElement("option");
-                        opt.value       = item[campoId];
-                        opt.textContent = item[campoLabel];
-                        select.appendChild(opt);
-                    });
-                } else {
-                    select.innerHTML = `<option value="" disabled selected>Sin registros disponibles</option>`;
-                }
-            })
-            .catch(() => {
-                select.innerHTML = `<option value="" disabled selected>${textoError}</option>`;
-            });
-    }
+    const selGrupo = document.getElementById("cg-grupo");
+    const selClase = document.getElementById("cg-clase");
 
-    cargarSelect("cg-grupo", "grupos", "id_grupo", "nombre_grupo", "Error al cargar grupos");
-    cargarSelect("cg-clase", "clases", "id_clase", "nombre_clase",  "Error al cargar clases");
+    // Cargar los 3 catálogos necesarios en paralelo
+    // BACKEND: GET /materias  → { success, materias:  [{ id_materia, nombre }] }
+    // BACKEND: GET /docentes  → { success, docentes:  [{ id_usuario, nombre_completo }] }
+    // BACKEND: GET /grupos    → { success, grupos:    [{ id_grupo, nombre_grupo }] }
+    // BACKEND: GET /clases    → { success, clases:    [{ id_clase, tipo_clase, estado, id_materia, id_docente }] }
+    Promise.all([
+        fetch("http://127.0.0.1:5000/grupos").then(r => r.json()),
+        fetch("http://127.0.0.1:5000/clases").then(r => r.json()),
+        fetch("http://127.0.0.1:5000/materias").then(r => r.json()),
+        fetch("http://127.0.0.1:5000/docentes").then(r => r.json())
+    ])
+    .then(([dGrupos, dClases, dMaterias, dDocentes]) => {
+
+        const catalogoMaterias = (dMaterias.success && dMaterias.materias) ? dMaterias.materias : [];
+        const catalogoDocentes = (dDocentes.success && dDocentes.docentes) ? dDocentes.docentes : [];
+
+        // ── Poblar grupos ──────────────────────────────────
+        if (dGrupos.success && dGrupos.grupos && dGrupos.grupos.length) {
+            selGrupo.innerHTML = `<option value="" disabled selected>Selecciona un grupo...</option>`;
+            dGrupos.grupos.forEach(g => {
+                const opt = document.createElement("option");
+                opt.value       = g.id_grupo;
+                opt.textContent = g.nombre_grupo;
+                selGrupo.appendChild(opt);
+            });
+        } else {
+            selGrupo.innerHTML = `<option value="" disabled selected>Sin grupos disponibles</option>`;
+        }
+
+        // ── Poblar clases (solo ACTIVO) ────────────────────
+        const clasesActivas = (dClases.success && dClases.clases)
+            ? dClases.clases.filter(c => c.estado === "ACTIVO")
+            : [];
+
+        if (clasesActivas.length) {
+            selClase.innerHTML = `<option value="" disabled selected>Selecciona una clase...</option>`;
+            clasesActivas.forEach(c => {
+                const opt = document.createElement("option");
+                opt.value       = c.id_clase;
+                opt.textContent = etiquetaClase(c, catalogoMaterias, catalogoDocentes);
+                selClase.appendChild(opt);
+            });
+        } else {
+            selClase.innerHTML = `<option value="" disabled selected>Sin clases disponibles</option>`;
+        }
+    })
+    .catch(error => {
+        console.error(error);
+        selGrupo.innerHTML = `<option value="" disabled selected>Error al cargar grupos</option>`;
+        selClase.innerHTML = `<option value="" disabled selected>Error al cargar clases</option>`;
+    });
 
     // ── Envío del formulario ──────────────────────────────────
     const form = document.getElementById("add-clase-grupo-form");
@@ -96,16 +140,15 @@ function renderViewAsignarClaseGrupo(container) {
             return;
         }
 
-        const nueva = {
-            // BACKEND: POST /clase-grupo → { success: true }
-            id_grupo: parseInt(document.getElementById("cg-grupo").value),
-            id_clase: parseInt(document.getElementById("cg-clase").value),
-        };
-
+        // BACKEND: POST /clase-grupo → { success: true }
+        // Body: { id_grupo, id_clase }
         fetch("http://127.0.0.1:5000/clase-grupo", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(nueva)
+            body: JSON.stringify({
+                id_grupo: parseInt(document.getElementById("cg-grupo").value),
+                id_clase: parseInt(document.getElementById("cg-clase").value),
+            })
         })
         .then(res => res.json())
         .then(data => {
@@ -139,7 +182,7 @@ function renderViewVerClasesGrupo(container) {
                 <input
                     type="text"
                     id="cg-search-input"
-                    placeholder="Buscar por grupo o clase..."
+                    placeholder="Buscar por grupo, materia o docente..."
                     class="search-input"
                     autocomplete="off"
                 />
@@ -151,7 +194,9 @@ function renderViewVerClasesGrupo(container) {
                     <thead>
                         <tr>
                             <th>Grupo</th>
-                            <th>Clase</th>
+                            <th>Materia</th>
+                            <th style="text-align:center;">Tipo</th>
+                            <th>Docente</th>
                             <th style="text-align:center;">Estado</th>
                             <th style="text-align:center;">Acciones</th>
                         </tr>
@@ -213,6 +258,22 @@ function renderViewVerClasesGrupo(container) {
     let asignaciones    = [];
     let catalogoGrupos  = [];
     let catalogoClases  = [];
+    let catalogoMaterias = [];
+    let catalogoDocentes = [];
+
+    // ── Badge tipo de clase ───────────────────────────────────
+    function badgeTipo(tipo) {
+        const esTeo = tipo === "TEORIA";
+        return `<span style="
+            display:inline-flex; align-items:center; gap:4px;
+            padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600;
+            background:${esTeo ? "#eef1f9" : "#edfaf3"};
+            color:${esTeo ? "var(--azul-sami)" : "#27ae60"};
+        ">
+            <span class="material-symbols-rounded" style="font-size:0.9rem;">${esTeo ? "menu_book" : "science"}</span>
+            ${esTeo ? "Teoría" : "Práctica"}
+        </span>`;
+    }
 
     // ── Badge estado ──────────────────────────────────────────
     function badgeEstado(activo) {
@@ -230,12 +291,21 @@ function renderViewVerClasesGrupo(container) {
     // ── Resolver nombres desde catálogos ──────────────────────
     function nombreGrupo(id) {
         const g = catalogoGrupos.find(x => x.id_grupo === id);
-        return g ? g.nombre_grupo : `ID ${id}`;
+        return g ? g.nombre_grupo : `Grupo #${id}`;
     }
 
-    function nombreClase(id) {
-        const c = catalogoClases.find(x => x.id_clase === id);
-        return c ? c.nombre_clase : `ID ${id}`;
+    function datosClase(id) {
+        return catalogoClases.find(x => x.id_clase === id) || null;
+    }
+
+    function nombreMateria(id_materia) {
+        const m = catalogoMaterias.find(x => x.id_materia === id_materia);
+        return m ? m.nombre : `Materia #${id_materia}`;
+    }
+
+    function nombreDocente(id_docente) {
+        const d = catalogoDocentes.find(x => x.id_usuario === id_docente);
+        return d ? d.nombre_completo : `Docente #${id_docente}`;
     }
 
     // ── Renderizar tabla ──────────────────────────────────────
@@ -253,6 +323,7 @@ function renderViewVerClasesGrupo(container) {
         lista.forEach(item => {
             const idx      = asignaciones.indexOf(item);
             const esActivo = !!item.activo;
+            const clase    = datosClase(item.id_clase);
 
             const toggleIcon  = esActivo ? "block"           : "check_circle";
             const toggleClass = esActivo ? "btn-icon-danger"  : "btn-icon-success";
@@ -260,8 +331,10 @@ function renderViewVerClasesGrupo(container) {
 
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td>${nombreGrupo(item.id_grupo)}</td>
-                <td>${nombreClase(item.id_clase)}</td>
+                <td><strong>${nombreGrupo(item.id_grupo)}</strong></td>
+                <td>${clase ? nombreMateria(clase.id_materia) : `Clase #${item.id_clase}`}</td>
+                <td style="text-align:center;">${clase ? badgeTipo(clase.tipo_clase) : "—"}</td>
+                <td>${clase ? nombreDocente(clase.id_docente) : "—"}</td>
                 <td style="text-align:center;">${badgeEstado(esActivo)}</td>
                 <td style="text-align:center;">
                     <div style="display:flex; gap:6px; justify-content:center; align-items:center;">
@@ -277,29 +350,27 @@ function renderViewVerClasesGrupo(container) {
             tbody.appendChild(tr);
         });
 
-        // Listeners — editar
         tbody.querySelectorAll(".btn-edit-cg").forEach(btn =>
             btn.addEventListener("click", () => abrirModal(parseInt(btn.dataset.idx)))
         );
 
-        // Listeners — toggle estado
         tbody.querySelectorAll(".btn-toggle-cg").forEach(btn =>
-            btn.addEventListener("click", () => {
-                const item = asignaciones[parseInt(btn.dataset.idx)];
-                cambiarEstado(item);
-            })
+            btn.addEventListener("click", () => cambiarEstado(asignaciones[parseInt(btn.dataset.idx)]))
         );
     }
 
     // ── Filtrado ──────────────────────────────────────────────
     function filtrar() {
         const q = search.value.toLowerCase().trim();
-        return q
-            ? asignaciones.filter(item =>
+        if (!q) return [...asignaciones];
+        return asignaciones.filter(item => {
+            const clase = datosClase(item.id_clase);
+            return (
                 nombreGrupo(item.id_grupo).toLowerCase().includes(q) ||
-                nombreClase(item.id_clase).toLowerCase().includes(q)
-            )
-            : [...asignaciones];
+                (clase && nombreMateria(clase.id_materia).toLowerCase().includes(q)) ||
+                (clase && nombreDocente(clase.id_docente).toLowerCase().includes(q))
+            );
+        });
     }
 
     search.addEventListener("input", () => renderTabla(filtrar()));
@@ -307,7 +378,7 @@ function renderViewVerClasesGrupo(container) {
     // ── Cambiar estado ────────────────────────────────────────
     function cambiarEstado(item) {
         // BACKEND: PUT /clase-grupo/:id/estado → { success: true }
-        // Campo 'activo' (TINYINT 1) se agrega a la tabla clase_grupo
+        // Requiere campo `activo` TINYINT(1) en la tabla clase_grupo
         fetch(`http://127.0.0.1:5000/clase-grupo/${item.id_clase_grupo}/estado`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -328,27 +399,32 @@ function renderViewVerClasesGrupo(container) {
         });
     }
 
-    // ── Poblar selects del modal ──────────────────────────────
-    function poblarSelectModal(selectId, catalogo, campoId, campoLabel, idSeleccionado) {
-        const select = document.getElementById(selectId);
-        select.innerHTML = `<option value="" disabled>Selecciona una opción...</option>`;
-        catalogo.forEach(item => {
-            const opt = document.createElement("option");
-            opt.value       = item[campoId];
-            opt.textContent = item[campoLabel];
-            if (item[campoId] === idSeleccionado) opt.selected = true;
-            select.appendChild(opt);
-        });
-    }
-
     // ── Modal — abrir ─────────────────────────────────────────
     function abrirModal(idx) {
         const item = asignaciones[idx];
-
         document.getElementById("edit-cg-id").value = item.id_clase_grupo;
 
-        poblarSelectModal("edit-cg-grupo", catalogoGrupos, "id_grupo", "nombre_grupo", item.id_grupo);
-        poblarSelectModal("edit-cg-clase", catalogoClases, "id_clase", "nombre_clase",  item.id_clase);
+        // Poblar select de grupos
+        const selGrupoEdit = document.getElementById("edit-cg-grupo");
+        selGrupoEdit.innerHTML = "";
+        catalogoGrupos.forEach(g => {
+            const opt = document.createElement("option");
+            opt.value       = g.id_grupo;
+            opt.textContent = g.nombre_grupo;
+            if (g.id_grupo === item.id_grupo) opt.selected = true;
+            selGrupoEdit.appendChild(opt);
+        });
+
+        // Poblar select de clases con etiqueta legible
+        const selClaseEdit = document.getElementById("edit-cg-clase");
+        selClaseEdit.innerHTML = "";
+        catalogoClases.forEach(c => {
+            const opt = document.createElement("option");
+            opt.value       = c.id_clase;
+            opt.textContent = etiquetaClase(c, catalogoMaterias, catalogoDocentes);
+            if (c.id_clase === item.id_clase) opt.selected = true;
+            selClaseEdit.appendChild(opt);
+        });
 
         overlay.style.display = "flex";
     }
@@ -385,16 +461,15 @@ function renderViewVerClasesGrupo(container) {
 
         const idClaseGrupo = document.getElementById("edit-cg-id").value;
 
-        const datos = {
-            // BACKEND: PUT /clase-grupo/:id → { success: true }
-            id_grupo: parseInt(document.getElementById("edit-cg-grupo").value),
-            id_clase: parseInt(document.getElementById("edit-cg-clase").value),
-        };
-
+        // BACKEND: PUT /clase-grupo/:id → { success: true }
+        // Body: { id_grupo, id_clase }
         fetch(`http://127.0.0.1:5000/clase-grupo/${idClaseGrupo}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(datos)
+            body: JSON.stringify({
+                id_grupo: parseInt(document.getElementById("edit-cg-grupo").value),
+                id_clase: parseInt(document.getElementById("edit-cg-clase").value),
+            })
         })
         .then(res => res.json())
         .then(data => {
@@ -415,22 +490,34 @@ function renderViewVerClasesGrupo(container) {
     // ── Carga inicial ─────────────────────────────────────────
     function cargarCatalogos() {
         return Promise.all([
-            // BACKEND: GET /grupos → { success: true, grupos: [{ id_grupo, nombre_grupo }] }
+            // BACKEND: GET /grupos   → { success, grupos:   [{ id_grupo, nombre_grupo }] }
             fetch("http://127.0.0.1:5000/grupos")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoGrupos = d.grupos; })
                 .catch(() => {}),
 
-            // BACKEND: GET /clases → { success: true, clases: [{ id_clase, nombre_clase }] }
+            // BACKEND: GET /clases   → { success, clases:   [{ id_clase, tipo_clase, estado, id_materia, id_docente }] }
             fetch("http://127.0.0.1:5000/clases")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoClases = d.clases; })
+                .catch(() => {}),
+
+            // BACKEND: GET /materias → { success, materias: [{ id_materia, nombre }] }
+            fetch("http://127.0.0.1:5000/materias")
+                .then(r => r.json())
+                .then(d => { if (d.success) catalogoMaterias = d.materias; })
+                .catch(() => {}),
+
+            // BACKEND: GET /docentes → { success, docentes: [{ id_usuario, nombre_completo }] }
+            fetch("http://127.0.0.1:5000/docentes")
+                .then(r => r.json())
+                .then(d => { if (d.success) catalogoDocentes = d.docentes; })
                 .catch(() => {})
         ]);
     }
 
     function cargarAsignaciones() {
-        // BACKEND: GET /clase-grupo → { success: true, clase_grupos: [{ id_clase_grupo, id_clase, id_grupo, activo }] }
+        // BACKEND: GET /clase-grupo → { success, clase_grupos: [{ id_clase_grupo, id_clase, id_grupo, activo }] }
         fetch("http://127.0.0.1:5000/clase-grupo")
             .then(res => res.json())
             .then(data => {
