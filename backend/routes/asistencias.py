@@ -283,6 +283,7 @@ def obtener_asistencias():
                 a.estado,
                 a.tipo_registro,
                 a.observacion,
+                a.justificacion_aprobada,
                 a.fecha_modificacion,
                 a.ip_equipo_registro,
                 a.id_usuario,
@@ -318,6 +319,52 @@ def obtener_asistencias():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
  
+    finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
+        
+        
+# ─────────────────────────────────────────────
+# PUT /asistencias/<id>/justificacion
+# El maestro aprueba o rechaza una justificación
+# ─────────────────────────────────────────────
+@asistencias_bp.route("/asistencias/<int:id_asistencia>/justificacion", methods=["PUT"])
+def resolver_justificacion(id_asistencia):
+
+    conexion = None
+    cursor   = None
+    data     = request.get_json()
+
+    aprobada = data.get("justificacion_aprobada")
+    if aprobada not in ("APROBADA", "RECHAZADA"):
+        return jsonify({"success": False, "error": "Valor inválido"}), 400
+
+    try:
+        conexion = get_connection()
+        cursor   = conexion.cursor()
+
+        cursor.execute("""
+            UPDATE asistencia
+            SET
+                justificacion_aprobada = %s,
+                fecha_modificacion     = %s,
+                id_usuario_modificador = %s
+            WHERE id_asistencia = %s
+              AND estado        = 'JUSTIFICADA'
+        """, (
+            aprobada,
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            data.get("id_usuario_modificador"),
+            id_asistencia
+        ))
+
+        conexion.commit()
+        return jsonify({"success": True})
+
+    except Exception as e:
+        if conexion: conexion.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
     finally:
         if cursor:   cursor.close()
         if conexion: conexion.close()
