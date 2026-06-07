@@ -146,14 +146,14 @@ document.addEventListener("DOMContentLoaded", () => {
         },
 
         // Vistas
-        { id: "nav-mis-grupos", icon: "groups", label: "Vistas",
+        { id: "nav-maestro-info", icon: "visibility", label: "Información",
           dropdown: [
-            { label: "Clases del Grupo", view: "grupo-clase-ver"},
-            { label: "Ver Materias", view: "materias-ver"},
-            { label: "Ver Clases", view: "clase-ver"},
-            { label: "Ver Registros", view: "ciclo-ver"},
-            { label: "Ver Aulas",      view: "aula-ver"},
-            { label: "Ver Horarios Globales", view: "horario-ver-global"}
+            { label: "Clases del Grupo", view: "maestro-clase-grupo"},
+            { label: "Ver Materias", view: "maestro-materias"},
+            { label: "Ver Clases", view: "maestro-clases"},
+            { label: "Ver Ciclos", view: "maestro-ciclos"},
+            { label: "Ver Aulas", view: "maestro-aulas"},
+            { label: "Ver Horarios", view: "maestro-horarios"}
           ]
         },
     ];
@@ -390,10 +390,16 @@ document.addEventListener("DOMContentLoaded", () => {
         //Submenú control de horarios
         "horario-asignar":   () => renderViewAsignarHorario(main),
         "horario-ver-global":() => renderViewVerHorariosGlobales(main),
-
         //Submenu inscripciones de alumnos para maestros
         "maestro-inscripcion-registrar": () => renderViewMaestroInscripcion(main),
         "maestro-inscripcion-ver":       () => renderViewMaestroVerInscripciones(main),
+        // Vistas de docente
+        "maestro-clase-grupo": () => renderViewMaestroClaseGrupo(main),
+        "maestro-materias": () => renderViewMaestroMaterias(main),
+        "maestro-clases": () => renderViewMaestroClases(main),
+        "maestro-ciclos": () => renderViewMaestroCiclos(main),
+        "maestro-aulas": () => renderViewMaestroAulas(main),
+        "maestro-horarios": () => renderViewMaestroHorarios(main),
     };
 
     const main = document.getElementById("main-content");
@@ -427,11 +433,11 @@ document.addEventListener("DOMContentLoaded", () => {
               ]
             : esMaestro
             ? [
-                { icon: "groups",        label: "Mis Alumnos",  view: "maestro-alumnos" },
-                { icon: "library_books", label: "Ver Materias", view: "materias-ver"    },
+                { id: "nav-mis-horarios", icon: "select_check_box", label: "Listas", view: "maestro-alumnos" },
+                { label: "Ver Inscripciones", icon: "list_alt_check",    view: "maestro-inscripcion-ver"       }
               ]
             : [
-                { icon: "calendar_month", label: "Mis Horarios", view: "horarios" },
+                { id: "nav-horarios", icon: "today", label: "Clases", view: "horarios" },
               ];
 
         main.innerHTML = `
