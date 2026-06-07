@@ -1,0 +1,508 @@
+/* ============================================================
+mis-horarios.css — Estilos: Vista de Horarios del Estudiante
+============================================================ */
+
+/* ── UTILIDADES ── */
+.mh-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #aaa;
+    font-size: 0.9rem;
+    padding: 40px 0;
+}
+
+.mh-spin {
+    animation: mh-spin 1s linear infinite;
+    font-size: 1.6rem !important;
+}
+
+@keyframes mh-spin {
+    to { transform: rotate(360deg); }
+}
+
+.mh-empty {
+    text-align: center;
+    padding: 70px 20px;
+    color: #bbb;
+    font-size: 0.95rem;
+}
+
+.mh-empty .material-symbols-rounded {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 14px;
+}
+
+/* ── TARJETA DE PERFIL ── */
+.mh-perfil-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border: 1.5px solid #e8edf5;
+    border-radius: 16px;
+    padding: 18px 22px;
+    margin-bottom: 28px;
+}
+
+.mh-perfil-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--azul-sami, #2563eb);
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.mh-perfil-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.mh-perfil-nombre {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mh-perfil-carnet {
+    font-size: 0.82rem;
+    color: #888;
+    margin: 0;
+}
+
+.mh-perfil-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.mh-perfil-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: #eef1f9;
+    color: var(--azul-sami, #2563eb);
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.mh-perfil-carrera {
+    font-size: 0.78rem;
+    color: #888;
+    margin: 0;
+    max-width: 220px;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── GRID DE TARJETAS ── */
+.mh-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 18px;
+    margin-top: 4px;
+}
+
+/* ── TARJETA DE MATERIA ── */
+.mh-card {
+    background: #fff;
+    border: 1.5px solid #e8edf5;
+    border-radius: 16px;
+    padding: 20px 20px 16px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .18s, transform .15s, box-shadow .18s;
+}
+
+.mh-card::after {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--azul-sami, #2563eb);
+    border-radius: 0 0 16px 16px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .22s ease;
+}
+
+.mh-card:hover {
+    border-color: var(--azul-sami, #2563eb);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(37, 99, 235, 0.11);
+}
+
+.mh-card:hover::after {
+    transform: scaleX(1);
+}
+
+/* Top de la tarjeta: icono + badge tipo */
+.mh-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mh-card-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mh-card-icon .material-symbols-rounded {
+    font-size: 1.35rem;
+}
+
+.mh-icon-teoria   { background: #eef1f9; color: var(--azul-sami, #2563eb); }
+.mh-icon-practica { background: #edfaf3; color: #27ae60; }
+
+.mh-tipo-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.mh-tipo-teoria   { background: #eef1f9; color: var(--azul-sami, #2563eb); }
+.mh-tipo-practica { background: #edfaf3; color: #27ae60; }
+
+/* Nombre de la materia */
+.mh-card-materia {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    line-height: 1.35;
+    margin: 0;
+}
+
+/* Metadatos (docente, aula, modalidad) */
+.mh-card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.mh-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.81rem;
+    color: #666;
+}
+
+.mh-meta-row .material-symbols-rounded {
+    font-size: 0.92rem;
+    color: #aaa;
+    flex-shrink: 0;
+}
+
+/* Chips de días */
+.mh-dias-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.mh-dia-chip {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 10px;
+    background: #f3f5fb;
+    border: 1px solid #e8edf5;
+    gap: 1px;
+}
+
+.mh-dia-nombre {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--azul-sami, #2563eb);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.mh-dia-hora {
+    font-size: 0.7rem;
+    color: #888;
+    white-space: nowrap;
+}
+
+/* Footer de la tarjeta */
+.mh-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    color: var(--azul-sami, #2563eb);
+    font-weight: 600;
+    margin-top: 2px;
+    padding-top: 10px;
+    border-top: 1px dashed #e8edf5;
+}
+
+.mh-card-footer .material-symbols-rounded {
+    font-size: 0.92rem;
+}
+
+/* ── BOTÓN VOLVER ── */
+.mh-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--azul-sami, #2563eb);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 6px 0;
+    margin-bottom: 22px;
+    transition: opacity .15s;
+}
+
+.mh-back-btn:hover { opacity: .65; }
+
+/* ── CABECERA DEL DETALLE ── */
+.mh-detalle-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 20px;
+    border: 1.5px solid transparent;
+}
+
+.mh-header-teoria {
+    background: #eef1f9;
+    border-color: #c5d3f0;
+}
+
+.mh-header-practica {
+    background: #edfaf3;
+    border-color: #a3e4c2;
+}
+
+.mh-detalle-icono {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.mh-header-teoria   .mh-detalle-icono .material-symbols-rounded { color: var(--azul-sami, #2563eb); font-size: 1.6rem; }
+.mh-header-practica .mh-detalle-icono .material-symbols-rounded { color: #27ae60; font-size: 1.6rem; }
+
+.mh-detalle-tipo {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin: 0 0 4px;
+}
+
+.mh-header-teoria   .mh-detalle-tipo { color: var(--azul-sami, #2563eb); }
+.mh-header-practica .mh-detalle-tipo { color: #27ae60; }
+
+.mh-detalle-titulo h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* ── GRID DE INFO GENERAL ── */
+.mh-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.mh-info-bloque {
+    background: #fff;
+    border: 1.5px solid #e8edf5;
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.mh-info-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 6px;
+}
+
+.mh-info-label .material-symbols-rounded {
+    font-size: 0.9rem;
+}
+
+.mh-info-valor {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mh-info-sub {
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: #888;
+}
+
+/* ── SECCIÓN LABEL ── */
+.mh-seccion-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--azul-sami, #2563eb);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 1.5px solid #e8edf5;
+}
+
+.mh-seccion-label .material-symbols-rounded {
+    font-size: 1rem;
+}
+
+/* ── HORARIOS POR DÍA ── */
+.mh-horarios-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mh-horario-bloque {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    background: #fff;
+    border: 1.5px solid #e8edf5;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.mh-horario-dia {
+    width: 90px;
+    flex-shrink: 0;
+    background: var(--mh-dia-color, #2563eb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 12px;
+}
+
+.mh-horario-dia-nombre {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.mh-horario-datos {
+    flex: 1;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+}
+
+.mh-horario-franja {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    color: #1a1a2e;
+}
+
+.mh-horario-franja .material-symbols-rounded {
+    font-size: 1.1rem;
+    color: #aaa;
+}
+
+.mh-horario-sep {
+    color: #bbb;
+    font-size: 0.85rem;
+}
+
+.mh-horario-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.mh-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #f3f5fb;
+    border: 1px solid #e8edf5;
+    font-size: 0.75rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.mh-chip .material-symbols-rounded {
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+    .mh-perfil-right   { display: none; }
+    .mh-grid           { grid-template-columns: 1fr; }
+    .mh-info-grid      { grid-template-columns: 1fr 1fr; }
+    .mh-detalle-header { padding: 16px; }
+    .mh-horario-dia    { width: 70px; }
+    .mh-horario-dia-nombre { font-size: 0.75rem; }
+}

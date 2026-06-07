@@ -124,6 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 3. SIDEBAR ITEMS SEGÚN ROL
     const navItemsEstudiante = [
+        { id: "nav-mis-horarios", icon: "calendar_month", label: "Mis Horarios", view: "mis-horarios" },
         { id: "nav-horarios", icon: "today", label: "Clases", view: "horarios" },
         { id: "nav-reportes", icon: "history", label: "Reportes",
           dropdown: [
@@ -351,6 +352,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const vistas = {
         //Vista del estudiante
         "horarios":          () => renderViewHorarios(main),
+        "mis-horarios": () => renderViewMisHorarios(main),
         //Submenú administación de usuarios
         "admin-usuarios":    () => renderViewAdminUsuarios(main),
         "admin-registrados": () => renderViewAdminRegistrados(main),
@@ -438,6 +440,7 @@ document.addEventListener("DOMContentLoaded", () => {
               ]
             : [
                 { id: "nav-horarios", icon: "today", label: "Clases", view: "horarios" },
+                { id: "nav-mis-horarios", icon: "calendar_month", label: "Mis Horarios", view: "mis-horarios" },
               ];
 
         main.innerHTML = `
