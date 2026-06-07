@@ -126,12 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const navItemsEstudiante = [
         { id: "nav-mis-horarios", icon: "calendar_month", label: "Mis Horarios", view: "mis-horarios" },
         { id: "nav-horarios", icon: "today", label: "Clases", view: "horarios" },
-        { id: "nav-reportes", icon: "history", label: "Reportes",
-          dropdown: [
-            { label: "Asistencia Diaria", href: "WIP.html" },
-            { label: "Resumen Mensual",   href: "WIP.html" }
-          ]
-        }
+        { id: "nav-reporte", icon: "summarize", label: "Mi Reporte", view: "reporte-asistencia" },
     ];
 
     const navItemsMaestro = [
@@ -353,6 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
         //Vista del estudiante
         "horarios":          () => renderViewHorarios(main),
         "mis-horarios": () => renderViewMisHorarios(main),
+        "reporte-asistencia": () => renderViewReporteAsistencia(main),
         //Submenú administación de usuarios
         "admin-usuarios":    () => renderViewAdminUsuarios(main),
         "admin-registrados": () => renderViewAdminRegistrados(main),
