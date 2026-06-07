@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Activar cuenta — SAMI</title>
-    <link rel="icon" href="image/icon-sami.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/style-login.css">
+    <link rel="icon" href="../image/icon-sami.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../css/style-login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
 </head>
 <body>
     <div class="login-container">
         <div class="mainlogo-login">
-            <img src="image/sami-logo.svg" alt="SAMI Logo" class="login-logo">
+            <img src="../image/sami-logo.svg" alt="SAMI Logo" class="login-logo">
         </div>
 
         <!-- Estado: verificando -->
@@ -24,13 +25,25 @@
             <h2 id="saludo">Activa tu cuenta</h2>
             <p>Establece tu contraseña para comenzar</p>
 
-            <div class="input-group">
+            <div class="input-group" style="position:relative;">
                 <i class="fas fa-lock"></i>
                 <input type="password" id="password" placeholder="Nueva contraseña (mín. 8 caracteres)" required minlength="8" />
+                <button type="button" id="toggle-pwd" tabindex="-1" style="
+                    position:absolute; right:10px; top:50%; transform:translateY(-50%);
+                    background:none; border:none; cursor:pointer; color:#888; padding:4px;
+                    display:flex; align-items:center;">
+                    <span class="material-symbols-rounded" style="font-size:1.2rem;">visibility</span>
+                </button>
             </div>
-            <div class="input-group">
+            <div class="input-group" style="position:relative;">
                 <i class="fas fa-lock"></i>
                 <input type="password" id="password-confirm" placeholder="Confirmar contraseña" required />
+                <button type="button" id="toggle-pwd-confirm" tabindex="-1" style="
+                    position:absolute; right:10px; top:50%; transform:translateY(-50%);
+                    background:none; border:none; cursor:pointer; color:#888; padding:4px;
+                    display:flex; align-items:center;">
+                    <span class="material-symbols-rounded" style="font-size:1.2rem;">visibility</span>
+                </button>
             </div>
 
             <button type="submit" class="login-btn">Activar cuenta</button>
@@ -123,6 +136,24 @@
             })
             .catch(() => alert("Error al conectar con el servidor."));
         });
+
+        //para poder ver el ojito
+        document.getElementById("toggle-pwd").addEventListener("click", () => {
+        const input = document.getElementById("password");
+        const icon  = document.querySelector("#toggle-pwd .material-symbols-rounded");
+        const esPassword = input.type === "password";
+        input.type = esPassword ? "text" : "password";
+        icon.textContent = esPassword ? "visibility_off" : "visibility";
+    });
+
+        document.getElementById("toggle-pwd-confirm").addEventListener("click", () => {
+        const input = document.getElementById("password-confirm");
+        const icon  = document.querySelector("#toggle-pwd-confirm .material-symbols-rounded");
+        const esPassword = input.type === "password";
+        input.type = esPassword ? "text" : "password";
+        icon.textContent = esPassword ? "visibility_off" : "visibility";
+    });
+
     </script>
 </body>
 </html>

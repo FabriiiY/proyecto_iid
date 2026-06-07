@@ -60,19 +60,106 @@ def enviar_activacion(id_usuario):
             recipients=[usuario["correo_institucional"]]
         )
         msg.html = f"""
-            <div style="font-family:sans-serif; max-width:500px; margin:auto;">
-                <h2>Bienvenido/a a SAMI, {usuario['primer_nombre']}</h2>
-                <p>Tu cuenta ha sido creada. Para activarla y establecer tu contraseña haz clic aquí:</p>
-                <a href="{link}" style="
-                    display:inline-block; padding:12px 28px;
-                    background:#2563eb; color:#fff;
-                    border-radius:8px; text-decoration:none; font-weight:600;
-                ">Activar mi cuenta</a>
-                <p style="color:#999; font-size:0.85rem; margin-top:20px;">
-                    Este enlace expira en 48 horas. Si no solicitaste esto, ignora este correo.
-                </p>
-            </div>
-        """
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="UTF-8"></head>
+            <body style="margin:0; padding:0; background:#f0f4f8; font-family:'Segoe UI', Arial, sans-serif;">
+
+                <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4f8; padding:40px 0;">
+                    <tr>
+                        <td align="center">
+                            <table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+                                
+                                <!-- HEADER -->
+                                <tr>
+                                    <td style="background:linear-gradient(135deg, #1e40af 0%, #2563eb 100%); padding:36px 40px; text-align:center;">
+                                        <h1 style="margin:0; color:#ffffff; font-size:1.8rem; font-weight:800; letter-spacing:-0.5px;">
+                                            SAMI
+                                        </h1>
+                                        <p style="margin:6px 0 0; color:#bfdbfe; font-size:0.85rem; letter-spacing:0.1em; text-transform:uppercase;">
+                                            Sistema de Asistencia y Marcación Inteligente
+                                        </p>
+                                    </td>
+                                </tr>
+
+                                <!-- BODY -->
+                                <tr>
+                                    <td style="padding:40px 40px 32px;">
+                                        
+                                        <!-- Ícono -->
+                                        <div style="text-align:center; margin-bottom:24px;">
+                                            <div style="
+                                                display:inline-block;
+                                                background:#eff6ff;
+                                                border-radius:50%;
+                                                width:64px; height:64px;
+                                                line-height:64px;
+                                                font-size:2rem;
+                                                text-align:center;
+                                            ">👋</div>
+                                        </div>
+
+                                        <h2 style="margin:0 0 8px; color:#1e293b; font-size:1.4rem; font-weight:700; text-align:center;">
+                                            ¡Bienvenido/a, {usuario['primer_nombre']}!
+                                        </h2>
+                                        <p style="margin:0 0 24px; color:#64748b; font-size:0.95rem; text-align:center; line-height:1.6;">
+                                            Tu cuenta en <strong>SAMI</strong> ha sido creada exitosamente.<br>
+                                            Para activarla y establecer tu contraseña, haz clic en el botón.
+                                        </p>
+
+                                        <!-- Botón -->
+                                        <div style="text-align:center; margin:32px 0;">
+                                            <a href="{link}" style="
+                                                display:inline-block;
+                                                padding:14px 36px;
+                                                background:linear-gradient(135deg, #1e40af, #2563eb);
+                                                color:#ffffff;
+                                                text-decoration:none;
+                                                font-weight:700;
+                                                font-size:1rem;
+                                                border-radius:10px;
+                                                letter-spacing:0.02em;
+                                                box-shadow:0 4px 12px rgba(37,99,235,0.35);
+                                            ">
+                                                🔐 Activar mi cuenta
+                                            </a>
+                                        </div>
+
+                                        <!-- Advertencia -->
+                                        <div style="
+                                            background:#fef9ec;
+                                            border-left:4px solid #f59e0b;
+                                            border-radius:8px;
+                                            padding:14px 16px;
+                                            margin-top:24px;
+                                        ">
+                                            <p style="margin:0; color:#92400e; font-size:0.85rem; line-height:1.5;">
+                                                ⏰ <strong>Este enlace expira en 48 horas.</strong><br>
+                                                Si no solicitaste esta cuenta, puedes ignorar este correo con seguridad.
+                                            </p>
+                                        </div>
+
+                                    </td>
+                                </tr>
+
+                                <!-- FOOTER -->
+                                <tr>
+                                    <td style="background:#f8fafc; padding:20px 40px; border-top:1px solid #e2e8f0; text-align:center;">
+                                        <p style="margin:0; color:#94a3b8; font-size:0.78rem; line-height:1.6;">
+                                            Este correo fue enviado automáticamente por SAMI.<br>
+                                            Por favor no respondas a este mensaje.
+                                        </p>
+                                    </td>
+                                </tr>
+
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+            </body>
+            </html>
+            """
         mail.send(msg)
 
         return jsonify({"success": True, "mensaje": "Correo de activación enviado."})
