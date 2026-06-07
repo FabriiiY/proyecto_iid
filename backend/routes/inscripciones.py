@@ -226,3 +226,105 @@ def obtener_admins():
     finally:
         if cursor:   cursor.close()
         if conexion: conexion.close()
+        
+        
+        
+# PARA VISTA DE MAESTROS ==================================================
+
+# ─────────────────────────────────────────────
+# GET: grupos del docente (para vista maestro)
+# ─────────────────────────────────────────────
+@inscripciones_bp.route("/mis-grupos-inscripcion", methods=["GET"])
+def mis_grupos_inscripcion():
+
+    conexion   = None
+    cursor     = None
+    id_docente = request.args.get("id_docente")
+
+    if not id_docente:
+        return jsonify({"success": False, "error": "id_docente es requerido"}), 400
+
+    try:
+        conexion = get_connection()
+        cursor   = conexion.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT DISTINCT
+                g.id_grupo,
+                g.nombre_grupo,
+                m.nombre AS materia_nombre
+            FROM clase c
+            JOIN clase_grupo cg ON cg.id_clase  = c.id_clase  AND cg.estado = 'ACTIVO'
+            JOIN grupo       g  ON g.id_grupo   = cg.id_grupo
+            JOIN materia     m  ON m.id_materia = c.id_materia
+            WHERE c.id_docente = %s
+              AND c.estado     = 'ACTIVO'
+            ORDER BY g.nombre_grupo ASC
+        """, (id_docente,))
+
+        grupos = cursor.fetchall()
+
+        return jsonify({"success": True, "grupos": grupos})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
+        
+        
+# PARA MAESTROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOS :V =========================================================
+
+# ─────────────────────────────────────────────
+# GET: inscripciones de los grupos del docente
+# ─────────────────────────────────────────────
+@inscripciones_bp.route("/inscripciones-mis-grupos", methods=["GET"])
+def inscripciones_mis_grupos():
+
+    conexion   = None
+    cursor     = None
+    id_docente = request.args.get("id_docente")
+
+    if not id_docente:
+        return jsonify({"success": False, "error": "id_docente es requerido"}), 400
+
+    try:
+        conexion = get_connection()
+        cursor   = conexion.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT
+                i.id_inscripcion,
+                i.estado,
+                i.fecha_inscripcion,
+                i.observacion,
+                CONCAT(u.primer_nombre, ' ', u.primer_apellido) AS estudiante_nombre,
+                u.carnet,
+                g.nombre_grupo
+            FROM inscripcion i
+            JOIN usuario u ON u.id_usuario = i.id_usuario
+            JOIN grupo   g ON g.id_grupo   = i.id_grupo
+            WHERE i.id_grupo IN (
+                SELECT DISTINCT cg.id_grupo
+                FROM clase c
+                JOIN clase_grupo cg ON cg.id_clase = c.id_clase AND cg.estado = 'ACTIVO'
+                WHERE c.id_docente = %s AND c.estado = 'ACTIVO'
+            )
+            ORDER BY g.nombre_grupo ASC, u.primer_apellido ASC
+        """, (id_docente,))
+
+        inscripciones = cursor.fetchall()
+
+        for ins in inscripciones:
+            if ins.get("fecha_inscripcion") and not isinstance(ins["fecha_inscripcion"], str):
+                ins["fecha_inscripcion"] = ins["fecha_inscripcion"].strftime("%Y-%m-%d %H:%M:%S")
+
+        return jsonify({"success": True, "inscripciones": inscripciones})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()

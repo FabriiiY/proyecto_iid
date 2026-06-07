@@ -19,6 +19,7 @@ from routes.carrera_materia import carrera_materia_bp
 from routes.clase_grupo import clase_grupo_bp
 from routes.horarios import horarios_bp
 from routes.inscripciones import inscripciones_bp
+from routes.asistencias import asistencias_bp
 #esto es nuevo para correos
 from routes.activacion import activacion_bp
 
@@ -54,6 +55,7 @@ app.register_blueprint(clase_grupo_bp)
 app.register_blueprint(horarios_bp)
 app.register_blueprint(inscripciones_bp)
 app.register_blueprint(activacion_bp)
+app.register_blueprint(asistencias_bp)
 
 
 @app.route("/")

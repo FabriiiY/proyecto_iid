@@ -147,10 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Inscripciones
         { id: "nav-inscripciones", icon: "how_to_reg", label: "Inscripción",
-          dropdown: [
-            { label: "Registrar Inscripción",  view: "inscripcion-registrar" },
-            { label: "Ver Inscripciones",      view: "inscripcion-ver"       }
-          ]
+        dropdown: [
+            { label: "Registrar Inscripción", view: "maestro-inscripcion-registrar" },
+            { label: "Ver Inscripciones",     view: "maestro-inscripcion-ver"       }
+        ]
         },
 
         // Configurar Horario
@@ -394,6 +394,10 @@ document.addEventListener("DOMContentLoaded", () => {
         //Submenú control de horarios
         "horario-asignar":   () => renderViewAsignarHorario(main),
         "horario-ver-global":() => renderViewVerHorariosGlobales(main),
+
+        //Submenu inscripciones de alumnos para maestros
+        "maestro-inscripcion-registrar": () => renderViewMaestroInscripcion(main),
+        "maestro-inscripcion-ver":       () => renderViewMaestroVerInscripciones(main),
     };
 
     const main = document.getElementById("main-content");
