@@ -6,8 +6,6 @@ function renderViewMaestroAlumnos(container) {
 
     const usuarioActivo = window.SAMI?.usuario || {};
     const idDocente = usuarioActivo.id;
-    console.log("USUARIO ACTIVO:", usuarioActivo);  // ← agrega esto
-    console.log("ID DOCENTE:", idDocente);           // ← y esto
 
     // ── Estado global de la vista ─────────────────────────────
     let claseSeleccionada = null; // { id_clase, materia_nombre, tipo_clase, grupo_nombre, id_grupo }
@@ -430,7 +428,9 @@ function renderViewMaestroAlumnos(container) {
                             asistenciaHoy.asistencias.forEach(a => {
                                 previas[a.id_usuario] = {
                                     estado:     a.estado,
-                                    observacion: a.observacion
+                                    observacion: a.observacion,
+                                    id_asistencia:          a.id_asistencia,
+                                    justificacion_aprobada: a.justificacion_aprobada
                                 };
                             });
                         }
@@ -477,6 +477,30 @@ function renderViewMaestroAlumnos(container) {
                 </label>
             `).join("");
 
+            // ── Indicador de justificación pendiente ──────────
+            const prevActual = previas[est.id_usuario];
+            const justifHTML = (prevActual?.estado === "JUSTIFICADA" && prevActual?.justificacion_aprobada === "PENDIENTE")
+                ? `<div style="
+                        margin-top:10px; padding:10px 12px;
+                        background:#f5eef8; border:1.5px solid #c9a8e0;
+                        border-radius:8px; font-size:0.82rem; color:#8e44ad;
+                        display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+                    ">
+                        <span class="material-symbols-rounded" style="font-size:1rem;">verified</span>
+                        <span style="flex:1;">Justificación pendiente: <em>${prevActual.observacion || '—'}</em></span>
+                        <button class="btn-aprobar-justif" data-id="${prevActual.id_asistencia}"
+                            style="padding:5px 12px; border-radius:6px; border:none;
+                            background:#1a8a4a; color:#fff; font-size:0.78rem; font-weight:700; cursor:pointer;">
+                            Aprobar
+                        </button>
+                        <button class="btn-rechazar-justif" data-id="${prevActual.id_asistencia}"
+                            style="padding:5px 12px; border-radius:6px; border:none;
+                            background:#c0392b; color:#fff; font-size:0.78rem; font-weight:700; cursor:pointer;">
+                            Rechazar
+                        </button>
+                    </div>`
+                : "";
+
             html += `
                 <div class="ml-alumno-row">
                     <div class="ml-alumno-avatar">${inicial}</div>
@@ -484,6 +508,7 @@ function renderViewMaestroAlumnos(container) {
                         <div class="ml-alumno-nombre">${nombre}</div>
                         <div class="ml-alumno-carnet">Carnet: ${est.carnet || "—"}</div>
                         <div class="ml-opciones">${radioOpts}</div>
+                        ${justifHTML}
                         <textarea
                             class="ml-obs-input"
                             id="obs-${est.id_usuario}"
@@ -607,6 +632,45 @@ function renderViewMaestroAlumnos(container) {
                 }
             }
         });
+
+        //PARA PODER APROBAR O DESAPROBAR 
+
+        // ── Aprobar / Rechazar justificaciones ────────────────
+        cuerpo.querySelectorAll(".btn-aprobar-justif, .btn-rechazar-justif").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const idAsistencia = btn.dataset.id;
+                const accion = btn.classList.contains("btn-aprobar-justif") ? "APROBADA" : "RECHAZADA";
+
+                btn.disabled = true;
+
+                fetch(`http://127.0.0.1:5000/asistencias/${idAsistencia}/justificacion`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        justificacion_aprobada: accion,
+                        id_usuario_modificador: window.SAMI?.usuario?.id || null
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Justificación ${accion.toLowerCase()} correctamente.`);
+                        // Recargar la lista para reflejar el cambio
+                        renderLista(clase);
+                    } else {
+                        alert(data.error || "No se pudo procesar la justificación.");
+                        btn.disabled = false;
+                    }
+                })
+                .catch(() => {
+                    alert("Error al conectar con el servidor.");
+                    btn.disabled = false;
+                });
+            });
+        });
+
+        //HASTA ACa
+
 
         // ── Guardar lista ─────────────────────────────────────
         document.getElementById("ml-btn-guardar").addEventListener("click", () => {

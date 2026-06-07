@@ -4,7 +4,7 @@
 function renderViewHorarios(container) {
 
     const usuarioActivo = window.SAMI?.usuario || {};
-    const idEstudiante  = usuarioActivo.id_usuario;
+    const idEstudiante  = usuarioActivo.id; //se cambia esto const idEstudiante  = usuarioActivo.id_usuario;
 
     // ── Intervalo global — se limpia al salir de la vista ─────
     let _tickInterval = null;
@@ -181,16 +181,24 @@ function renderViewHorarios(container) {
                     ? `<span class="material-symbols-rounded">check_circle</span> Asistencia Confirmada`
                     : estadoMarcado === "TARDE"
                     ? `<span class="material-symbols-rounded">schedule</span> Registrado — Tarde`
+                    : estadoMarcado === "JUSTIFICADA" && clase._justificacionAprobada === "APROBADA"
+                    ? `<span class="material-symbols-rounded">verified</span> Justificación Aprobada`
+                    : estadoMarcado === "JUSTIFICADA" && clase._justificacionAprobada === "RECHAZADA"
+                    ? `<span class="material-symbols-rounded">cancel</span> Justificación Rechazada`
                     : estadoMarcado === "JUSTIFICADA"
-                    ? `<span class="material-symbols-rounded">verified</span> Justificación Enviada`
+                    ? `<span class="material-symbols-rounded">verified</span> Justificación Pendiente`
                     : `<span class="material-symbols-rounded">check_circle</span> Marcado`,
                 style: estadoMarcado === "PRESENTE"
                     ? "background:#e6f9f0; color:#1a8a4a; cursor:not-allowed; border:1.5px solid #a3e4c2;"
                     : estadoMarcado === "TARDE"
                     ? "background:#fef5e7; color:#d4780a; cursor:not-allowed; border:1.5px solid #f5d08a;"
+                    : estadoMarcado === "JUSTIFICADA" && clase._justificacionAprobada === "APROBADA"
+                    ? "background:#e6f9f0; color:#1a8a4a; cursor:not-allowed; border:1.5px solid #a3e4c2;"
+                    : estadoMarcado === "JUSTIFICADA" && clase._justificacionAprobada === "RECHAZADA"
+                    ? "background:#fdecea; color:#c0392b; cursor:not-allowed; border:1.5px solid #e8b4b0;"
                     : "background:#f5eef8; color:#8e44ad; cursor:not-allowed; border:1.5px solid #c9a8e0;",
                 disabled: true
-            }
+            },
         };
 
         const cfg = configs[boton.estado];
@@ -275,7 +283,7 @@ function renderViewHorarios(container) {
             fecha:         fechaHoy,
             hora:          horaAhora,
             estado:        "JUSTIFICADA",
-            tipo_registro: "MANUAL",
+            tipo_registro: "AUTOMATICO",
             observacion:   obs
         };
 
@@ -290,10 +298,10 @@ function renderViewHorarios(container) {
         .then(data => {
             document.getElementById("justif-overlay").style.display = "none";
             if (data.success) {
-                // Marcar el slide como justificado
-                clase._yaMarco    = true;
-                clase._estadoMarcado = "JUSTIFICADA";
-                actualizarBadge(clase.id_horario, "JUSTIFICADA");
+                clase._yaMarco               = true;
+                clase._estadoMarcado         = "JUSTIFICADA";
+                clase._justificacionAprobada = "PENDIENTE";
+                actualizarBadge(clase.id_horario, "JUSTIFICADA", "PENDIENTE");
                 rehacerBoton(clase);
                 alert("Justificación enviada correctamente.");
             } else {
@@ -307,18 +315,29 @@ function renderViewHorarios(container) {
     });
 
     // ── ACTUALIZAR BADGE DE ESTADO ────────────────────────────
-    function actualizarBadge(idHorario, estado) {
+    function actualizarBadge(idHorario, estado, justificacionAprobada = null) {
         const badge = document.getElementById(`badge-h${idHorario}`);
         if (!badge) return;
+
+        let claveEstado = estado;
+        if (estado === "JUSTIFICADA") {
+            claveEstado = justificacionAprobada === "APROBADA"  ? "JUSTIFICADA_APROBADA"
+                        : justificacionAprobada === "RECHAZADA" ? "JUSTIFICADA_RECHAZADA"
+                        : "JUSTIFICADA_PENDIENTE";
+        }
+
         const map = {
-            PRESENTE:    { texto: "Presente",   clase: "attended"            },
-            TARDE:       { texto: "Tarde",       clase: "status-tarde"        },
-            JUSTIFICADA: { texto: "Justificada", clase: "status-justificada"  },
-            AUSENTE:     { texto: "Ausente",     clase: "status-ausente"      },
-            pendiente:   { texto: "Pendiente",   clase: "pending"             }
+            PRESENTE:              { texto: "Presente",          clase: "attended"           },
+            TARDE:                 { texto: "Tarde",             clase: "status-tarde"       },
+            JUSTIFICADA_PENDIENTE: { texto: "Justif. Pendiente", clase: "status-justificada" },
+            JUSTIFICADA_APROBADA:  { texto: "Justif. Aprobada",  clase: "attended"           },
+            JUSTIFICADA_RECHAZADA: { texto: "Justif. Rechazada", clase: "status-ausente"     },
+            AUSENTE:               { texto: "Ausente",           clase: "status-ausente"     },
+            pendiente:             { texto: "Pendiente",         clase: "pending"            }
         };
-        const cfg = map[estado] || map.pendiente;
-        badge.className  = `status-badge ${cfg.clase}`;
+
+        const cfg = map[claveEstado] || map.pendiente;
+        badge.className   = `status-badge ${cfg.clase}`;
         badge.textContent = cfg.texto;
     }
 
@@ -382,13 +401,19 @@ function renderViewHorarios(container) {
 
             // Badge de estado inicial
             const badgeEstadoInicial = clase._yaMarco
-                ? clase._estadoMarcado
+                ? (clase._estadoMarcado === "JUSTIFICADA"
+                    ? (clase._justificacionAprobada === "APROBADA"  ? "JUSTIFICADA_APROBADA"
+                    : clase._justificacionAprobada === "RECHAZADA" ? "JUSTIFICADA_RECHAZADA"
+                    : "JUSTIFICADA_PENDIENTE")
+                    : clase._estadoMarcado)
                 : (ventana === "cerrado" && !clase._yaMarco ? "AUSENTE" : "pendiente");
 
             const badgeMap = {
                 PRESENTE:    { texto: "Presente",   cls: "attended"           },
                 TARDE:       { texto: "Tarde",       cls: "status-tarde"       },
-                JUSTIFICADA: { texto: "Justificada", cls: "status-justificada" },
+                JUSTIFICADA_PENDIENTE: { texto: "Justif. Pendiente",    cls: "status-justificada" },
+                JUSTIFICADA_APROBADA:  { texto: "Justif. Aprobada",     cls: "attended"           },
+                JUSTIFICADA_RECHAZADA: { texto: "Justif. Rechazada",    cls: "status-ausente"},
                 AUSENTE:     { texto: "Ausente",     cls: "status-ausente"     },
                 pendiente:   { texto: "Pendiente",   cls: "pending"            }
             };
@@ -561,7 +586,8 @@ function renderViewHorarios(container) {
             const clases = data.horarios.map(h => ({
                 ...h,
                 _yaMarco:      !!h.estado_asistencia,
-                _estadoMarcado: h.estado_asistencia || null
+                _estadoMarcado: h.estado_asistencia || null,
+                _justificacionAprobada: h.justificacion_aprobada || null
             }));
 
             construirCarrusel(clases);

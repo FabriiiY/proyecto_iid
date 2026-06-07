@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from database import get_connection
+from datetime import datetime
 
 horarios_bp = Blueprint("horarios", __name__)
 
@@ -395,6 +396,177 @@ def obtener_modalidades():
         return jsonify({"success": True, "modalidades": modalidades})
 
     except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
+        
+        
+        
+# ===========================================================================
+# PARA ALUMNOS
+
+# ─────────────────────────────────────────────
+# GET /mis-horarios-hoy?id_usuario=X&dia=LUNES
+# Horarios del estudiante para el día actual
+# ─────────────────────────────────────────────
+@horarios_bp.route("/mis-horarios-hoy", methods=["GET"])
+def mis_horarios_hoy():
+
+    conexion   = None
+    cursor     = None
+    id_usuario = request.args.get("id_usuario")
+    dia        = request.args.get("dia")
+
+    if not id_usuario or not dia:
+        return jsonify({"success": False, "error": "id_usuario y dia son requeridos"}), 400
+
+    try:
+        conexion = get_connection()
+        cursor   = conexion.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT
+                h.id_horario,
+                h.hora_inicio,
+                h.hora_fin,
+                h.minutos_anticipacion,
+                h.minutos_tolerancia,
+                h.dia_semana,
+                c.id_clase,
+                c.tipo_clase,
+                m.nombre                                        AS materia_nombre,
+                CONCAT(u.primer_nombre, ' ', u.primer_apellido) AS docente_nombre,
+                a.codigo_aula,
+                a.edificio,
+                mo.nombre                                       AS modalidad_nombre,
+                asi.estado                                      AS estado_asistencia,
+                asi.justificacion_aprobada                      AS justificacion_aprobada
+            FROM horario h
+            JOIN clase       c   ON c.id_clase      = h.id_clase
+            JOIN materia     m   ON m.id_materia    = c.id_materia
+            JOIN usuario     u   ON u.id_usuario    = c.id_docente
+            JOIN aula        a   ON a.id_aula       = h.id_aula
+            JOIN modalidad   mo  ON mo.id_modalidad = h.id_modalidad
+            JOIN clase_grupo cg  ON cg.id_clase     = c.id_clase AND cg.estado = 'ACTIVO'
+            JOIN inscripcion i   ON i.id_grupo      = cg.id_grupo
+                                AND i.id_usuario    = %s
+                                AND i.estado        = 'ACTIVA'
+            LEFT JOIN asistencia asi ON asi.id_horario = h.id_horario
+                                    AND asi.id_usuario = %s
+                                    AND asi.fecha      = CURDATE()
+            WHERE h.dia_semana  = %s
+              AND h.fecha_inicio <= CURDATE()
+              AND h.fecha_fin    >= CURDATE()
+              AND h.estado       = 'ACTIVO'
+            ORDER BY h.hora_inicio ASC
+        """, (id_usuario, id_usuario, dia))
+
+        horarios = cursor.fetchall()
+
+        # Serializar campos time
+        for h in horarios:
+            for campo in ("hora_inicio", "hora_fin"):
+                if h.get(campo) and not isinstance(h[campo], str):
+                    total   = int(h[campo].total_seconds())
+                    h[campo] = f"{total // 3600:02d}:{(total % 3600) // 60:02d}:00"
+
+        return jsonify({"success": True, "horarios": horarios})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
+
+
+# ─────────────────────────────────────────────
+# POST /asistencias
+# El estudiante marca su propia asistencia
+# ─────────────────────────────────────────────
+@horarios_bp.route("/asistencias", methods=["POST"])
+def marcar_asistencia():
+
+    conexion = None
+    cursor   = None
+    data     = request.get_json()
+
+    if not data:
+        return jsonify({"success": False, "error": "Se requiere un body JSON"}), 400
+
+    ip_cliente = request.headers.get("X-Forwarded-For", request.remote_addr)
+
+    try:
+        conexion = get_connection()
+        cursor   = conexion.cursor(dictionary=True)
+
+        # Verificar si ya existe registro para (id_usuario, id_horario, fecha)
+        cursor.execute("""
+            SELECT id_asistencia
+            FROM asistencia
+            WHERE id_usuario = %s
+              AND id_horario = %s
+              AND fecha      = %s
+        """, (data["id_usuario"], data["id_horario"], data["fecha"]))
+
+        existente = cursor.fetchone()
+
+        if existente:
+            # Ya marcó — actualizar
+            cursor.execute("""
+                UPDATE asistencia
+                SET
+                    hora                   = %s,
+                    estado                 = %s,
+                    tipo_registro          = %s,
+                    observacion            = %s,
+                    fecha_modificacion     = %s,
+                    id_usuario_modificador = %s,
+                    ip_equipo_registro     = %s,
+                    justificacion_aprobada = %s
+                WHERE id_asistencia = %s
+            """, (
+                data["hora"],
+                data["estado"],
+                data.get("tipo_registro", "AUTOMATICO"),
+                data.get("observacion"),
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                data["id_usuario"],
+                ip_cliente,
+                "PENDIENTE" if data["estado"] == "JUSTIFICADA" else None,
+                existente["id_asistencia"]
+            ))
+        else:
+            # Nuevo registro
+            cursor.execute("""
+                INSERT INTO asistencia
+                    (fecha, hora, estado, tipo_registro, observacion,
+                     id_usuario, id_horario, ip_equipo_registro,
+                     id_usuario_registrador, justificacion_aprobada)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                data["fecha"],
+                data["hora"],
+                data["estado"],
+                data.get("tipo_registro", "AUTOMATICO"),
+                data.get("observacion"),
+                data["id_usuario"],
+                data["id_horario"],
+                ip_cliente,
+                data["id_usuario"],  # el estudiante se registra a sí mismo
+                "PENDIENTE" if data["estado"] == "JUSTIFICADA" else None
+            ))
+
+        conexion.commit()
+        return jsonify({"success": True})
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        if conexion:
+            conexion.rollback()
         return jsonify({"success": False, "error": str(e)}), 500
 
     finally:
