@@ -1,0 +1,190 @@
+/* =========================================
+           ESTILOS DE LA PANTALLA DE ACTIVACIÓN
+           (Basado en la paleta de SAMI Login)
+        ========================================= */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+        :root {
+            --crema-fondo: #f5f5dc;
+            --hueso: #fdfaf5;
+            --azul-sami: #3b5998;
+            --magenta-sami: #ff00ff;
+            --verde-exito: #1a8a4a;
+            --rojo-error: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #efebe9 0%, #d7ccc8 100%);
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            animation: aparecerContenedor 0.4s ease-out;
+        }
+
+        /* ── LOGO ── */
+        .mainlogo-login {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .login-logo {
+            width: 320px; /* Al ser SVG, puedes subirle el tamaño sin miedo */
+            height: 120px;
+            object-fit: cover;
+            transform: scale(1.5);
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* ── TIPOGRAFÍA ── */
+        h2 {
+            color: var(--azul-sami);
+            margin-bottom: 5px;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        p {
+            color: #8d6e63;
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        /* ── INPUTS (Formulario) ── */
+        .input-group {
+            display: flex;
+            align-items: center;
+            background: #f1f1f1;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            padding: 0 15px;
+            border: 1px solid #e0e0e0;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .input-group:focus-within {
+            border-color: var(--azul-sami);
+            box-shadow: 0 0 0 3px rgba(59, 89, 152, 0.1);
+            background: #ffffff;
+        }
+
+        .input-group i {
+            color: #888;
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 0;
+            border: none;
+            background: transparent;
+            outline: none;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        /* ── BOTONES ── */
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: var(--azul-sami);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-decoration: none;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background: #2d4373;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(59, 89, 152, 0.2);
+        }
+
+        /* ── ESTADOS DE LA PÁGINA (Éxito, Error, Verificando) ── */
+        .estado-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: aparecerEstado 0.3s ease;
+        }
+
+        .estado-icono {
+            font-size: 4.5rem;
+            margin-bottom: 15px;
+        }
+
+        .icono-exito { color: var(--verde-exito); }
+        .icono-error { color: var(--rojo-error); }
+
+        .estado-titulo-exito { color: var(--verde-exito); margin-bottom: 5px; font-weight: 700; font-size: 1.3rem;}
+        .estado-titulo-error { color: var(--rojo-error); margin-bottom: 5px; font-weight: 700; font-size: 1.3rem;}
+
+        /* Enlace de volver */
+        .estado-link {
+            color: var(--azul-sami);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-top: 15px;
+            display: inline-block;
+            transition: color 0.3s;
+        }
+
+        .estado-link:hover {
+            color: var(--magenta-sami);
+            text-decoration: underline;
+        }
+
+        /* ── SPINNER DE CARGA (Para estado verificando) ── */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--azul-sami);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        /* ── ANIMACIONES GLOBALES ── */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes aparecerEstado {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes aparecerContenedor {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }

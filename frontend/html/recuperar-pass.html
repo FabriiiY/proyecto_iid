@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Contraseña</title>
+    <link rel="stylesheet" href="../css/recuperar-contra.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+        <div class="login-container">
+        <!-- Flecha de regreso al Login -->
+        <a href="login-Marcacion.html" class="back-arrow" title="Volver al inicio de sesión">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+
+        <div class="mainlogo-login">
+            <img src="../image/sami-logo.svg" alt="SAMI Logo" class="login-logo">
+        </div>
+
+        <!-- FORMULARIO DE RECUPERACIÓN -->
+        <form id="recovery-form" class="login-form">
+            <h2>Restablecer Contraseña</h2>
+            <p>Ingresa tu correo institucional y te enviaremos las instrucciones.</p>
+            
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="correo-recuperacion" placeholder="usuario@institucion.edu.sv" required>
+            </div>
+
+            <button type="submit" class="login-btn">Solicitar contraseña</button>
+        </form>
+
+        <!-- MENSAJE DE ÉXITO (Se muestra con JS al enviar el formulario) -->
+        <div id="success-state" class="success-message">
+            <i class="fas fa-paper-plane"></i>
+            <h3>¡Correo enviado!</h3>
+            <p style="margin-bottom: 20px;">Si el correo está registrado en SAMI, recibirás un enlace de recuperación en los próximos minutos.</p>
+            <a href="login-Marcacion.html" class="login-btn" style="text-decoration: none; display: inline-block;">Volver al Login</a>
+        </div>
+    </div>
+
+    <script>
+        // Lógica puramente Front-End para dar una buena experiencia de usuario
+        const recoveryForm = document.getElementById('recovery-form');
+        const successState = document.getElementById('success-state');
+
+        recoveryForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Evitamos que la página se recargue
+            
+            // Aquí tu compañero conectará el fetch() hacia el backend para enviar el correo.
+            // const correo = document.getElementById('correo-recuperacion').value;
+            // fetch('http://su-backend/api/recuperar', {...})
+
+            // Efecto visual: ocultamos el formulario y mostramos el mensaje de éxito
+            recoveryForm.style.display = 'none';
+            successState.style.display = 'flex';
+        });
+    </script>
+</body>
+</html>

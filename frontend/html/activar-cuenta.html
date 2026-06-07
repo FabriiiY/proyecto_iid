@@ -4,58 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Activar cuenta — SAMI</title>
-    <link rel="icon" href="image/icon-sami.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/style-login.css">
+    <link rel="icon" href="../image/icon-sami.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../css/activacion-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="login-container">
+<div class="login-container">
         <div class="mainlogo-login">
-            <img src="image/sami-logo.svg" alt="SAMI Logo" class="login-logo">
+            <img src="../image/sami-logo.svg" alt="SAMI Logo" class="login-logo" onerror="this.src='https://via.placeholder.com/220x80?text=SAMI+LOGO'">
         </div>
 
-        <!-- Estado: verificando -->
-        <div id="estado-verificando" style="text-align:center; color:#666;">
-            <p>Verificando enlace...</p>
+        <!-- 1. Estado: Verificando -->
+        <div id="estado-verificando" class="estado-container">
+            <div class="spinner"></div>
+            <p>Conectando con el servidor y verificando enlace seguro...</p>
         </div>
 
-        <!-- Formulario: establecer contraseña -->
-        <form id="form-activar" class="login-form" style="display:none;" novalidate>
+        <!-- 2. Formulario: Establecer contraseña -->
+        <form id="form-activar" class="estado-container" style="display:none;" novalidate>
             <h2 id="saludo">Activa tu cuenta</h2>
-            <p>Establece tu contraseña para comenzar</p>
+            <p>Establece una nueva contraseña para comenzar.</p>
 
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="password" placeholder="Nueva contraseña (mín. 8 caracteres)" required minlength="8" />
-            </div>
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="password-confirm" placeholder="Confirmar contraseña" required />
+            <div style="width: 100%;">
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Nueva contraseña (mín. 8 caracteres)" required minlength="8" />
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-check-double"></i>
+                    <input type="password" id="password-confirm" placeholder="Confirmar contraseña" required />
+                </div>
             </div>
 
-            <button type="submit" class="login-btn">Activar cuenta</button>
+            <button type="submit" class="login-btn">Activar mi cuenta</button>
         </form>
 
-        <!-- Estado: error -->
-        <div id="estado-error" style="display:none; text-align:center;">
-            <span class="material-symbols-rounded" style="font-size:3rem; color:#e74c3c;">error</span>
-            <p id="msg-error" style="color:#e74c3c;">El enlace no es válido o ya expiró.</p>
-            <a href="login-Marcacion.html" style="color:#2563eb;">Volver al login</a>
+        <!-- 3. Estado: Error -->
+        <div id="estado-error" class="estado-container" style="display:none;">
+            <i class="fas fa-exclamation-circle" style="font-size: 3.5rem; color: var(--rojo-error); margin-bottom: 15px;"></i>
+            <h3 class="estado-titulo-error">Enlace no válido</h3>
+            <p id="msg-error">El enlace de activación no es válido o ya ha expirado.</p>
+            <a href="login-Marcacion.html" class="estado-link">Volver al inicio de sesión</a>
         </div>
 
-        <!-- Estado: éxito -->
-        <div id="estado-exito" style="display:none; text-align:center;">
-            <span class="material-symbols-rounded" style="font-size:3rem; color:#1a8a4a;">check_circle</span>
-            <p style="color:#1a8a4a; font-weight:600;">¡Cuenta activada correctamente!</p>
-            <p style="color:#666;">Ya puedes iniciar sesión con tu correo y contraseña.</p>
-            <a href="login-Marcacion.html" class="login-btn" style="display:inline-block; margin-top:16px; text-decoration:none;">
-                Ir al login
-            </a>
+        <!-- 4. Estado: Éxito -->
+        <div id="estado-exito" class="estado-container" style="display:none;">
+            <span class="material-symbols-rounded estado-icono icono-exito">check_circle</span>
+            <h3 class="estado-titulo-exito">¡Cuenta activada!</h3>
+            <p>Tu cuenta ha sido configurada correctamente. Ya puedes iniciar sesión en el sistema.</p>
+            <a href="login-Marcacion.html" class="login-btn">Ir al Login</a>
         </div>
     </div>
 
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet">
-
+    <!-- SCRIPT INTACTO -->
     <script>
         const params = new URLSearchParams(window.location.search);
         const token  = params.get("token");
@@ -70,7 +71,7 @@
         if (!token) {
             divVerificando.style.display = "none";
             msgError.textContent = "No se proporcionó un enlace de activación.";
-            divError.style.display = "block";
+            divError.style.display = "flex"; // Modificado ligeramente para Flexbox
         } else {
             fetch(`http://127.0.0.1:5000/activar/verificar?token=${token}`)
                 .then(r => r.json())
@@ -78,16 +79,16 @@
                     divVerificando.style.display = "none";
                     if (data.success) {
                         document.getElementById("saludo").textContent = `Hola, ${data.primer_nombre} 👋`;
-                        formActivar.style.display = "block";
+                        formActivar.style.display = "flex"; // Modificado para Flexbox
                     } else {
                         msgError.textContent = data.error;
-                        divError.style.display = "block";
+                        divError.style.display = "flex"; // Modificado para Flexbox
                     }
                 })
                 .catch(() => {
                     divVerificando.style.display = "none";
                     msgError.textContent = "Error al conectar con el servidor.";
-                    divError.style.display = "block";
+                    divError.style.display = "flex"; // Modificado para Flexbox
                 });
         }
 
@@ -116,7 +117,7 @@
             .then(data => {
                 if (data.success) {
                     formActivar.style.display = "none";
-                    divExito.style.display    = "block";
+                    divExito.style.display    = "flex"; // Modificado para Flexbox
                 } else {
                     alert(data.error || "No se pudo activar la cuenta.");
                 }
