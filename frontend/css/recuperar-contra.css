@@ -1,0 +1,177 @@
+/* ============================================================
+RECUPERAR CONTRASEÑA 
+============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+    --crema-fondo: #f5f5dc;
+    --hueso: #fdfaf5;
+    --azul-sami: #3b5998;
+    --magenta-sami: #ff00ff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #efebe9 0%, #d7ccc8 100%);
+    margin: 0;
+}
+
+/* ── CONTENEDOR PRINCIPAL ── */
+.login-container {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    position: relative; /* ¡Clave para poder posicionar la flecha de regreso! */
+}
+
+/* ── FLECHA DE REGRESO ── */
+.back-arrow {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    color: #754331;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background: #f1f1f1;
+    z-index: 10;
+}
+
+.back-arrow:hover {
+    color: var(--azul-sami);
+    background: #e2e8f0;
+    transform: translateX(-3px); /* Efecto de moverse hacia la izquierda */
+}
+
+/* ── LOGO ── */
+.mainlogo-login {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.login-logo {
+    width: 320px; 
+    height: 120px;
+    object-fit: cover;
+    transform: scale(1.5);
+    display: block;
+    margin: 0 auto;
+}
+
+/* ── TIPOGRAFÍA Y TEXTOS ── */
+h2 {
+    color: var(--azul-sami);
+    margin-bottom: 5px;
+    font-weight: 700;
+}
+
+p {
+    color: #8d6e63;
+    font-size: 0.85rem;
+    margin-bottom: 25px;
+    line-height: 1.4;
+}
+
+/* ── INPUTS ── */
+.input-group {
+    display: flex;
+    align-items: center;
+    background: #f1f1f1;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    padding: 0 15px;
+    border: 1px solid #e0e0e0;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.input-group:focus-within {
+    border-color: var(--azul-sami);
+    box-shadow: 0 0 0 3px rgba(59, 89, 152, 0.1);
+    background: #ffffff;
+}
+
+.input-group i {
+    color: #888;
+    margin-right: 10px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 0;
+    border: none;
+    background: transparent;
+    outline: none;
+    color: #333;
+}
+
+/* ── BOTÓN ── */
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: var(--azul-sami);
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-block; /* Por si se usa en enlaces (como en el mensaje de éxito) */
+    text-align: center;
+}
+
+.login-btn:hover {
+    background: #2d4373;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(59, 89, 152, 0.2);
+}
+
+/* ── ESTADO DE ÉXITO (MENSAJE ENVIADO) ── */
+.success-message {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    animation: aparecer 0.4s ease;
+}
+
+.success-message i {
+    font-size: 3.5rem;
+    color: #1a8a4a;
+    margin-bottom: 15px;
+}
+
+.success-message h3 {
+    color: #1a8a4a;
+    margin-bottom: 10px;
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+/* ── ANIMACIONES ── */
+@keyframes aparecer {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}

@@ -1,1 +1,26 @@
 holaa
+Lo que cambió y por qué
+1. Concepto correcto: "Sesión de marcación"
+El formulario ya no registra UNA asistencia de UN estudiante. Ahora crea una sesión (clase + horario + fecha + hora) y permite seleccionar N estudiantes a la vez — cada uno genera su propio registro en la tabla asistencia.
+2. Estudiantes filtrados por clase (no todos)
+El select de estudiantes desapareció del form principal. Al seleccionar una clase, se carga automáticamente la lista de alumnos inscritos en esa clase vía el endpoint GET /estudiantes-clase?id_clase=X (que el backend resuelve con inscripcion → id_grupo → clase_grupo). Solo el maestro ve sus propios alumnos.
+3. Selección múltiple con checkboxes
+La tabla tiene:
+
+Checkbox por fila + resaltado visual al marcar
+Seleccionar todos (en cabecera y en barra de herramientas, sincronizados)
+Select de estado por fila (cada alumno puede tener estado distinto)
+Botón "Aplicar a seleccionados" para cambiar el estado de varios de golpe
+
+4. Estado / fecha_modificacion / id_usuario_modificador
+
+Al crear: no se envía id_usuario_modificador (queda null en la BD). El backend registra quién creó con id_usuario_creador.
+Al editar: el campo "Modificado por" se pre-selecciona automáticamente con la cuenta del maestro activo, pero se puede cambiar a un admin.
+El backend debe escribir fecha_modificacion = NOW() al hacer el PUT.
+
+5. Ver asistencias: agregar/quitar estudiantes de la sesión
+El modal de edición ahora tiene una sección extra que:
+
+Muestra todos los registros de la misma sesión (misma clase + horario + fecha)
+Permite quitar un estudiante (DELETE /asistencias/:id)
+Permite agregar un estudiante que no estaba (POST /asistencias)

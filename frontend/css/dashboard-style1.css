@@ -67,8 +67,8 @@ body {
     align-items: center;
     justify-content: flex-start;
     height: 60px;
-    width: 190px;
-    padding: 6px 12px;
+    width: 250px;
+    padding: 3px 6px;
     border-radius: 10px;
     overflow: hidden;
     transition:
@@ -145,8 +145,26 @@ body {
 }
 
 .primary-nav {
-    flex-grow: 1; /* Ocupa el espacio disponible */
+    flex: 1 1 0;          /* Crece y TAMBIÉN puede encogerse */
+    min-height: 0;        /* Necesario para que overflow funcione en flex */
     list-style: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    /* Scrollbar discreta acorde al estilo */
+    scrollbar-width: thin;
+    scrollbar-color: var(--borde) transparent;
+}
+
+.primary-nav::-webkit-scrollbar {
+    width: 4px;
+}
+.primary-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+.primary-nav::-webkit-scrollbar-thumb {
+    background-color: var(--borde);
+    border-radius: 4px;
 }
 
 .secondary-nav {
@@ -154,6 +172,8 @@ body {
     border-top: 1px solid var(--borde);
     padding-top: 15px;
     margin-bottom: 10px;
+    flex-shrink: 0;      /* Nunca se encoge: siempre visible al fondo */
+    position: relative;  /* Ancla para el popup hacia arriba */
 }
 
 /* Enlaces de Navegación */
@@ -269,6 +289,50 @@ body {
 .logout:hover {
     background: #dfc3c7 !important;
     color: #D32F2F !important;
+}
+
+/* ── CONFIGURACIÓN: popup que sube POR ENCIMA del botón ── */
+
+/* Sobreescribe el dropdown genérico solo para el ítem de config */
+#config-dropdown-container .dropdown-menu {
+    /* Salir hacia arriba en lugar de hacia abajo */
+    position: absolute;
+    bottom: calc(100% + 8px); /* 8px de aire sobre el botón */
+    left: 15px;
+    right: 15px;
+
+    /* Anular la animación por height del JS y usar max-height */
+    height: auto !important;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+
+    transition:
+        max-height 0.25s ease,
+        opacity 0.2s ease;
+
+    /* Tarjeta flotante */
+    background: var(--topbar-bg);
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.12);
+    padding: 6px;
+}
+
+#config-dropdown-container.open .dropdown-menu {
+    max-height: 300px;
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Links dentro del popup de config */
+#config-dropdown-container .dropdown-link {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
 }
 
 .sidebar.collapsed {

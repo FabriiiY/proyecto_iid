@@ -145,11 +145,19 @@ document.addEventListener("DOMContentLoaded", () => {
           ]
         },
 
+        // Inscripciones
+        { id: "nav-inscripciones", icon: "how_to_reg", label: "Inscripción",
+          dropdown: [
+            { label: "Registrar Inscripción",  view: "inscripcion-registrar" },
+            { label: "Ver Inscripciones",      view: "inscripcion-ver"       }
+          ]
+        },
+
         // Configurar Horario
         { id: "nav-horario-maestro", icon: "schedule", label: "Configurar Horario",
           dropdown: [
-            { label: "Asignar Horario de Clase", href: "WIP.html" },
-            { label: "Ver Historial",            href: "WIP.html" }
+            { label: "Registrar Asistencia",   href: "WIP.html" },
+            { label: "Ver Asistencias",       href: "WIP.html"  }  
           ]
         }
     ];
