@@ -5,7 +5,9 @@
 function renderViewMaestroAlumnos(container) {
 
     const usuarioActivo = window.SAMI?.usuario || {};
-    const idDocente     = usuarioActivo.id_usuario;
+    const idDocente = usuarioActivo.id;
+    console.log("USUARIO ACTIVO:", usuarioActivo);  // ← agrega esto
+    console.log("ID DOCENTE:", idDocente);           // ← y esto
 
     // ── Estado global de la vista ─────────────────────────────
     let claseSeleccionada = null; // { id_clase, materia_nombre, tipo_clase, grupo_nombre, id_grupo }
@@ -419,7 +421,25 @@ function renderViewMaestroAlumnos(container) {
                 document.getElementById("ml-contador").innerHTML =
                     `<strong>${estudiantes.length}</strong> estudiantes`;
 
-                renderFormLista(cuerpo, estudiantes, clase, fechaHoy, horaAhora);
+                // Consultar si ya hay lista guardada hoy
+                fetch(`http://127.0.0.1:5000/asistencias?id_clase=${clase.id_clase}&fecha=${fechaHoy}`)
+                    .then(r => r.json())
+                    .then(asistenciaHoy => {
+                        const previas = {};
+                        if (asistenciaHoy.success && asistenciaHoy.asistencias.length) {
+                            asistenciaHoy.asistencias.forEach(a => {
+                                previas[a.id_usuario] = {
+                                    estado:     a.estado,
+                                    observacion: a.observacion
+                                };
+                            });
+                        }
+                        renderFormLista(cuerpo, estudiantes, clase, fechaHoy, horaAhora, previas);
+                    })
+                    .catch(() => {
+                        renderFormLista(cuerpo, estudiantes, clase, fechaHoy, horaAhora, {});
+                    });
+                    //hasta aca
             })
             .catch(() => {
                 document.getElementById("ml-lista-cuerpo").innerHTML = `
@@ -432,7 +452,7 @@ function renderViewMaestroAlumnos(container) {
     }
 
     // ── Formulario de asistencia ──────────────────────────────
-    function renderFormLista(cuerpo, estudiantes, clase, fechaHoy, horaAhora) {
+    function renderFormLista(cuerpo, estudiantes, clase, fechaHoy, horaAhora, previas = {}) {
 
         const estados = [
             { valor: "PRESENTE",    icon: "check_circle",      label: "Presente"    },
@@ -494,6 +514,48 @@ function renderViewMaestroAlumnos(container) {
             </div>
         `;
 
+
+        // ── Validar ventana de edición ────────────────────────
+        const diasMap = {
+            0: "DOMINGO", 1: "LUNES", 2: "MARTES", 3: "MIERCOLES",
+            4: "JUEVES", 5: "VIERNES", 6: "SABADO"
+        };
+        const diaHoy     = diasMap[new Date().getDay()];
+        const diasClase  = clase.horarios?.map(h => h.dia_semana) || [];
+        const puedeEditar = diasClase.includes(diaHoy);
+
+        if (!puedeEditar) {
+            const btnGuardar = document.getElementById("ml-btn-guardar");
+            const btnMarcar  = document.getElementById("ml-btn-marcar-todos");
+            btnGuardar.disabled = true;
+            btnMarcar.disabled  = true;
+            btnGuardar.style.opacity = "0.5";
+            btnMarcar.style.opacity  = "0.5";
+
+            cuerpo.querySelectorAll("input[type='radio']").forEach(r => r.disabled = true);
+            cuerpo.querySelectorAll("textarea").forEach(t => t.disabled = true);
+
+            const aviso = document.createElement("div");
+            aviso.style.cssText = `
+                background: #fef5e7;
+                border: 1.5px solid #d4780a;
+                color: #d4780a;
+                border-radius: 10px;
+                padding: 12px 16px;
+                margin-bottom: 16px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            `;
+            aviso.innerHTML = `
+                <span class="material-symbols-rounded">lock</span>
+                Esta clase no se imparte hoy. Solo puedes ver la última lista registrada.
+            `;
+            cuerpo.insertBefore(aviso, cuerpo.firstChild);
+        }
+
         // ── Mostrar/ocultar observación según el estado ───────
         estudiantes.forEach(est => {
             const radios   = cuerpo.querySelectorAll(`input[name="asist-${est.id_usuario}"]`);
@@ -528,6 +590,24 @@ function renderViewMaestroAlumnos(container) {
             });
         });
 
+        // ── Pre-marcar estados previos
+        estudiantes.forEach(est => {
+            const prev = previas[est.id_usuario];
+            if (!prev) return;
+
+            const radio = cuerpo.querySelector(
+                `input[name="asist-${est.id_usuario}"][value="${prev.estado}"]`
+            );
+            if (radio) {
+                radio.checked = true;
+                const obsField = document.getElementById(`obs-${est.id_usuario}`);
+                if (prev.estado !== "PRESENTE" && prev.observacion) {
+                    obsField.style.display = "block";
+                    obsField.value = prev.observacion;
+                }
+            }
+        });
+
         // ── Guardar lista ─────────────────────────────────────
         document.getElementById("ml-btn-guardar").addEventListener("click", () => {
             // Validar que todos tengan estado
@@ -551,12 +631,23 @@ function renderViewMaestroAlumnos(container) {
                 return {
                     id_usuario:    est.id_usuario,
                     id_clase:      clase.id_clase,
-                    id_horario:    clase.horarios?.[0]?.id_horario || null, // primer horario activo
+
+
+                    id_horario: (() => {
+                        const diasMap = {0: "DOMINGO", 1: "LUNES", 2: "MARTES", 3: "MIERCOLES",4: "JUEVES", 5: "VIERNES", 6: "SABADO"};
+                        const diaHoy = diasMap[new Date().getDay()];
+                        const horarioHoy = clase.horarios?.find(h => h.dia_semana === diaHoy);
+                        return horarioHoy?.id_horario || clase.horarios?.[0]?.id_horario || null;
+                    })(),
+
+
                     fecha:         fechaHoy,
                     hora:          horaAhora + ":00",
                     estado:        estado,
                     tipo_registro: "MANUAL",
-                    observacion:   obs
+                    observacion:   obs,
+                    id_usuario_modificador: window.SAMI?.usuario?.id || null,
+                    id_usuario_registrador: window.SAMI?.usuario?.id || null 
                 };
             });
 
@@ -602,4 +693,460 @@ function renderViewMaestroAlumnos(container) {
 
     // ── Iniciar ───────────────────────────────────────────────
     renderClases();
+}
+
+
+
+//ACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+// ============================================================
+//  Panel del Maestro: Registrar Inscripción
+// ============================================================
+function renderViewMaestroInscripcion(container) {
+
+    const usuarioActivo = window.SAMI?.usuario || {};
+    const idDocente     = usuarioActivo.id;
+
+    container.innerHTML = `
+        <div class="dashboard-header">
+            <h1><span class="material-symbols-rounded">how_to_reg</span> Registrar Inscripción</h1>
+            <p>Inscribe un estudiante en uno de tus grupos activos.</p>
+        </div>
+
+        <div class="admin-card" style="max-width:760px;">
+            <h3><span class="material-symbols-rounded">add_circle</span> Nueva Inscripción</h3>
+
+            <form id="mins-form" novalidate>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Estudiante <span class="req">*</span></label>
+                        <select id="mins-estudiante" required class="form-select">
+                            <option value="" disabled selected>Cargando estudiantes...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Grupo <span class="req">*</span></label>
+                        <select id="mins-grupo" required class="form-select">
+                            <option value="" disabled selected>Cargando tus grupos...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Registrador fijo — no editable por el maestro -->
+                <div class="form-group">
+                    <label>Registrado por</label>
+                    <input
+                        type="text"
+                        class="form-input-full"
+                        value="${usuarioActivo.nombre || usuarioActivo.primer_nombre || 'Docente'} ${usuarioActivo.primer_apellido || ''}"
+                        disabled
+                        style="background:#f5f5f5; color:#888; cursor:not-allowed;"
+                    />
+                    <small style="color:#aaa; font-size:0.78rem;">
+                        Se registra automáticamente con tu cuenta.
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label>Observación <span class="opt">(opcional)</span></label>
+                    <input
+                        type="text"
+                        id="mins-observacion"
+                        placeholder="Ej. Inscripción tardía autorizada por coordinación"
+                        autocomplete="off"
+                        maxlength="255"
+                        class="form-input-full"
+                    />
+                    <small style="color:#aaa; font-size:0.78rem;">Máx. 255 caracteres</small>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+                    <button type="submit" class="btn-primary" style="width:auto; padding:12px 30px;">
+                        <span class="material-symbols-rounded">save</span> Guardar Inscripción
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    `;
+
+    // ── Cargar estudiantes ────────────────────────────────────
+    fetch("http://127.0.0.1:5000/estudiantes")
+        .then(r => r.json())
+        .then(data => {
+            const select = document.getElementById("mins-estudiante");
+            if (data.success && data.estudiantes.length) {
+                select.innerHTML = `<option value="" disabled selected>Selecciona un estudiante...</option>`;
+                data.estudiantes.forEach(est => {
+                    const opt = document.createElement("option");
+                    opt.value       = est.id_usuario;
+                    opt.textContent = est.nombre_completo;
+                    select.appendChild(opt);
+                });
+            } else {
+                select.innerHTML = `<option value="" disabled selected>Sin estudiantes disponibles</option>`;
+            }
+        })
+        .catch(() => {
+            document.getElementById("mins-estudiante").innerHTML =
+                `<option value="" disabled selected>Error al cargar estudiantes</option>`;
+        });
+
+    // ── Cargar solo los grupos del docente ────────────────────
+    fetch(`http://127.0.0.1:5000/mis-grupos-inscripcion?id_docente=${idDocente}`)
+        .then(r => r.json())
+        .then(data => {
+            const select = document.getElementById("mins-grupo");
+            if (data.success && data.grupos.length) {
+                select.innerHTML = `<option value="" disabled selected>Selecciona un grupo...</option>`;
+                data.grupos.forEach(g => {
+                    const opt = document.createElement("option");
+                    opt.value       = g.id_grupo;
+                    opt.textContent = `${g.nombre_grupo} — ${g.materia_nombre}`;
+                    select.appendChild(opt);
+                });
+            } else {
+                select.innerHTML = `<option value="" disabled selected>Sin grupos asignados</option>`;
+            }
+        })
+        .catch(() => {
+            document.getElementById("mins-grupo").innerHTML =
+                `<option value="" disabled selected>Error al cargar grupos</option>`;
+        });
+
+    // ── Envío ─────────────────────────────────────────────────
+    document.getElementById("mins-form").addEventListener("submit", e => {
+        e.preventDefault();
+
+        const idEstudiante = document.getElementById("mins-estudiante").value;
+        const idGrupo      = document.getElementById("mins-grupo").value;
+
+        if (!idEstudiante || !idGrupo) {
+            alert("Por favor selecciona el estudiante y el grupo.");
+            return;
+        }
+
+        const ahora = new Date();
+        ahora.setMinutes(ahora.getMinutes() - ahora.getTimezoneOffset());
+
+        const payload = {
+            id_usuario:          parseInt(idEstudiante),
+            id_grupo:            parseInt(idGrupo),
+            id_usuario_registro: idDocente,
+            fecha_inscripcion:   ahora.toISOString().slice(0, 16),
+            observacion:         document.getElementById("mins-observacion").value.trim() || null,
+        };
+
+        const btn = document.querySelector("#mins-form button[type='submit']");
+        btn.disabled = true;
+        btn.innerHTML = `<span class="material-symbols-rounded">hourglass_top</span> Guardando...`;
+
+        fetch("http://127.0.0.1:5000/inscripciones", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert("Inscripción registrada correctamente.");
+                document.getElementById("mins-form").reset();
+            } else {
+                alert(data.error || data.mensaje || "No se pudo registrar la inscripción.");
+            }
+        })
+        .catch(() => alert("Error al conectar con el servidor."))
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = `<span class="material-symbols-rounded">save</span> Guardar Inscripción`;
+        });
+    });
+}
+
+
+// ============================================================
+//  Panel del Maestro: Ver Inscripciones
+// ============================================================
+function renderViewMaestroVerInscripciones(container) {
+
+    const usuarioActivo = window.SAMI?.usuario || {};
+    const idDocente     = usuarioActivo.id;
+
+    container.innerHTML = `
+        <div class="dashboard-header">
+            <h1><span class="material-symbols-rounded">list_alt</span> Mis Inscripciones</h1>
+            <p>Consulta las inscripciones de los estudiantes en tus grupos.</p>
+        </div>
+
+        <div class="admin-card">
+            <div class="search-bar-wrapper">
+                <span class="material-symbols-rounded search-icon">search</span>
+                <input
+                    type="text"
+                    id="mins-search"
+                    placeholder="Buscar por estudiante, grupo o estado..."
+                    class="search-input"
+                    autocomplete="off"
+                />
+            </div>
+
+            <div class="students-table-wrapper" style="margin-top:20px;">
+                <table class="students-table" id="mins-table" style="display:none;">
+                    <thead>
+                        <tr>
+                            <th>Estudiante</th>
+                            <th>Carnet</th>
+                            <th>Grupo</th>
+                            <th>Fecha</th>
+                            <th>Observación</th>
+                            <th style="text-align:center;">Estado</th>
+                            <th style="text-align:center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mins-tbody"></tbody>
+                </table>
+                <div id="mins-empty" class="empty-state">Cargando inscripciones...</div>
+            </div>
+        </div>
+
+        <!-- MODAL EDITAR -->
+        <div id="mins-modal-overlay" class="modal-overlay" style="display:none;">
+            <div class="modal-card" style="max-width:580px;">
+                <div class="modal-header">
+                    <h3><span class="material-symbols-rounded">edit</span> Editar Inscripción</h3>
+                    <button id="mins-modal-close" class="modal-close-btn">
+                        <span class="material-symbols-rounded">close</span>
+                    </button>
+                </div>
+
+                <form id="mins-edit-form" novalidate>
+                    <input type="hidden" id="mins-edit-id" />
+
+                    <!-- Estudiante — solo lectura -->
+                    <div class="form-group">
+                        <label>Estudiante</label>
+                        <input type="text" id="mins-edit-estudiante" class="form-input-full" disabled
+                            style="background:#f5f5f5; color:#888; cursor:not-allowed;" />
+                    </div>
+
+                    <!-- Grupo y Estado -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Grupo <span class="req">*</span></label>
+                            <select id="mins-edit-grupo" required class="form-select">
+                                <option value="" disabled>Cargando grupos...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Estado <span class="req">*</span></label>
+                            <select id="mins-edit-estado" required class="form-select">
+                                <option value="ACTIVA">Activa</option>
+                                <option value="RETIRADA">Retirada</option>
+                                <option value="FINALIZADA">Finalizada</option>
+                                <option value="GRADUADA">Graduada</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Observación -->
+                    <div class="form-group">
+                        <label>Observación <span class="opt">(opcional)</span></label>
+                        <input type="text" id="mins-edit-observacion" autocomplete="off"
+                            maxlength="255" class="form-input-full"
+                            placeholder="Ej. Cambio de grupo autorizado" />
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                        <button type="button" id="mins-modal-cancel" class="btn-secondary">Cancelar</button>
+                        <button type="submit" class="btn-primary" style="width:auto;">
+                            <span class="material-symbols-rounded">save</span> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+
+    const tbody  = document.getElementById("mins-tbody");
+    const table  = document.getElementById("mins-table");
+    const empty  = document.getElementById("mins-empty");
+    const search = document.getElementById("mins-search");
+    const overlay  = document.getElementById("mins-modal-overlay");
+    const editForm = document.getElementById("mins-edit-form");
+
+    let inscripciones = [];
+    let misGrupos     = [];
+
+    // ── Badges de estado ──────────────────────────────────────
+    const estadoConfig = {
+        ACTIVA:     { color: "#1a8a4a", bg: "#e6f9f0", icon: "check_circle"     },
+        RETIRADA:   { color: "#c0392b", bg: "#fdecea", icon: "cancel"           },
+        FINALIZADA: { color: "#7f8c8d", bg: "#f0f0f0", icon: "task_alt"         },
+        GRADUADA:   { color: "#8e44ad", bg: "#f5eef8", icon: "workspace_premium" }
+    };
+
+    function badgeEstado(estado) {
+        const cfg = estadoConfig[estado] || estadoConfig.ACTIVA;
+        return `<span style="
+            display:inline-flex; align-items:center; gap:4px;
+            padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600;
+            background:${cfg.bg}; color:${cfg.color};
+        ">
+            <span class="material-symbols-rounded" style="font-size:0.85rem;">${cfg.icon}</span>
+            ${estado.charAt(0) + estado.slice(1).toLowerCase()}
+        </span>`;
+    }
+
+    function formatFecha(dt) {
+        if (!dt) return "—";
+        return new Date(dt).toLocaleDateString("es-SV", {
+            day: "2-digit", month: "short", year: "numeric"
+        });
+    }
+
+    // ── Renderizar tabla ──────────────────────────────────────
+    function renderTabla(lista) {
+        tbody.innerHTML = "";
+        if (lista.length === 0) {
+            empty.style.display = "block";
+            empty.textContent   = "No hay inscripciones en tus grupos.";
+            table.style.display = "none";
+            return;
+        }
+        empty.style.display = "none";
+        table.style.display = "table";
+
+        lista.forEach(ins => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${ins.estudiante_nombre || "—"}</td>
+                <td style="font-size:0.85rem; color:#888;">${ins.carnet || "—"}</td>
+                <td><span class="subject-tag">${ins.nombre_grupo || "—"}</span></td>
+                <td style="font-size:0.85rem;">${formatFecha(ins.fecha_inscripcion)}</td>
+                <td style="max-width:160px; white-space:nowrap; overflow:hidden;
+                    text-overflow:ellipsis; font-size:0.85rem; color:#777;">
+                    ${ins.observacion || "<span style='color:#bbb;'>—</span>"}
+                </td>
+                <td style="text-align:center;">${badgeEstado(ins.estado)}</td>
+                <td style="text-align:center;">
+                    <button class="btn-icon btn-edit-mins" data-id="${ins.id_inscripcion}" title="Editar">
+                        <span class="material-symbols-rounded">edit</span>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        tbody.querySelectorAll(".btn-edit-mins").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const ins = inscripciones.find(i => i.id_inscripcion == btn.dataset.id);
+                if (ins) abrirModal(ins);
+            });
+        });
+    }
+
+    // ── Filtrado ──────────────────────────────────────────────
+    search.addEventListener("input", () => {
+        const q = search.value.toLowerCase().trim();
+        renderTabla(q
+            ? inscripciones.filter(i =>
+                (i.estudiante_nombre || "").toLowerCase().includes(q) ||
+                (i.nombre_grupo      || "").toLowerCase().includes(q) ||
+                (i.estado            || "").toLowerCase().includes(q)
+            )
+            : [...inscripciones]
+        );
+    });
+
+    // ── Modal ─────────────────────────────────────────────────
+    function poblarGruposModal(idGrupoSel) {
+        const select = document.getElementById("mins-edit-grupo");
+        select.innerHTML = "";
+        misGrupos.forEach(g => {
+            const opt = document.createElement("option");
+            opt.value       = g.id_grupo;
+            opt.textContent = `${g.nombre_grupo} — ${g.materia_nombre}`;
+            if (g.id_grupo == idGrupoSel) opt.selected = true;
+            select.appendChild(opt);
+        });
+    }
+
+    function abrirModal(ins) {
+        document.getElementById("mins-edit-id").value          = ins.id_inscripcion;
+        document.getElementById("mins-edit-estudiante").value  = ins.estudiante_nombre;
+        document.getElementById("mins-edit-estado").value      = ins.estado;
+        document.getElementById("mins-edit-observacion").value = ins.observacion || "";
+        poblarGruposModal(ins.id_grupo);
+        overlay.style.display = "flex";
+    }
+
+    function cerrarModal() {
+        overlay.style.display = "none";
+        editForm.reset();
+    }
+
+    document.getElementById("mins-modal-close").addEventListener("click",  cerrarModal);
+    document.getElementById("mins-modal-cancel").addEventListener("click", cerrarModal);
+    overlay.addEventListener("click", e => { if (e.target === overlay) cerrarModal(); });
+
+    // ── Guardar edición ───────────────────────────────────────
+    editForm.addEventListener("submit", e => {
+        e.preventDefault();
+
+        const idIns  = document.getElementById("mins-edit-id").value;
+        const idGrupo = document.getElementById("mins-edit-grupo").value;
+        const estado  = document.getElementById("mins-edit-estado").value;
+
+        if (!idGrupo || !estado) {
+            alert("Por favor completa todos los campos obligatorios.");
+            return;
+        }
+
+        const datos = {
+            id_grupo:            parseInt(idGrupo),
+            id_usuario_registro: idDocente,
+            estado:              estado,
+            observacion:         document.getElementById("mins-edit-observacion").value.trim() || null,
+        };
+
+        fetch(`http://127.0.0.1:5000/inscripciones/${idIns}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(datos)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert("Inscripción actualizada correctamente.");
+                cerrarModal();
+                cargarInscripciones();
+            } else {
+                alert(data.error || data.mensaje || "No se pudo actualizar.");
+            }
+        })
+        .catch(() => alert("Error al conectar con el servidor."));
+    });
+
+    // ── Carga inicial ─────────────────────────────────────────
+    function cargarInscripciones() {
+        fetch(`http://127.0.0.1:5000/inscripciones-mis-grupos?id_docente=${idDocente}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    inscripciones = data.inscripciones || [];
+                    renderTabla(inscripciones);
+                } else {
+                    empty.textContent = "No se pudieron cargar las inscripciones.";
+                }
+            })
+            .catch(() => { empty.textContent = "Error al conectar con el servidor."; });
+    }
+
+    // Cargar grupos del docente para el modal
+    fetch(`http://127.0.0.1:5000/mis-grupos-inscripcion?id_docente=${idDocente}`)
+        .then(r => r.json())
+        .then(data => { if (data.success) misGrupos = data.grupos || []; })
+        .catch(() => {});
+
+    cargarInscripciones();
 }

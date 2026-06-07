@@ -602,3 +602,4 @@ function renderViewVerInscripciones(container) {
 
     cargarCatalogos().then(cargarInscripciones);
 }
+
