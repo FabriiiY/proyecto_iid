@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 06, 2026 at 11:00 PM
+-- Generation Time: Jun 07, 2026 at 03:54 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -31,15 +31,14 @@ CREATE TABLE `asistencia` (
   `id_asistencia` int(11) NOT NULL,
   `fecha` date NOT NULL,
   `hora` time NOT NULL,
-  `estado` enum('PRESENTE','TARDE','AUSENTE','JUSTIFICADA') NOT NULL,
+  `estado` enum('PRESENTE','AUSENTE','TARDE','JUSTIFICADA') NOT NULL,
   `tipo_registro` enum('AUTOMATICO','MANUAL') NOT NULL,
-  `equipo_registro` varchar(100) DEFAULT NULL,
   `observacion` varchar(255) DEFAULT NULL,
   `fecha_modificacion` datetime DEFAULT NULL,
   `id_usuario` int(11) NOT NULL,
-  `id_clase` int(11) NOT NULL,
   `id_horario` int(11) NOT NULL,
-  `id_usuario_modificador` int(11) DEFAULT NULL
+  `id_usuario_modificador` int(11) DEFAULT NULL,
+  `ip_equipo_registro` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -548,7 +547,7 @@ INSERT INTO `usuario` (`id_usuario`, `primer_nombre`, `segundo_nombre`, `primer_
 ALTER TABLE `asistencia`
   ADD PRIMARY KEY (`id_asistencia`),
   ADD UNIQUE KEY `uk_asistencia_unica` (`id_usuario`,`id_horario`,`fecha`),
-  ADD KEY `fk_asistencia_clase` (`id_clase`),
+  ADD UNIQUE KEY `uk_asistencia` (`id_usuario`,`id_horario`,`fecha`),
   ADD KEY `fk_asistencia_horario` (`id_horario`),
   ADD KEY `fk_asistencia_modificador` (`id_usuario_modificador`);
 
@@ -832,7 +831,6 @@ ALTER TABLE `usuario`
 -- Constraints for table `asistencia`
 --
 ALTER TABLE `asistencia`
-  ADD CONSTRAINT `fk_asistencia_clase` FOREIGN KEY (`id_clase`) REFERENCES `clase` (`id_clase`),
   ADD CONSTRAINT `fk_asistencia_horario` FOREIGN KEY (`id_horario`) REFERENCES `horario` (`id_horario`),
   ADD CONSTRAINT `fk_asistencia_modificador` FOREIGN KEY (`id_usuario_modificador`) REFERENCES `usuario` (`id_usuario`),
   ADD CONSTRAINT `fk_asistencia_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`);
