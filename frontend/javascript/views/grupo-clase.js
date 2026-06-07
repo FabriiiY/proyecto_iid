@@ -1,5 +1,12 @@
 // ============================================================
-//  views/grupos-clase.js — Vistas de Clase del Grupo (Admin)
+//  views/grupos-clase.js — Vistas de Clase del Grupo (Admin + Maestro)
+//
+//  Comportamiento según rol (window.SAMI.usuario.id_rol):
+//    Admin   → renderViewAsignarClaseGrupo (crear) + renderViewVerClasesGrupo (ver/editar/toggle)
+//    Maestro → solo renderViewVerClasesGrupo en modo lectura:
+//              · Endpoint filtrado por id_docente → solo sus clases activas
+//              · Sin columna "Acciones" (sin botón editar ni toggle)
+//              · Sin modal de edición
 // ============================================================
 
 // La tabla `clase` no tiene nombre propio.
@@ -169,10 +176,15 @@ function renderViewAsignarClaseGrupo(container) {
 
 // ── VISTA: VER CLASES DE GRUPO ────────────────────────────────
 function renderViewVerClasesGrupo(container) {
+
+    const usuarioActivo = window.SAMI?.usuario || {};
+    const esAdmin       = window.SAMI?.esAdmin   === true;
+    const esMaestro     = window.SAMI?.esMaestro === true;
+
     container.innerHTML = `
         <div class="dashboard-header">
             <h1><span class="material-symbols-rounded">table_view</span> Clases por Grupo</h1>
-            <p>Consulta, edita o cambia el estado de las asignaciones clase-grupo.</p>
+            <p>${esAdmin ? "Consulta, edita o cambia el estado de las asignaciones clase-grupo." : "Consulta las clases asignadas a tus grupos."}</p>
         </div>
 
         <div class="admin-card">
@@ -198,7 +210,7 @@ function renderViewVerClasesGrupo(container) {
                             <th style="text-align:center;">Tipo</th>
                             <th>Docente</th>
                             <th style="text-align:center;">Estado</th>
-                            <th style="text-align:center;">Acciones</th>
+                            ${esAdmin ? `<th style="text-align:center;">Acciones</th>` : ""}
                         </tr>
                     </thead>
                     <tbody id="cg-tbody"></tbody>
@@ -207,7 +219,8 @@ function renderViewVerClasesGrupo(container) {
             </div>
         </div>
 
-        <!-- MODAL EDITAR CLASE-GRUPO -->
+        <!-- MODAL EDITAR CLASE-GRUPO (solo Admin) -->
+        ${esAdmin ? `
         <div id="cg-modal-overlay" class="modal-overlay" style="display:none;">
             <div class="modal-card" style="max-width:520px;">
                 <div class="modal-header">
@@ -245,6 +258,7 @@ function renderViewVerClasesGrupo(container) {
                 </form>
             </div>
         </div>
+        ` : ""}
     `;
 
     // ── Referencias DOM ───────────────────────────────────────
@@ -252,8 +266,9 @@ function renderViewVerClasesGrupo(container) {
     const table    = document.getElementById("cg-table");
     const emptyMsg = document.getElementById("cg-empty-msg");
     const search   = document.getElementById("cg-search-input");
-    const overlay  = document.getElementById("cg-modal-overlay");
-    const editForm = document.getElementById("cg-edit-form");
+    // Modal solo existe en el DOM si es Admin
+    const overlay  = esAdmin ? document.getElementById("cg-modal-overlay") : null;
+    const editForm = esAdmin ? document.getElementById("cg-edit-form")      : null;
 
     let asignaciones    = [];
     let catalogoGrupos  = [];
@@ -336,6 +351,7 @@ function renderViewVerClasesGrupo(container) {
                 <td style="text-align:center;">${clase ? badgeTipo(clase.tipo_clase) : "—"}</td>
                 <td>${clase ? nombreDocente(clase.id_docente) : "—"}</td>
                 <td style="text-align:center;">${badgeEstado(esActivo)}</td>
+                ${esAdmin ? `
                 <td style="text-align:center;">
                     <div style="display:flex; gap:6px; justify-content:center; align-items:center;">
                         <button class="btn-icon btn-edit-cg" data-idx="${idx}" title="Editar asignación">
@@ -346,17 +362,21 @@ function renderViewVerClasesGrupo(container) {
                         </button>
                     </div>
                 </td>
+                ` : ""}
             `;
             tbody.appendChild(tr);
         });
 
-        tbody.querySelectorAll(".btn-edit-cg").forEach(btn =>
-            btn.addEventListener("click", () => abrirModal(parseInt(btn.dataset.idx)))
-        );
+        // Botones de acción solo disponibles para Admin
+        if (esAdmin) {
+            tbody.querySelectorAll(".btn-edit-cg").forEach(btn =>
+                btn.addEventListener("click", () => abrirModal(parseInt(btn.dataset.idx)))
+            );
 
-        tbody.querySelectorAll(".btn-toggle-cg").forEach(btn =>
-            btn.addEventListener("click", () => cambiarEstado(asignaciones[parseInt(btn.dataset.idx)]))
-        );
+            tbody.querySelectorAll(".btn-toggle-cg").forEach(btn =>
+                btn.addEventListener("click", () => cambiarEstado(asignaciones[parseInt(btn.dataset.idx)]))
+            );
+        }
     }
 
     // ── Filtrado ──────────────────────────────────────────────
@@ -400,93 +420,97 @@ function renderViewVerClasesGrupo(container) {
         });
     }
 
-    // ── Modal — abrir ─────────────────────────────────────────
-    function abrirModal(idx) {
-        const item = asignaciones[idx];
-        document.getElementById("edit-cg-id").value = item.id_clase_grupo;
+    // ── Modal — abrir / cerrar / guardar (solo Admin) ─────────
+    if (esAdmin) {
 
-        // Poblar select de grupos
-        const selGrupoEdit = document.getElementById("edit-cg-grupo");
-        selGrupoEdit.innerHTML = "";
-        catalogoGrupos.forEach(g => {
-            const opt = document.createElement("option");
-            opt.value       = g.id_grupo;
-            opt.textContent = g.nombre_grupo;
-            if (g.id_grupo === item.id_grupo) opt.selected = true;
-            selGrupoEdit.appendChild(opt);
-        });
+        function abrirModal(idx) {
+            const item = asignaciones[idx];
+            document.getElementById("edit-cg-id").value = item.id_clase_grupo;
 
-        // Poblar select de clases con etiqueta legible
-        const selClaseEdit = document.getElementById("edit-cg-clase");
-        selClaseEdit.innerHTML = "";
-        catalogoClases.forEach(c => {
-            const opt = document.createElement("option");
-            opt.value       = c.id_clase;
-            opt.textContent = etiquetaClase(c, catalogoMaterias, catalogoDocentes);
-            if (c.id_clase === item.id_clase) opt.selected = true;
-            selClaseEdit.appendChild(opt);
-        });
+            // Poblar select de grupos
+            const selGrupoEdit = document.getElementById("edit-cg-grupo");
+            selGrupoEdit.innerHTML = "";
+            catalogoGrupos.forEach(g => {
+                const opt = document.createElement("option");
+                opt.value       = g.id_grupo;
+                opt.textContent = g.nombre_grupo;
+                if (g.id_grupo === item.id_grupo) opt.selected = true;
+                selGrupoEdit.appendChild(opt);
+            });
 
-        overlay.style.display = "flex";
-    }
+            // Poblar select de clases con etiqueta legible
+            const selClaseEdit = document.getElementById("edit-cg-clase");
+            selClaseEdit.innerHTML = "";
+            catalogoClases.forEach(c => {
+                const opt = document.createElement("option");
+                opt.value       = c.id_clase;
+                opt.textContent = etiquetaClase(c, catalogoMaterias, catalogoDocentes);
+                if (c.id_clase === item.id_clase) opt.selected = true;
+                selClaseEdit.appendChild(opt);
+            });
 
-    function cerrarModal() {
-        overlay.style.display = "none";
-        editForm.reset();
-    }
-
-    document.getElementById("cg-modal-close").addEventListener("click",  cerrarModal);
-    document.getElementById("cg-modal-cancel").addEventListener("click", cerrarModal);
-    overlay.addEventListener("click", e => { if (e.target === overlay) cerrarModal(); });
-
-    // ── Modal — guardar cambios ───────────────────────────────
-    editForm.addEventListener("submit", e => {
-        e.preventDefault();
-
-        const camposSelect = ["edit-cg-grupo", "edit-cg-clase"];
-        let valido = true;
-
-        camposSelect.forEach(id => {
-            const el = document.getElementById(id);
-            if (!el.value) {
-                el.style.borderColor = "#e74c3c";
-                valido = false;
-                el.addEventListener("change", () => el.style.borderColor = "", { once: true });
-            }
-        });
-
-        if (!valido) {
-            alert("Por favor completa todos los campos obligatorios.");
-            return;
+            overlay.style.display = "flex";
         }
 
-        const idClaseGrupo = document.getElementById("edit-cg-id").value;
+        function cerrarModal() {
+            overlay.style.display = "none";
+            editForm.reset();
+        }
 
-        // BACKEND: PUT /clase-grupo/:id → { success: true }
-        // Body: { id_grupo, id_clase }
-        fetch(`http://127.0.0.1:5000/clase-grupo/${idClaseGrupo}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                id_grupo: parseInt(document.getElementById("edit-cg-grupo").value),
-                id_clase: parseInt(document.getElementById("edit-cg-clase").value),
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                alert("Asignación actualizada correctamente.");
-                cerrarModal();
-                cargarAsignaciones();
-            } else {
-                alert(data.error || data.mensaje || "No se pudo actualizar la asignación.");
+        document.getElementById("cg-modal-close").addEventListener("click",  cerrarModal);
+        document.getElementById("cg-modal-cancel").addEventListener("click", cerrarModal);
+        overlay.addEventListener("click", e => { if (e.target === overlay) cerrarModal(); });
+
+        // ── Modal — guardar cambios ───────────────────────────
+        editForm.addEventListener("submit", e => {
+            e.preventDefault();
+
+            const camposSelect = ["edit-cg-grupo", "edit-cg-clase"];
+            let valido = true;
+
+            camposSelect.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el.value) {
+                    el.style.borderColor = "#e74c3c";
+                    valido = false;
+                    el.addEventListener("change", () => el.style.borderColor = "", { once: true });
+                }
+            });
+
+            if (!valido) {
+                alert("Por favor completa todos los campos obligatorios.");
+                return;
             }
-        })
-        .catch(error => {
-            console.error(error);
-            alert("Error al conectar con el servidor.");
+
+            const idClaseGrupo = document.getElementById("edit-cg-id").value;
+
+            // BACKEND: PUT /clase-grupo/:id → { success: true }
+            // Body: { id_grupo, id_clase }
+            fetch(`http://127.0.0.1:5000/clase-grupo/${idClaseGrupo}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id_grupo: parseInt(document.getElementById("edit-cg-grupo").value),
+                    id_clase: parseInt(document.getElementById("edit-cg-clase").value),
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Asignación actualizada correctamente.");
+                    cerrarModal();
+                    cargarAsignaciones();
+                } else {
+                    alert(data.error || data.mensaje || "No se pudo actualizar la asignación.");
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                alert("Error al conectar con el servidor.");
+            });
         });
-    });
+
+    } // fin if (esAdmin)
 
     // ── Carga inicial ─────────────────────────────────────────
     function cargarCatalogos() {
@@ -518,8 +542,13 @@ function renderViewVerClasesGrupo(container) {
     }
 
     function cargarAsignaciones() {
-        // BACKEND: GET /clase-grupo → { success, clase_grupos: [{ id_clase_grupo, id_clase, id_grupo, activo }] }
-        fetch("http://127.0.0.1:5000/clase-grupo")
+        // Admin:   GET /clase-grupo                           → todas las asignaciones
+        // Maestro: GET /clase-grupo?id_docente=X&estado=ACTIVO → solo las suyas y activas
+        const url = esMaestro
+            ? `http://127.0.0.1:5000/clase-grupo?id_docente=${usuarioActivo.id_usuario}&estado=ACTIVO`
+            : "http://127.0.0.1:5000/clase-grupo";
+
+        fetch(url)
             .then(res => res.json())
             .then(data => {
                 if (data.success) {

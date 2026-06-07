@@ -137,14 +137,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // Mis Horarios
         { id: "nav-mis-horarios", icon: "calendar_month", label: "Mis Horarios", view: "maestro-alumnos" },
 
-        // Mis Grupos y Alumnos
-        { id: "nav-mis-grupos", icon: "groups", label: "Mis Grupos y Alumnos",
-          dropdown: [
-            { label: "Crear Grupo / Asignar Estudiantes", href: "WIP.html" },
-            { label: "Ver Mis Estudiantes",               href: "WIP.html" }
-          ]
-        },
-
         // Inscripciones
         { id: "nav-inscripciones", icon: "how_to_reg", label: "Inscripción",
           dropdown: [
@@ -153,13 +145,17 @@ document.addEventListener("DOMContentLoaded", () => {
           ]
         },
 
-        // Configurar Horario
-        { id: "nav-horario-maestro", icon: "schedule", label: "Configurar Horario",
+        // Vistas
+        { id: "nav-mis-grupos", icon: "groups", label: "Vistas",
           dropdown: [
-            { label: "Registrar Asistencia",   href: "WIP.html" },
-            { label: "Ver Asistencias",       href: "WIP.html"  }  
+            { label: "Clases del Grupo", view: "grupo-clase-ver"},
+            { label: "Ver Materias", view: "materias-ver"},
+            { label: "Ver Clases", view: "clase-ver"},
+            { label: "Ver Registros", view: "ciclo-ver"},
+            { label: "Ver Aulas",      view: "aula-ver"},
+            { label: "Ver Horarios Globales", view: "horario-ver-global"}
           ]
-        }
+        },
     ];
 
     const navItemsAdmin = [
