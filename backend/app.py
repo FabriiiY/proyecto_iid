@@ -1,4 +1,5 @@
 import os
+import traceback
 from flask import Flask, jsonify
 from flask_cors import CORS
 #esto es nuevo para correos w
@@ -66,3 +67,8 @@ def inicio():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
+    
+@app.errorhandler(500)
+def internal_error(e):
+    traceback.print_exc()  # fuerza el traceback a stdout
+    return {"error": str(e)}, 500
