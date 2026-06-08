@@ -10,14 +10,29 @@ horarios_bp = Blueprint("horarios", __name__)
 @horarios_bp.route("/horarios", methods=["GET"])
 def obtener_horarios():
 
-    conexion = None
-    cursor = None
+    conexion   = None
+    cursor     = None
+    id_docente = request.args.get("id_docente")
+    estado     = request.args.get("estado")
 
     try:
         conexion = get_connection()
-        cursor = conexion.cursor(dictionary=True)
+        cursor   = conexion.cursor(dictionary=True)
 
-        cursor.execute("""
+        # Construir WHERE dinámico
+        condiciones = []
+        params      = []
+
+        if id_docente:
+            condiciones.append("cl.id_docente = %s")
+            params.append(id_docente)
+        if estado:
+            condiciones.append("h.estado = %s")
+            params.append(estado)
+
+        where = ("WHERE " + " AND ".join(condiciones)) if condiciones else ""
+
+        cursor.execute(f"""
             SELECT
                 h.*,
                 a.codigo_aula,
@@ -32,41 +47,30 @@ def obtener_horarios():
             INNER JOIN clase     cl  ON h.id_clase     = cl.id_clase
             INNER JOIN materia   mat ON cl.id_materia  = mat.id_materia
             INNER JOIN usuario   u   ON cl.id_docente  = u.id_usuario
+            {where}
             ORDER BY h.dia_semana, h.hora_inicio
-        """)
+        """, params)
 
         horarios = cursor.fetchall()
 
+        def fmt_time(t):
+            if t is None: return None
+            if isinstance(t, str): return t
+            total = int(t.total_seconds())
+            return f"{total // 3600:02d}:{(total % 3600) // 60:02d}:{total % 60:02d}"
+
         for h in horarios:
-            
-            def fmt_time(t):
-                if t is None:
-                    return None
-                if isinstance(t, str):
-                    return t
-                total    = int(t.total_seconds())
-                horas    = total // 3600
-                minutos  = (total % 3600) // 60
-                segundos = total % 60
-                return f"{horas:02d}:{minutos:02d}:{segundos:02d}"
-            
-            for h in horarios:
-                h["hora_inicio"] = fmt_time(h.get("hora_inicio"))
-                h["hora_fin"]    = fmt_time(h.get("hora_fin"))
+            h["hora_inicio"] = fmt_time(h.get("hora_inicio"))
+            h["hora_fin"]    = fmt_time(h.get("hora_fin"))
+            for campo in ["fecha_inicio", "fecha_fin"]:
+                val = h.get(campo)
+                if val is None: h[campo] = None
+                elif isinstance(val, str): h[campo] = val[:10]
+                else: h[campo] = val.strftime("%Y-%m-%d")
+            if h.get("fecha_actualizacion") and not isinstance(h["fecha_actualizacion"], str):
+                h["fecha_actualizacion"] = h["fecha_actualizacion"].strftime("%Y-%m-%d %H:%M:%S")
 
-                for campo in ["fecha_inicio", "fecha_fin"]:
-                    val = h.get(campo)
-                    if val is None:
-                        h[campo] = None
-                    elif isinstance(val, str):
-                        h[campo] = val[:10]
-                    else:
-                        h[campo] = val.strftime("%Y-%m-%d")
-
-                if h.get("fecha_actualizacion") and not isinstance(h["fecha_actualizacion"], str):
-                    h["fecha_actualizacion"] = h["fecha_actualizacion"].strftime("%Y-%m-%d %H:%M:%S")
-                
-            return jsonify({"success": True, "horarios": horarios})
+        return jsonify({"success": True, "horarios": horarios})
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
@@ -567,6 +571,187 @@ def marcar_asistencia():
         traceback.print_exc()
         if conexion:
             conexion.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
+        
+        
+# que los alunos puedan ver sus horarios
+
+# ─────────────────────────────────────────────
+# GET /mis-horarios-completos?id_usuario=X
+# Todos los horarios activos del estudiante (todos los días)
+# ─────────────────────────────────────────────
+@horarios_bp.route("/mis-horarios-completos", methods=["GET"])
+def mis_horarios_completos():
+
+    conexion   = None
+    cursor     = None
+    id_usuario = request.args.get("id_usuario")
+
+    if not id_usuario:
+        return jsonify({"success": False, "error": "id_usuario es requerido"}), 400
+
+    try:
+        conexion = get_connection()
+        cursor   = conexion.cursor(dictionary=True)
+
+        # Datos del estudiante
+        cursor.execute("""
+            SELECT
+                u.primer_nombre, u.primer_apellido, u.carnet,
+                g.nombre_grupo  AS grupo_nombre,
+                ca.nombre       AS carrera_nombre,
+                ci.nombre       AS ciclo_nombre
+            FROM usuario u
+            JOIN inscripcion i  ON i.id_usuario = u.id_usuario AND i.estado = 'ACTIVA'
+            JOIN grupo       g  ON g.id_grupo   = i.id_grupo
+            JOIN carrera     ca ON ca.id_carrera = g.id_carrera
+            JOIN ciclo       ci ON ci.id_ciclo   = g.id_ciclo
+            WHERE u.id_usuario = %s
+            LIMIT 1
+        """, (id_usuario,))
+
+        estudiante = cursor.fetchone()
+
+        # Horarios activos
+        cursor.execute("""
+            SELECT
+                h.id_horario,
+                h.dia_semana,
+                h.hora_inicio,
+                h.hora_fin,
+                h.minutos_anticipacion,
+                h.minutos_tolerancia,
+                h.fecha_inicio,
+                h.fecha_fin,
+                c.id_clase,
+                c.tipo_clase,
+                m.nombre                                        AS materia_nombre,
+                CONCAT(u.primer_nombre, ' ', u.primer_apellido) AS docente_nombre,
+                a.codigo_aula,
+                a.edificio,
+                a.nivel,
+                mo.nombre                                       AS modalidad_nombre
+            FROM horario h
+            JOIN clase       c   ON c.id_clase      = h.id_clase
+            JOIN materia     m   ON m.id_materia    = c.id_materia
+            JOIN usuario     u   ON u.id_usuario    = c.id_docente
+            JOIN aula        a   ON a.id_aula       = h.id_aula
+            JOIN modalidad   mo  ON mo.id_modalidad = h.id_modalidad
+            JOIN clase_grupo cg  ON cg.id_clase     = c.id_clase AND cg.estado = 'ACTIVO'
+            JOIN inscripcion i   ON i.id_grupo      = cg.id_grupo
+                                AND i.id_usuario    = %s
+                                AND i.estado        = 'ACTIVA'
+            WHERE h.estado       = 'ACTIVO'
+              AND h.fecha_inicio <= CURDATE()
+              AND h.fecha_fin    >= CURDATE()
+            ORDER BY FIELD(h.dia_semana,
+                'LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO','DOMINGO'),
+                h.hora_inicio ASC
+        """, (id_usuario,))
+
+        materias = cursor.fetchall()
+
+        # Serializar campos time y date
+        for h in materias:
+            for campo in ("hora_inicio", "hora_fin"):
+                if h.get(campo) and not isinstance(h[campo], str):
+                    total    = int(h[campo].total_seconds())
+                    h[campo] = f"{total // 3600:02d}:{(total % 3600) // 60:02d}:00"
+            for campo in ("fecha_inicio", "fecha_fin"):
+                val = h.get(campo)
+                if val and not isinstance(val, str):
+                    h[campo] = val.strftime("%Y-%m-%d")
+
+        return jsonify({"success": True, "estudiante": estudiante, "materias": materias})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
+        
+        
+        
+# PARA REPORTEEEEEEEEEEEEEEEES ========================================================================
+
+# ─────────────────────────────────────────────
+# GET /reporte-asistencia?id_usuario=X&fecha_ini=Y&fecha_fin=Z
+# Reporte de asistencia del estudiante por rango de fechas
+# ─────────────────────────────────────────────
+@horarios_bp.route("/reporte-asistencia", methods=["GET"])
+def reporte_asistencia():
+
+    conexion   = None
+    cursor     = None
+    id_usuario = request.args.get("id_usuario")
+    fecha_ini  = request.args.get("fecha_ini")
+    fecha_fin  = request.args.get("fecha_fin")
+
+    if not id_usuario or not fecha_ini or not fecha_fin:
+        return jsonify({"success": False, "error": "id_usuario, fecha_ini y fecha_fin son requeridos"}), 400
+
+    try:
+        conexion = get_connection()
+        cursor   = conexion.cursor(dictionary=True)
+
+        # Datos del estudiante
+        cursor.execute("""
+            SELECT
+                CONCAT(u.primer_nombre, ' ', u.primer_apellido) AS nombre_completo,
+                u.carnet,
+                g.nombre_grupo  AS grupo_nombre,
+                ca.nombre       AS carrera_nombre
+            FROM usuario u
+            JOIN inscripcion i  ON i.id_usuario = u.id_usuario AND i.estado = 'ACTIVA'
+            JOIN grupo       g  ON g.id_grupo   = i.id_grupo
+            JOIN carrera     ca ON ca.id_carrera = g.id_carrera
+            WHERE u.id_usuario = %s
+            LIMIT 1
+        """, (id_usuario,))
+
+        estudiante = cursor.fetchone()
+
+        # Asistencias en el rango
+        cursor.execute("""
+            SELECT
+                a.id_asistencia,
+                a.fecha,
+                a.hora,
+                a.estado,
+                a.observacion,
+                c.id_clase,
+                c.tipo_clase,
+                m.nombre      AS materia_nombre,
+                h.hora_inicio,
+                h.hora_fin
+            FROM asistencia a
+            JOIN horario h ON h.id_horario = a.id_horario
+            JOIN clase   c ON c.id_clase   = h.id_clase
+            JOIN materia m ON m.id_materia = c.id_materia
+            WHERE a.id_usuario = %s
+              AND a.fecha BETWEEN %s AND %s
+            ORDER BY a.fecha DESC, h.hora_inicio ASC
+        """, (id_usuario, fecha_ini, fecha_fin))
+
+        asistencias = cursor.fetchall()
+
+        # Serializar
+        for row in asistencias:
+            if row.get("fecha") and not isinstance(row["fecha"], str):
+                row["fecha"] = row["fecha"].strftime("%Y-%m-%d")
+            for campo in ("hora", "hora_inicio", "hora_fin"):
+                if row.get(campo) and not isinstance(row[campo], str):
+                    total = int(row[campo].total_seconds())
+                    row[campo] = f"{total // 3600:02d}:{(total % 3600) // 60:02d}:00"
+
+        return jsonify({"success": True, "estudiante": estudiante, "asistencias": asistencias})
+
+    except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
     finally:
