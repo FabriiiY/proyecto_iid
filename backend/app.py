@@ -32,8 +32,8 @@ CORS(app)
 # ── Configuración Flask-Mail (Gmail producción) ──
 app.config["MAIL_SERVER"]   = "smtp.gmail.com"
 app.config["MAIL_PORT"]     = 587
-app.config["MAIL_USERNAME"] = "cuentadeadmin03@gmail.com"
-app.config["MAIL_PASSWORD"] = "bvonxrrrazierqru"
+app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME", "cuentadeadmin03@gmail.com")
+app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD", "tu_contraseña_aqui")
 app.config["MAIL_USE_TLS"]  = True
 app.config["MAIL_USE_SSL"]  = False
 
