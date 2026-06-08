@@ -51,7 +51,7 @@ function renderViewMaestroAulas(container) {
                     <span class="material-symbols-rounded" style="font-size:2.5rem; color:#ccc;">
                         meeting_room
                     </span>
-                    <p>No hay aulas activas registradas.</p>
+                    <p>No hay aulas registradas.</p>
                 </div>
             </div>
         </div>
@@ -94,7 +94,7 @@ function renderViewMaestroAulas(container) {
         lista.forEach(a => {
             const tr = document.createElement("tr");
             tr.innerHTML = `
-                <td><strong>${a.codigo}</strong></td>
+                <td><strong>${a.codigo_aula}</strong></td>
                 <td>${a.edificio || "—"}</td>
                 <td style="text-align:center;">${a.nivel ?? "—"}</td>
                 <td style="text-align:center;">${a.capacidad ?? "—"}</td>
@@ -124,12 +124,12 @@ function renderViewMaestroAulas(container) {
     // ── Carga inicial — solo ACTIVAS ──────────────────────────
     // BACKEND: GET /aulas?estado=ACTIVO
     //   → { success, aulas: [...] }
-    fetch("http://127.0.0.1:5000/aulas?estado=ACTIVO")
+    fetch("http://127.0.0.1:5000/aulas")
         .then(res => res.json())
         .then(data => {
             if (data.success) {
                 // Filtro en cliente como segunda capa de seguridad
-                aulas = (data.aulas || []).filter(a => a.estado === "ACTIVO");
+                aulas = data.aulas || [];
                 renderTabla(aulas);
             } else {
                 emptyMsg.querySelector("p").textContent =

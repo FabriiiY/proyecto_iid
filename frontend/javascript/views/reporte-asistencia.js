@@ -5,7 +5,7 @@
 function renderViewReporteAsistencia(container) {
 
     const usuarioActivo = window.SAMI?.usuario || {};
-    const idEstudiante  = usuarioActivo.id_usuario;
+    const idEstudiante = usuarioActivo.id;
 
     // ── Inyectar CSS si no existe ─────────────────────────────
     if (!document.getElementById("rpt-style")) {

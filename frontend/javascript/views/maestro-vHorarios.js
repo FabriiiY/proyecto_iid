@@ -23,7 +23,7 @@
 function renderViewMaestroHorarios(container) {
 
     const usuarioActivo = window.SAMI?.usuario || {};
-    const idDocente     = usuarioActivo.id_usuario;
+    const idDocente = usuarioActivo.id;
 
     container.innerHTML = `
         <div class="dashboard-header">

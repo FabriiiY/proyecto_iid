@@ -19,7 +19,7 @@
 function renderViewMaestroMaterias(container) {
 
     const usuarioActivo = window.SAMI?.usuario || {};
-    const idDocente     = usuarioActivo.id_usuario;
+    const idDocente = usuarioActivo.id;
 
     container.innerHTML = `
         <div class="dashboard-header">
@@ -121,7 +121,7 @@ function renderViewMaestroMaterias(container) {
     search.addEventListener("input", () => renderTabla(filtrar()));
 
     // ── Carga inicial ─────────────────────────────────────────
-    fetch(`http://127.0.0.1:5000/materias?id_docente=${idDocente}`)
+    fetch(`http://127.0.0.1:5000/mis-materias?id_docente=${idDocente}`)
         .then(res => res.json())
         .then(data => {
             if (data.success) {

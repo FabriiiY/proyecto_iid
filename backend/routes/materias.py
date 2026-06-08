@@ -239,3 +239,51 @@ def cambiar_estado_materia(id_materia):
 
         if conexion:
             conexion.close()
+
+
+# ===============================================================
+# PARA MAESTROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOS
+
+# ─────────────────────────────────────────────
+# GET /mis-materias?id_docente=X
+# Materias que imparte el docente
+# ─────────────────────────────────────────────
+@materias_bp.route("/mis-materias", methods=["GET"])
+def mis_materias():
+
+    conexion   = None
+    cursor     = None
+    id_docente = request.args.get("id_docente")
+
+    if not id_docente:
+        return jsonify({"success": False, "error": "id_docente es requerido"}), 400
+
+    try:
+        conexion = get_connection()
+        cursor   = conexion.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT DISTINCT
+                m.id_materia,
+                m.nombre,
+                m.horas_teoricas,
+                m.horas_practicas,
+                m.unidades_valorativas,
+                m.descripcion,
+                m.estado
+            FROM materia m
+            JOIN clase c ON c.id_materia = m.id_materia
+            WHERE c.id_docente = %s
+              AND c.estado     = 'ACTIVO'
+            ORDER BY m.nombre ASC
+        """, (id_docente,))
+
+        materias = cursor.fetchall()
+        return jsonify({"success": True, "materias": materias})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+    finally:
+        if cursor:   cursor.close()
+        if conexion: conexion.close()
