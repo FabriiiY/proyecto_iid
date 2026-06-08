@@ -27,11 +27,12 @@ app = Flask(__name__)
 
 CORS(app)
 
-# ── Configuración Flask-Mail (Mailtrap) ──
-app.config["MAIL_SERVER"]   = "sandbox.smtp.mailtrap.io"
-app.config["MAIL_PORT"]     = 2525
-app.config["MAIL_USERNAME"] = "8e5d80c1d6392a"
-app.config["MAIL_PASSWORD"] = "e83615a6f852b8"  # ← el que aparece en Mailtrap
+# ── Configuración Flask-Mail (Mailtrap) ── CAMBIO A UN SERVIDOR DE CORREO REAL PERO USANDO CORREO DE GMAIL
+# ── Configuración Flask-Mail (Gmail producción) ──
+app.config["MAIL_SERVER"]   = "smtp.gmail.com"
+app.config["MAIL_PORT"]     = 587
+app.config["MAIL_USERNAME"] = "cuentadeadmin03@gmail.com"
+app.config["MAIL_PASSWORD"] = "bvonxrrrazierqru"
 app.config["MAIL_USE_TLS"]  = True
 app.config["MAIL_USE_SSL"]  = False
 
@@ -63,4 +64,5 @@ def inicio():
     return jsonify({"mensaje": "Backend SAMI funcionando"})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)

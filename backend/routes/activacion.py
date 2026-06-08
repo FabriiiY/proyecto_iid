@@ -54,11 +54,18 @@ def enviar_activacion(id_usuario):
         link = f"http://127.0.0.1:5500/frontend/html/activar-cuenta.html?token={token}"
 
         mail = Mail(current_app)
-        msg  = Message(
+        #ANTES
+        #msg  = Message(
+            #subject="Activa tu cuenta SAMI",
+            #sender="noreply@sami.edu.sv",
+            #recipients=[usuario["correo_institucional"]]
+        #)
+        msg = Message(
             subject="Activa tu cuenta SAMI",
-            sender="noreply@sami.edu.sv",
+            sender="cuentadeadmin03@gmail.com",
             recipients=[usuario["correo_institucional"]]
         )
+        
         msg.html = f"""
             <!DOCTYPE html>
             <html>
