@@ -39,6 +39,7 @@ app.config["MAIL_USE_SSL"]  = False
 mail = Mail(app)
 #termina aca
 
+
 app.register_blueprint(auth_bp)
 app.register_blueprint(usuarios_bp)
 app.register_blueprint(materias_bp)
@@ -57,7 +58,6 @@ app.register_blueprint(horarios_bp)
 app.register_blueprint(inscripciones_bp)
 app.register_blueprint(activacion_bp)
 app.register_blueprint(asistencias_bp)
-
 
 @app.route("/")
 def inicio():
