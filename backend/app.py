@@ -27,7 +27,6 @@ from routes.activacion import activacion_bp
 app = Flask(__name__)
 
 CORS(app)
-
 # ── Configuración Flask-Mail (Mailtrap) ── CAMBIO A UN SERVIDOR DE CORREO REAL PERO USANDO CORREO DE GMAIL
 # ── Configuración Flask-Mail (Gmail producción) ──
 app.config["MAIL_SERVER"]   = "smtp.gmail.com"
