@@ -71,7 +71,10 @@ def login():
         })
 
     except Exception as e:
+        import traceback
         return jsonify({
             "success": False,
-            "error": str(e)
+            "error": str(e),
+            "traceback": traceback.format_exc()
         }), 500
+        
