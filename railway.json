@@ -4,7 +4,6 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "python app.py",
-    "rootDirectory": "backend"
+    "startCommand": "cd backend && python app.py"
   }
 }
