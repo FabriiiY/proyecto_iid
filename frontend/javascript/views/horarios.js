@@ -289,7 +289,7 @@ function renderViewHorarios(container) {
 
         document.getElementById("justif-enviar").disabled = true;
 
-        fetch("http://127.0.0.1:5000/asistencias", {
+        fetch("https://proyectoiid-production.up.railway.app/asistencias", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -357,7 +357,7 @@ function renderViewHorarios(container) {
 
         // BACKEND: POST /asistencias
         // usa ON DUPLICATE KEY UPDATE para (id_usuario, id_horario, fecha)
-        fetch("http://127.0.0.1:5000/asistencias", {
+        fetch("https://proyectoiid-production.up.railway.app/asistencias", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -574,7 +574,7 @@ function renderViewHorarios(container) {
         </div>
     `;
 
-    fetch(`http://127.0.0.1:5000/mis-horarios-hoy?id_usuario=${idEstudiante}&dia=${diaHoy}`)
+    fetch(`https://proyectoiid-production.up.railway.app/mis-horarios-hoy?id_usuario=${idEstudiante}&dia=${diaHoy}`)
         .then(r => r.json())
         .then(data => {
             if (!data.success || !data.horarios || data.horarios.length === 0) {

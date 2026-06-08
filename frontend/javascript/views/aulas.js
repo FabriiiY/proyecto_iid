@@ -135,7 +135,7 @@ function renderViewRegistrarAula(container) {
             descripcion: document.getElementById("a-descripcion").value.trim() || null,
         };
 
-        fetch("http://127.0.0.1:5000/aulas", {
+        fetch("https://proyectoiid-production.up.railway.app/aulas", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(nueva)
@@ -385,7 +385,7 @@ function renderViewVerAulas(container) {
 
     // ── Cambiar estado (activar / desactivar) ─────────────────
     function cambiarEstado(aula, nuevoEstado) {
-        fetch(`http://127.0.0.1:5000/aulas/${aula.id_aula}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/aulas/${aula.id_aula}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ estado: nuevoEstado })
@@ -463,7 +463,7 @@ function renderViewVerAulas(container) {
             descripcion: document.getElementById("edit-a-descripcion").value.trim() || null,
         };
 
-        fetch(`http://127.0.0.1:5000/aulas/${idAula}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/aulas/${idAula}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datos)
@@ -487,7 +487,7 @@ function renderViewVerAulas(container) {
 
     // ── Carga inicial ─────────────────────────────────────────
     function cargarAulas() {
-        fetch("http://127.0.0.1:5000/aulas")
+        fetch("https://proyectoiid-production.up.railway.app/aulas")
         .then(res => res.json())
         .then(data => {
             if (data.success) {

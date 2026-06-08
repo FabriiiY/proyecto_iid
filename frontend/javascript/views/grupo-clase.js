@@ -71,10 +71,10 @@ function renderViewAsignarClaseGrupo(container) {
     // BACKEND: GET /grupos    → { success, grupos:    [{ id_grupo, nombre_grupo }] }
     // BACKEND: GET /clases    → { success, clases:    [{ id_clase, tipo_clase, estado, id_materia, id_docente }] }
     Promise.all([
-        fetch("http://127.0.0.1:5000/grupos/activos").then(r => r.json()),
-        fetch("http://127.0.0.1:5000/clases").then(r => r.json()),
-        fetch("http://127.0.0.1:5000/materias").then(r => r.json()),
-        fetch("http://127.0.0.1:5000/docentes").then(r => r.json())
+        fetch("https://proyectoiid-production.up.railway.app/grupos/activos").then(r => r.json()),
+        fetch("https://proyectoiid-production.up.railway.app/clases").then(r => r.json()),
+        fetch("https://proyectoiid-production.up.railway.app/materias").then(r => r.json()),
+        fetch("https://proyectoiid-production.up.railway.app/docentes").then(r => r.json())
     ])
     .then(([dGrupos, dClases, dMaterias, dDocentes]) => {
 
@@ -142,7 +142,7 @@ function renderViewAsignarClaseGrupo(container) {
 
         // BACKEND: POST /clase-grupo → { success: true }
         // Body: { id_grupo, id_clase }
-        fetch("http://127.0.0.1:5000/clase-grupo", {
+        fetch("https://proyectoiid-production.up.railway.app/clase-grupo", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -380,7 +380,7 @@ function renderViewVerClasesGrupo(container) {
         // BACKEND: PUT /clase-grupo/:id/estado → { success: true }
         // Requiere campo `activo` TINYINT(1) en la tabla clase_grupo
         const nuevoEstado = item.estado === "ACTIVO" ? "INACTIVO" : "ACTIVO";
-        fetch(`http://127.0.0.1:5000/clase-grupo/${item.id_clase_grupo}/estado`, {
+        fetch(`https://proyectoiid-production.up.railway.app/clase-grupo/${item.id_clase_grupo}/estado`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ estado: nuevoEstado })
@@ -464,7 +464,7 @@ function renderViewVerClasesGrupo(container) {
 
         // BACKEND: PUT /clase-grupo/:id → { success: true }
         // Body: { id_grupo, id_clase }
-        fetch(`http://127.0.0.1:5000/clase-grupo/${idClaseGrupo}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/clase-grupo/${idClaseGrupo}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -492,25 +492,25 @@ function renderViewVerClasesGrupo(container) {
     function cargarCatalogos() {
         return Promise.all([
             // BACKEND: GET /grupos   → { success, grupos:   [{ id_grupo, nombre_grupo }] }
-            fetch("http://127.0.0.1:5000/grupos")
+            fetch("https://proyectoiid-production.up.railway.app/grupos")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoGrupos = d.grupos; })
                 .catch(() => {}),
 
             // BACKEND: GET /clases   → { success, clases:   [{ id_clase, tipo_clase, estado, id_materia, id_docente }] }
-            fetch("http://127.0.0.1:5000/clases")
+            fetch("https://proyectoiid-production.up.railway.app/clases")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoClases = d.clases; })
                 .catch(() => {}),
 
             // BACKEND: GET /materias → { success, materias: [{ id_materia, nombre }] }
-            fetch("http://127.0.0.1:5000/materias")
+            fetch("https://proyectoiid-production.up.railway.app/materias")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoMaterias = d.materias; })
                 .catch(() => {}),
 
             // BACKEND: GET /docentes → { success, docentes: [{ id_usuario, nombre_completo }] }
-            fetch("http://127.0.0.1:5000/docentes")
+            fetch("https://proyectoiid-production.up.railway.app/docentes")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoDocentes = d.docentes; })
                 .catch(() => {})
@@ -519,7 +519,7 @@ function renderViewVerClasesGrupo(container) {
 
     function cargarAsignaciones() {
         // BACKEND: GET /clase-grupo → { success, clase_grupos: [{ id_clase_grupo, id_clase, id_grupo, activo }] }
-        fetch("http://127.0.0.1:5000/clase-grupo")
+        fetch("https://proyectoiid-production.up.railway.app/clase-grupo")
             .then(res => res.json())
             .then(data => {
                 if (data.success) {

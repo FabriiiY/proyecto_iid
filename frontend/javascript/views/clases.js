@@ -65,7 +65,7 @@ function renderViewRegistrarClase(container) {
     // ── Cargar selects ────────────────────────────────────────
     function cargarSelect(selectId, endpoint, campoId, campoLabel, textoError) {
         const select = document.getElementById(selectId);
-        fetch(`http://127.0.0.1:5000/${endpoint}`)
+        fetch(`https://proyectoiid-production.up.railway.app/${endpoint}`)
             .then(res => res.json())
             .then(data => {
                 const key   = Object.keys(data).find(k => Array.isArray(data[k]));
@@ -133,7 +133,7 @@ function renderViewRegistrarClase(container) {
             tipo_clase: tipoSeleccionado.value,
         };
 
-        fetch("http://127.0.0.1:5000/clases", {
+        fetch("https://proyectoiid-production.up.railway.app/clases", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(nueva)
@@ -377,7 +377,7 @@ function renderViewVerClases(container) {
 
     // ── Cambiar estado ────────────────────────────────────────
     function cambiarEstado(clase, nuevoEstado) {
-        fetch(`http://127.0.0.1:5000/clases/${clase.id_clase}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/clases/${clase.id_clase}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ estado: nuevoEstado })
@@ -471,7 +471,7 @@ function renderViewVerClases(container) {
             tipo_clase: tipoSeleccionado.value,
         };
 
-        fetch(`http://127.0.0.1:5000/clases/${idClase}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/clases/${idClase}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datos)
@@ -497,7 +497,7 @@ function renderViewVerClases(container) {
     function cargarCatalogos() {
         return Promise.all([
             // BACKEND: GET /materias → { success: true, materias: [{ id_materia, nombre }] }
-            fetch("http://127.0.0.1:5000/materias/activas")
+            fetch("https://proyectoiid-production.up.railway.app/materias/activas")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoMaterias = d.materias; })
                 .catch(() => {}),
@@ -505,7 +505,7 @@ function renderViewVerClases(container) {
             // BACKEND: GET /docentes → { success: true, docentes: [{ id_usuario, nombre_completo }] }
             // Usuarios con id_rol = 2 y estado = 'ACTIVO'
             // nombre_completo = primer_nombre + " " + primer_apellido (construido en el backend)
-            fetch("http://127.0.0.1:5000/docentes")
+            fetch("https://proyectoiid-production.up.railway.app/docentes")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoDocentes = d.docentes; })
                 .catch(() => {})
@@ -514,7 +514,7 @@ function renderViewVerClases(container) {
 
     function cargarClases() {
         // BACKEND: GET /clases → { success: true, clases: [...] }
-        fetch("http://127.0.0.1:5000/clases")
+        fetch("https://proyectoiid-production.up.railway.app/clases")
             .then(res => res.json())
             .then(data => {
                 if (data.success) {

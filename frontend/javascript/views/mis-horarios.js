@@ -93,7 +93,7 @@ function renderViewMisHorarios(container) {
         //   ORDER BY FIELD(h.dia_semana,'LUNES','MARTES','MIERCOLES','JUEVES','VIERNES','SABADO','DOMINGO'),
         //            h.hora_inicio
 
-        fetch(`http://127.0.0.1:5000/mis-horarios-completos?id_usuario=${idEstudiante}`)
+        fetch(`https://proyectoiid-production.up.railway.app/mis-horarios-completos?id_usuario=${idEstudiante}`)
             .then(r => r.json())
             .then(data => {
                 const wrap = document.getElementById("mh-grid-wrap");

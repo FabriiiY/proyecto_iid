@@ -89,7 +89,7 @@ function renderViewRegistrarCarrera(container) {
     // BACKEND: GET /tipo_programas → { success: true, tipo_programas: [...] }
     const selectTipo = document.getElementById("c-tipo-programa");
 
-    fetch("http://127.0.0.1:5000/tipos-programa/activos")
+    fetch("https://proyectoiid-production.up.railway.app/tipos-programa/activos")
         .then(res => res.json())
         .then(data => {
             selectTipo.innerHTML = `<option value="" disabled selected>Selecciona un tipo...</option>`;
@@ -138,7 +138,7 @@ function renderViewRegistrarCarrera(container) {
             id_tipo_programa: parseInt(document.getElementById("c-tipo-programa").value),
         };
 
-        fetch("http://127.0.0.1:5000/carreras", {
+        fetch("https://proyectoiid-production.up.railway.app/carreras", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(nueva)
@@ -378,7 +378,7 @@ function renderViewVerCarreras(container) {
 
     // ── Cambiar estado ────────────────────────────────────────
     function cambiarEstado(carrera, nuevoEstado) {
-        fetch(`http://127.0.0.1:5000/carreras/${carrera.id_carrera}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/carreras/${carrera.id_carrera}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ estado: nuevoEstado })
@@ -467,7 +467,7 @@ function renderViewVerCarreras(container) {
             id_tipo_programa: parseInt(document.getElementById("edit-c-tipo-programa").value),
         };
 
-        fetch(`http://127.0.0.1:5000/carreras/${idCarrera}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/carreras/${idCarrera}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datos)
@@ -492,7 +492,7 @@ function renderViewVerCarreras(container) {
     // BACKEND: GET /tipo_programas → { success: true, tipo_programas: [{ id_tipo_programa, nombre }] }
     // El select necesita el catálogo antes de que el usuario abra el modal de edición.
     function cargarTiposProgramaYLuego(callback) {
-        fetch("http://127.0.0.1:5000/tipos-programa/activos")
+        fetch("https://proyectoiid-production.up.railway.app/tipos-programa/activos")
             .then(res => res.json())
             .then(data => {
                 if (data.success) tiposProgramaCatalogo = data.tipos;
@@ -502,7 +502,7 @@ function renderViewVerCarreras(container) {
     }
 
     function cargarCarreras() {
-        fetch("http://127.0.0.1:5000/carreras")
+        fetch("https://proyectoiid-production.up.railway.app/carreras")
             .then(res => res.json())
             .then(data => {
                 if (data.success) {

@@ -157,7 +157,7 @@ function renderViewMaestroClaseGrupo(container) {
             // Solo los grupos asignados al docente
             // BACKEND: GET /mis-grupos?id_docente=X
             //   → { success, grupos: [{ id_grupo, nombre_grupo }] }
-            fetch(`http://127.0.0.1:5000/mis-grupos?id_docente=${idDocente}`)
+            fetch(`https://proyectoiid-production.up.railway.app/mis-grupos?id_docente=${idDocente}`)
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoGrupos = d.grupos || []; })
                 .catch(() => {}),
@@ -165,14 +165,14 @@ function renderViewMaestroClaseGrupo(container) {
             // Solo las clases del docente
             // BACKEND: GET /mis-clases?id_docente=X
             //   → { success, clases: [{ id_clase, tipo_clase, estado, id_materia, id_docente }] }
-            fetch(`http://127.0.0.1:5000/mis-clases?id_docente=${idDocente}`)
+            fetch(`https://proyectoiid-production.up.railway.app/mis-clases?id_docente=${idDocente}`)
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoClases = d.clases || []; })
                 .catch(() => {}),
 
             // Materias (catálogo general, solo para resolver nombres)
             // BACKEND: GET /materias → { success, materias: [{ id_materia, nombre }] }
-            fetch("http://127.0.0.1:5000/materias")
+            fetch("https://proyectoiid-production.up.railway.app/materias")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoMaterias = d.materias || []; })
                 .catch(() => {})
@@ -186,7 +186,7 @@ function renderViewMaestroClaseGrupo(container) {
         //   El backend filtra: clase_grupo JOIN clase
         //                      WHERE clase.id_docente = X
         //                        AND clase_grupo.estado = 'ACTIVO'
-        fetch(`http://127.0.0.1:5000/clase-grupo?id_docente=${idDocente}`)
+        fetch(`https://proyectoiid-production.up.railway.app/clase-grupo?id_docente=${idDocente}`)
             .then(r => r.json())
             .then(data => {
                 if (data.success) {

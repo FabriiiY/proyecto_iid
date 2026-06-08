@@ -265,7 +265,7 @@ function renderViewMaestroAlumnos(container) {
         //   JOIN ciclo ci ON ci.id_ciclo = g.id_ciclo
         //   WHERE c.id_docente = :id_docente AND c.estado = 'ACTIVO'
 
-        fetch(`http://127.0.0.1:5000/mis-clases-grupos?id_docente=${idDocente}`)
+        fetch(`https://proyectoiid-production.up.railway.app/mis-clases-grupos?id_docente=${idDocente}`)
             .then(r => r.json())
             .then(data => {
                 const wrap = document.getElementById("ml-clases-wrap");
@@ -400,7 +400,7 @@ function renderViewMaestroAlumnos(container) {
         //   JOIN usuario u ON u.id_usuario = i.id_usuario
         //   WHERE i.id_grupo = :id_grupo AND i.estado = 'ACTIVA' AND u.estado = 'ACTIVO'
 
-        fetch(`http://127.0.0.1:5000/estudiantes-grupo?id_grupo=${clase.id_grupo}`)
+        fetch(`https://proyectoiid-production.up.railway.app/estudiantes-grupo?id_grupo=${clase.id_grupo}`)
             .then(r => r.json())
             .then(data => {
                 const cuerpo = document.getElementById("ml-lista-cuerpo");
@@ -420,7 +420,7 @@ function renderViewMaestroAlumnos(container) {
                     `<strong>${estudiantes.length}</strong> estudiantes`;
 
                 // Consultar si ya hay lista guardada hoy
-                fetch(`http://127.0.0.1:5000/asistencias?id_clase=${clase.id_clase}&fecha=${fechaHoy}`)
+                fetch(`https://proyectoiid-production.up.railway.app/asistencias?id_clase=${clase.id_clase}&fecha=${fechaHoy}`)
                     .then(r => r.json())
                     .then(asistenciaHoy => {
                         const previas = {};
@@ -643,7 +643,7 @@ function renderViewMaestroAlumnos(container) {
 
                 btn.disabled = true;
 
-                fetch(`http://127.0.0.1:5000/asistencias/${idAsistencia}/justificacion`, {
+                fetch(`https://proyectoiid-production.up.railway.app/asistencias/${idAsistencia}/justificacion`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -727,7 +727,7 @@ function renderViewMaestroAlumnos(container) {
             //   registrados: N,
             //   actualizados: M
             // }
-            fetch("http://127.0.0.1:5000/asistencias/lista", {
+            fetch("https://proyectoiid-production.up.railway.app/asistencias/lista", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ registros })
@@ -835,7 +835,7 @@ function renderViewMaestroInscripcion(container) {
     `;
 
     // ── Cargar estudiantes ────────────────────────────────────
-    fetch("http://127.0.0.1:5000/estudiantes")
+    fetch("https://proyectoiid-production.up.railway.app/estudiantes")
         .then(r => r.json())
         .then(data => {
             const select = document.getElementById("mins-estudiante");
@@ -857,7 +857,7 @@ function renderViewMaestroInscripcion(container) {
         });
 
     // ── Cargar solo los grupos del docente ────────────────────
-    fetch(`http://127.0.0.1:5000/mis-grupos-inscripcion?id_docente=${idDocente}`)
+    fetch(`https://proyectoiid-production.up.railway.app/mis-grupos-inscripcion?id_docente=${idDocente}`)
         .then(r => r.json())
         .then(data => {
             const select = document.getElementById("mins-grupo");
@@ -905,7 +905,7 @@ function renderViewMaestroInscripcion(container) {
         btn.disabled = true;
         btn.innerHTML = `<span class="material-symbols-rounded">hourglass_top</span> Guardando...`;
 
-        fetch("http://127.0.0.1:5000/inscripciones", {
+        fetch("https://proyectoiid-production.up.railway.app/inscripciones", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -1173,7 +1173,7 @@ function renderViewMaestroVerInscripciones(container) {
             observacion:         document.getElementById("mins-edit-observacion").value.trim() || null,
         };
 
-        fetch(`http://127.0.0.1:5000/inscripciones/${idIns}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/inscripciones/${idIns}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datos)
@@ -1193,7 +1193,7 @@ function renderViewMaestroVerInscripciones(container) {
 
     // ── Carga inicial ─────────────────────────────────────────
     function cargarInscripciones() {
-        fetch(`http://127.0.0.1:5000/inscripciones-mis-grupos?id_docente=${idDocente}`)
+        fetch(`https://proyectoiid-production.up.railway.app/inscripciones-mis-grupos?id_docente=${idDocente}`)
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
@@ -1207,7 +1207,7 @@ function renderViewMaestroVerInscripciones(container) {
     }
 
     // Cargar grupos del docente para el modal
-    fetch(`http://127.0.0.1:5000/mis-grupos-inscripcion?id_docente=${idDocente}`)
+    fetch(`https://proyectoiid-production.up.railway.app/mis-grupos-inscripcion?id_docente=${idDocente}`)
         .then(r => r.json())
         .then(data => { if (data.success) misGrupos = data.grupos || []; })
         .catch(() => {});

@@ -114,7 +114,7 @@ function renderViewMaestroCiclos(container) {
     // ── Carga inicial — solo ACTIVOS ──────────────────────────
     // BACKEND: GET /ciclos?estado=ACTIVO
     //   → { success, ciclos: [...] }
-    fetch("http://127.0.0.1:5000/ciclos?estado=ACTIVO")
+    fetch("https://proyectoiid-production.up.railway.app/ciclos?estado=ACTIVO")
         .then(res => res.json())
         .then(data => {
             if (data.success) {

@@ -85,7 +85,7 @@
             msgError.textContent = "No se proporcionó un enlace de activación.";
             divError.style.display = "flex"; // Modificado ligeramente para Flexbox
         } else {
-            fetch(`http://127.0.0.1:5000/activar/verificar?token=${token}`)
+            fetch(`https://proyectoiid-production.up.railway.app/activar/verificar?token=${token}`)
                 .then(r => r.json())
                 .then(data => {
                     divVerificando.style.display = "none";
@@ -120,7 +120,7 @@
                 return;
             }
 
-            fetch("http://127.0.0.1:5000/activar", {
+            fetch("https://proyectoiid-production.up.railway.app/activar", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ token, password: pwd })

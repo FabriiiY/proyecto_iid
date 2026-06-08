@@ -97,7 +97,7 @@ function renderViewRegistrarInscripcion(container) {
     // ── Helper genérico de select ─────────────────────────────
     function cargarSelect(selectId, endpoint, campoId, campoLabel, textoError, idPreseleccionar) {
         const select = document.getElementById(selectId);
-        fetch(`http://127.0.0.1:5000/${endpoint}`)
+        fetch(`https://proyectoiid-production.up.railway.app/${endpoint}`)
             .then(res => res.json())
             .then(data => {
                 const key   = Object.keys(data).find(k => Array.isArray(data[k]));
@@ -137,8 +137,8 @@ function renderViewRegistrarInscripcion(container) {
     // BACKEND: GET /docentes → { success: true, docentes: [{ id_usuario, nombre_completo }] }
     const selectRegistrador = document.getElementById("ins-registrador");
     Promise.all([
-        fetch("http://127.0.0.1:5000/admins").then(r => r.json()).catch(() => ({ success: false })),
-        fetch("http://127.0.0.1:5000/docentes").then(r => r.json()).catch(() => ({ success: false }))
+        fetch("https://proyectoiid-production.up.railway.app/admins").then(r => r.json()).catch(() => ({ success: false })),
+        fetch("https://proyectoiid-production.up.railway.app/docentes").then(r => r.json()).catch(() => ({ success: false }))
     ]).then(([dataAdmins, dataDocentes]) => {
         const admins   = (dataAdmins.success   ? dataAdmins.admins    : []) || [];
         const docentes = (dataDocentes.success  ? dataDocentes.docentes : []) || [];
@@ -199,7 +199,7 @@ function renderViewRegistrarInscripcion(container) {
             observacion:         document.getElementById("ins-observacion").value.trim() || null,
         };
 
-        fetch("http://127.0.0.1:5000/inscripciones", {
+        fetch("https://proyectoiid-production.up.railway.app/inscripciones", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(nueva)
@@ -528,7 +528,7 @@ function renderViewVerInscripciones(container) {
             observacion:         document.getElementById("edit-ins-observacion").value.trim() || null,
         };
 
-        fetch(`http://127.0.0.1:5000/inscripciones/${idIns}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/inscripciones/${idIns}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datos)
@@ -553,13 +553,13 @@ function renderViewVerInscripciones(container) {
     function cargarCatalogos() {
         return Promise.all([
             // BACKEND: GET /estudiantes → { success: true, estudiantes: [{ id_usuario, nombre_completo }] }
-            fetch("http://127.0.0.1:5000/estudiantes")
+            fetch("https://proyectoiid-production.up.railway.app/estudiantes")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoEstudiantes = d.estudiantes || []; })
                 .catch(() => {}),
 
             // BACKEND: GET /grupos → { success: true, grupos: [{ id_grupo, nombre_grupo }] }
-            fetch("http://127.0.0.1:5000/grupos")
+            fetch("https://proyectoiid-production.up.railway.app/grupos")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoGrupos = d.grupos || []; })
                 .catch(() => {}),
@@ -568,8 +568,8 @@ function renderViewVerInscripciones(container) {
             // BACKEND: GET /admins   → { success: true, admins:   [{ id_usuario, nombre_completo }] }
             // BACKEND: GET /docentes → { success: true, docentes: [{ id_usuario, nombre_completo }] }
             Promise.all([
-                fetch("http://127.0.0.1:5000/admins").then(r => r.json()).catch(() => ({ success: false })),
-                fetch("http://127.0.0.1:5000/docentes").then(r => r.json()).catch(() => ({ success: false }))
+                fetch("https://proyectoiid-production.up.railway.app/admins").then(r => r.json()).catch(() => ({ success: false })),
+                fetch("https://proyectoiid-production.up.railway.app/docentes").then(r => r.json()).catch(() => ({ success: false }))
             ]).then(([da, dd]) => {
                 const admins   = (da.success ? da.admins   : []) || [];
                 const docentes = (dd.success ? dd.docentes : []) || [];
@@ -584,7 +584,7 @@ function renderViewVerInscripciones(container) {
 
     function cargarInscripciones() {
         // BACKEND: GET /inscripciones → { success: true, inscripciones: [...] }
-        fetch("http://127.0.0.1:5000/inscripciones")
+        fetch("https://proyectoiid-production.up.railway.app/inscripciones")
             .then(res => res.json())
             .then(data => {
                 if (data.success) {

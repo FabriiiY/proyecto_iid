@@ -191,21 +191,21 @@ function renderViewMaestroHorarios(container) {
             // Clases del docente (para resolver etiqueta)
             // BACKEND: GET /mis-clases?id_docente=X
             //   → { success, clases: [{ id_clase, materia_nombre, tipo_clase }] }
-            fetch(`http://127.0.0.1:5000/mis-clases?id_docente=${idDocente}`)
+            fetch(`https://proyectoiid-production.up.railway.app/mis-clases?id_docente=${idDocente}`)
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoClases = d.clases || []; })
                 .catch(() => {}),
 
             // Aulas (catálogo general para resolver nombres)
             // BACKEND: GET /aulas → { success, aulas: [{ id_aula, codigo_aula, edificio }] }
-            fetch("http://127.0.0.1:5000/aulas")
+            fetch("https://proyectoiid-production.up.railway.app/aulas")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoAulas = d.aulas || []; })
                 .catch(() => {}),
 
             // Modalidades (catálogo general)
             // BACKEND: GET /modalidades → { success, modalidades: [{ id_modalidad, nombre }] }
-            fetch("http://127.0.0.1:5000/modalidades")
+            fetch("https://proyectoiid-production.up.railway.app/modalidades")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoMods = d.modalidades || []; })
                 .catch(() => {})
@@ -216,7 +216,7 @@ function renderViewMaestroHorarios(container) {
         // Solo horarios ACTIVOS de las clases del docente
         // BACKEND: GET /horarios?id_docente=X&estado=ACTIVO
         //   → { success, horarios: [...] }
-        fetch(`http://127.0.0.1:5000/horarios?id_docente=${idDocente}&estado=ACTIVO`)
+        fetch(`https://proyectoiid-production.up.railway.app/horarios?id_docente=${idDocente}&estado=ACTIVO`)
             .then(r => r.json())
             .then(data => {
                 if (data.success) {

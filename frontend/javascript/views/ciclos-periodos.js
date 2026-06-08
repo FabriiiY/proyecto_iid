@@ -74,7 +74,7 @@ function renderViewRegistrarPeriodo(container) {
   const tbody = container.querySelector("#tabla-periodos tbody");
 
   function actualizarTablaLocal() {
-    fetch("http://127.0.0.1:5000/periodos")
+    fetch("https://proyectoiid-production.up.railway.app/periodos")
       .then((r) => r.json())
       .then((data) => {
         if (data.success && data.periodos && data.periodos.length > 0) {
@@ -129,7 +129,7 @@ function renderViewRegistrarPeriodo(container) {
                 const nuevoEstado = p.estado === "ACTIVO" ? "INACTIVO" : "ACTIVO";
                 const confirmar = confirm(`¿${nuevoEstado === "ACTIVO" ? "Activar" : "Desactivar"} el periodo "${p.nombre}"?`);
                 if (!confirmar) return;
-                fetch(`http://127.0.0.1:5000/periodos/${p.id_periodo}/estado`, {
+                fetch(`https://proyectoiid-production.up.railway.app/periodos/${p.id_periodo}/estado`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ estado: nuevoEstado })
@@ -168,7 +168,7 @@ function renderViewRegistrarPeriodo(container) {
       fecha_fin: document.getElementById("p-fecha-fin").value,
     };
 
-    fetch("http://127.0.0.1:5000/periodos", {
+    fetch("https://proyectoiid-production.up.railway.app/periodos", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(datos),
@@ -264,7 +264,7 @@ function abrirModalEditarPeriodo(p, alTerminarDeActualizar) {
         };
 
         
-        fetch(`http://127.0.0.1:5000/periodos/${p.id_periodo}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/periodos/${p.id_periodo}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datosActualizados)
@@ -396,7 +396,7 @@ function renderViewRegistrarTipoCiclo(container) {
     let tiposLocales = [];
 
     const cargarTablaTipos = () => {
-        fetch("http://127.0.0.1:5000/tipos-ciclo")
+        fetch("https://proyectoiid-production.up.railway.app/tipos-ciclo")
         .then(res => res.json())
         .then(data => {
             const tbody = document.getElementById("tbody-tipos");
@@ -434,7 +434,7 @@ function renderViewRegistrarTipoCiclo(container) {
             descripcion: document.getElementById("tc-descripcion").value.trim()
         };
 
-        fetch("http://127.0.0.1:5000/tipos-ciclo", {
+        fetch("https://proyectoiid-production.up.railway.app/tipos-ciclo", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -483,7 +483,7 @@ function renderViewRegistrarTipoCiclo(container) {
             estado: document.getElementById("edit-tc-estado").value
         };
 
-        fetch(`http://127.0.0.1:5000/tipos-ciclo/${id_tipo}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/tipos-ciclo/${id_tipo}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -570,7 +570,7 @@ function renderViewRegistrarCiclo(container) {
             id_tipo_ciclo: parseInt(document.getElementById("c-tipo").value)
         };
 
-        fetch("http://127.0.0.1:5000/ciclos", {
+        fetch("https://proyectoiid-production.up.railway.app/ciclos", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -677,7 +677,7 @@ function renderViewVerCiclos(container) {
     cargarSelectsCiclo('edit-c-periodo', 'edit-c-tipo');
 
     const cargarTablaCiclos = () => {
-        fetch("http://127.0.0.1:5000/ciclos")
+        fetch("https://proyectoiid-production.up.railway.app/ciclos")
         .then(res => res.json())
         .then(data => {
             const tbody = document.getElementById("tbody-ciclos");
@@ -734,7 +734,7 @@ function renderViewVerCiclos(container) {
             const confirmar = confirm(`¿${nuevoEstado === "ACTIVO" ? "Activar" : "Desactivar"} el ciclo "${c.nombre}"?`);
             if (!confirmar) return;
 
-            fetch(`http://127.0.0.1:5000/ciclos/${id_ciclo}`, {
+            fetch(`https://proyectoiid-production.up.railway.app/ciclos/${id_ciclo}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ estado: nuevoEstado })
@@ -796,7 +796,7 @@ document.getElementById("form-edit-ciclo").addEventListener("submit", function (
     };
     
 
-    fetch(`http://127.0.0.1:5000/ciclos/${id_ciclo}`, {
+    fetch(`https://proyectoiid-production.up.railway.app/ciclos/${id_ciclo}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -822,7 +822,7 @@ function cargarSelectsCiclo(idSelectPeriodo, idSelectTipo) {
     const selTipo = document.getElementById(idSelectTipo);
 
     if (selPeriodo) {
-        fetch("http://127.0.0.1:5000/periodos/activos")
+        fetch("https://proyectoiid-production.up.railway.app/periodos/activos")
         .then(r => r.json())
         .then(data => {
             selPeriodo.innerHTML = '<option value="" disabled selected>Selecciona un periodo...</option>';
@@ -841,7 +841,7 @@ function cargarSelectsCiclo(idSelectPeriodo, idSelectTipo) {
     }
 
     if (selTipo) {
-        fetch("http://127.0.0.1:5000/tipos-ciclo/activos")
+        fetch("https://proyectoiid-production.up.railway.app/tipos-ciclo/activos")
         .then(r => r.json())
         .then(data => {
             selTipo.innerHTML = '<option value="" disabled selected>Selecciona un tipo...</option>';

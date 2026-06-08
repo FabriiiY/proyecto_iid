@@ -358,7 +358,7 @@ function renderViewAdminUsuarios(container) {
             foto_perfil:         fotoBase64 || null
         };
 
-        fetch("http://127.0.0.1:5000/usuarios", {
+        fetch("https://proyectoiid-production.up.railway.app/usuarios", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(nuevo)
@@ -622,7 +622,7 @@ function renderViewAdminRegistrados(container) {
 
     // ── Cambiar estado vía API ───────────────────────────────
     function cambiarEstado(usuario, nuevoEstado) {
-        fetch(`http://127.0.0.1:5000/usuarios/${usuario.id_usuario}/estado`, {
+        fetch(`https://proyectoiid-production.up.railway.app/usuarios/${usuario.id_usuario}/estado`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ estado: nuevoEstado })
@@ -772,7 +772,7 @@ function renderViewAdminRegistrados(container) {
                 }
                 if (!confirm(`¿Enviar correo de activación a ${u.correo_institucional}?`)) return;
 
-                fetch(`http://127.0.0.1:5000/usuarios/${u.id_usuario}/enviar-activacion`, {
+                fetch(`https://proyectoiid-production.up.railway.app/usuarios/${u.id_usuario}/enviar-activacion`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" }
                 })
@@ -979,7 +979,7 @@ function renderViewAdminRegistrados(container) {
         const nuevaPass = document.getElementById("edit-password").value;
         if (nuevaPass.trim()) datos.password = nuevaPass;
 
-        fetch(`http://127.0.0.1:5000/usuarios/${usuario.id_usuario}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/usuarios/${usuario.id_usuario}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datos)
@@ -993,7 +993,7 @@ function renderViewAdminRegistrados(container) {
 
         cerrarModal();
 
-        fetch("http://127.0.0.1:5000/usuarios")
+        fetch("https://proyectoiid-production.up.railway.app/usuarios")
         .then(res => res.json())
         .then(data => {
 
@@ -1020,7 +1020,7 @@ function renderViewAdminRegistrados(container) {
         });
     });
 
-    fetch("http://127.0.0.1:5000/usuarios")
+    fetch("https://proyectoiid-production.up.railway.app/usuarios")
     .then(res => res.json())
     .then(data => {
 

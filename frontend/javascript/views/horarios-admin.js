@@ -164,7 +164,7 @@ function renderViewAsignarHorario(container) {
     // ── Helper genérico de select ─────────────────────────────
     function cargarSelect(selectId, endpoint, campoId, fnLabel, textoError) {
         const select = document.getElementById(selectId);
-        fetch(`http://127.0.0.1:5000/${endpoint}`)
+        fetch(`https://proyectoiid-production.up.railway.app/${endpoint}`)
             .then(res => res.json())
             .then(data => {
                 const key   = Object.keys(data).find(k => Array.isArray(data[k]));
@@ -281,7 +281,7 @@ function renderViewAsignarHorario(container) {
             minutos_tolerancia:   parseInt(document.getElementById("h-tolerancia").value),
         };
 
-        fetch("http://127.0.0.1:5000/horarios", {
+        fetch("https://proyectoiid-production.up.railway.app/horarios", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(nuevo)
@@ -595,7 +595,7 @@ function renderViewVerHorariosGlobales(container) {
 
     // ── Cambiar estado ────────────────────────────────────────
     function cambiarEstado(h, nuevoEstado) {
-        fetch(`http://127.0.0.1:5000/horarios/${h.id_horario}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/horarios/${h.id_horario}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ estado: nuevoEstado })
@@ -715,7 +715,7 @@ function renderViewVerHorariosGlobales(container) {
             minutos_tolerancia:   parseInt(document.getElementById("edit-h-tolerancia").value),
         };
 
-        fetch(`http://127.0.0.1:5000/horarios/${idH}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/horarios/${idH}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datos)
@@ -740,19 +740,19 @@ function renderViewVerHorariosGlobales(container) {
     function cargarCatalogos() {
         return Promise.all([
             // BACKEND: GET /clases → con JOIN para tener materia_nombre, tipo_clase, docente_nombre
-            fetch("http://127.0.0.1:5000/clases/activas")
+            fetch("https://proyectoiid-production.up.railway.app/clases/activas")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoClases = d.clases || []; })
                 .catch(() => {}),
 
             // BACKEND: GET /aulas → { success: true, aulas: [{ id_aula, codigo_aula, edificio }] }
-            fetch("http://127.0.0.1:5000/aulas/activas")
+            fetch("https://proyectoiid-production.up.railway.app/aulas/activas")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoAulas = d.aulas || []; })
                 .catch(() => {}),
 
             // BACKEND: GET /modalidades → { success: true, modalidades: [{ id_modalidad, nombre }] }
-            fetch("http://127.0.0.1:5000/modalidades/activas")
+            fetch("https://proyectoiid-production.up.railway.app/modalidades/activas")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoMods = d.modalidades || []; })
                 .catch(() => {})
@@ -761,7 +761,7 @@ function renderViewVerHorariosGlobales(container) {
 
     function cargarHorarios() {
         // BACKEND: GET /horarios → { success: true, horarios: [...] }
-        fetch("http://127.0.0.1:5000/horarios")
+        fetch("https://proyectoiid-production.up.railway.app/horarios")
             .then(res => res.json())
             .then(data => {
                 if (data.success) {

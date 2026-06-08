@@ -500,7 +500,7 @@ function renderViewReporteAsistencia(container) {
         //     AND a.fecha BETWEEN :fecha_ini AND :fecha_fin
         //   ORDER BY a.fecha DESC, h.hora_inicio
 
-        fetch(`http://127.0.0.1:5000/reporte-asistencia?id_usuario=${idEstudiante}&fecha_ini=${fechaIni}&fecha_fin=${fechaFin}`)
+        fetch(`https://proyectoiid-production.up.railway.app/reporte-asistencia?id_usuario=${idEstudiante}&fecha_ini=${fechaIni}&fecha_fin=${fechaFin}`)
             .then(r => r.json())
             .then(data => {
                 loading.style.display = "none";

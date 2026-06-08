@@ -31,14 +31,14 @@ function renderViewMiPerfil(container) {
     `;
 
     // ── TODO: reemplazar con fetch() GET /usuarios/:id ────────
-    // fetch(`http://127.0.0.1:5000/usuarios/${SAMI.usuario.id}`)
+    // fetch(`https://proyectoiid-production.up.railway.app/usuarios/${SAMI.usuario.id}`)
     //     .then(res => res.json())
     //     .then(data => { if (data.success) renderPerfil(data.usuario); })
     //     .catch(() => renderPerfil(SAMI.usuario));
     //
     // Por ahora usamos directamente el usuarioActivo del localStorage:
 
-    fetch(`http://127.0.0.1:5000/usuarios/${SAMI.usuario.id}`)
+    fetch(`https://proyectoiid-production.up.railway.app/usuarios/${SAMI.usuario.id}`)
     .then(res => res.json())
     .then(data => {
 

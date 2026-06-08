@@ -103,7 +103,7 @@ function renderViewMateriasAgregar(container) {
 };
 
         // TODO: reemplazar con fetch() POST /materias
-        fetch("http://127.0.0.1:5000/materias", {
+        fetch("https://proyectoiid-production.up.railway.app/materias", {
 
     method: "POST",
 
@@ -345,7 +345,7 @@ function renderViewMateriasVer(container) {
             : "ACTIVA";
 
         fetch(
-            `http://127.0.0.1:5000/materias/${id}/estado`,
+            `https://proyectoiid-production.up.railway.app/materias/${id}/estado`,
             {
                 method: "PUT",
 
@@ -448,7 +448,7 @@ function renderViewMateriasVer(container) {
 
     };
 
-    fetch(`http://127.0.0.1:5000/materias/${id}`, {
+    fetch(`https://proyectoiid-production.up.railway.app/materias/${id}`, {
 
         method: "PUT",
 
@@ -491,7 +491,7 @@ function renderViewMateriasVer(container) {
 });
     
 
-    fetch("http://127.0.0.1:5000/materias")
+    fetch("https://proyectoiid-production.up.railway.app/materias")
 
 .then(res => res.json())
 

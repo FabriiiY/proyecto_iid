@@ -121,7 +121,7 @@ function renderViewMaestroMaterias(container) {
     search.addEventListener("input", () => renderTabla(filtrar()));
 
     // ── Carga inicial ─────────────────────────────────────────
-    fetch(`http://127.0.0.1:5000/mis-materias?id_docente=${idDocente}`)
+    fetch(`https://proyectoiid-production.up.railway.app/mis-materias?id_docente=${idDocente}`)
         .then(res => res.json())
         .then(data => {
             if (data.success) {

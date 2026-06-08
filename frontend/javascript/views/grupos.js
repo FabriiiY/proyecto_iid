@@ -95,7 +95,7 @@ function renderViewRegistrarGrupo(container) {
     // ── Función genérica para cargar un select desde un endpoint ──
     function cargarSelect(selectId, endpoint, campo_id, campo_label, textoError) {
         const select = document.getElementById(selectId);
-        fetch(`http://127.0.0.1:5000/${endpoint}`)
+        fetch(`https://proyectoiid-production.up.railway.app/${endpoint}`)
             .then(res => res.json())
             .then(data => {
                 const key = Object.keys(data).find(k => Array.isArray(data[k]));
@@ -151,7 +151,7 @@ function renderViewRegistrarGrupo(container) {
             descripcion:         document.getElementById("g-descripcion").value.trim() || null,
         };
 
-        fetch("http://127.0.0.1:5000/grupos", {
+        fetch("https://proyectoiid-production.up.railway.app/grupos", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(nuevo)
@@ -406,7 +406,7 @@ function renderViewVerGrupos(container) {
 
     // ── Cambiar estado ────────────────────────────────────────
     function cambiarEstado(grupo, nuevoEstado) {
-        fetch(`http://127.0.0.1:5000/grupos/${grupo.id_grupo}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/grupos/${grupo.id_grupo}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ estado: nuevoEstado })
@@ -496,7 +496,7 @@ function renderViewVerGrupos(container) {
             descripcion:        document.getElementById("edit-g-descripcion").value.trim() || null,
         };
 
-        fetch(`http://127.0.0.1:5000/grupos/${idGrupo}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/grupos/${idGrupo}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(datos)
@@ -522,13 +522,13 @@ function renderViewVerGrupos(container) {
     function cargarCatalogos() {
         return Promise.all([
             // BACKEND: GET /ciclos → { success: true, ciclos: [{ id_ciclo, nombre }] }
-            fetch("http://127.0.0.1:5000/ciclos/activos")
+            fetch("https://proyectoiid-production.up.railway.app/ciclos/activos")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoCiclos = d.ciclos; })
                 .catch(() => {}),
 
             // BACKEND: GET /carreras → { success: true, carreras: [{ id_carrera, nombre }] }
-            fetch("http://127.0.0.1:5000/carreras/activas")
+            fetch("https://proyectoiid-production.up.railway.app/carreras/activas")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoCarreras = d.carreras; })
                 .catch(() => {})
@@ -537,7 +537,7 @@ function renderViewVerGrupos(container) {
 
     function cargarGrupos() {
         // BACKEND: GET /grupos → { success: true, grupos: [...] }
-        fetch("http://127.0.0.1:5000/grupos")
+        fetch("https://proyectoiid-production.up.railway.app/grupos")
             .then(res => res.json())
             .then(data => {
                 if (data.success) {

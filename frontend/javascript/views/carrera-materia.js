@@ -67,7 +67,7 @@ function renderViewAsignarMateriaCarrera(container) {
     // ── Cargar selects ────────────────────────────────────────
     function cargarSelect(selectId, endpoint, campoId, campoLabel, textoError) {
         const select = document.getElementById(selectId);
-        fetch(`http://127.0.0.1:5000/${endpoint}`)
+        fetch(`https://proyectoiid-production.up.railway.app/${endpoint}`)
             .then(res => res.json())
             .then(data => {
                 const key   = Object.keys(data).find(k => Array.isArray(data[k]));
@@ -121,7 +121,7 @@ function renderViewAsignarMateriaCarrera(container) {
             numero_correlativo: parseInt(document.getElementById("cm-correlativo").value),
         };
 
-        fetch("http://127.0.0.1:5000/carrera_materias", {
+        fetch("https://proyectoiid-production.up.railway.app/carrera_materias", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(nueva)
@@ -360,7 +360,7 @@ function renderViewVerMateriasCarrera(container) {
 
     // ── Cambiar estado ────────────────────────────────────────
     function cambiarEstado(reg, nuevoEstado) {
-        fetch(`http://127.0.0.1:5000/carrera_materias/${reg.id_carrera_materia}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/carrera_materias/${reg.id_carrera_materia}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ estado: nuevoEstado })
@@ -415,7 +415,7 @@ function renderViewVerMateriasCarrera(container) {
 
         const idCM = document.getElementById("edit-cm-id").value;
 
-        fetch(`http://127.0.0.1:5000/carrera_materias/${idCM}`, {
+        fetch(`https://proyectoiid-production.up.railway.app/carrera_materias/${idCM}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -442,13 +442,13 @@ function renderViewVerMateriasCarrera(container) {
     function cargarCatalogos() {
         return Promise.all([
             // BACKEND: GET /carreras → { success: true, carreras: [{ id_carrera, nombre }] }
-            fetch("http://127.0.0.1:5000/carreras")
+            fetch("https://proyectoiid-production.up.railway.app/carreras")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoCarreras = d.carreras; })
                 .catch(() => {}),
 
             // BACKEND: GET /materias → { success: true, materias: [{ id_materia, nombre }] }
-            fetch("http://127.0.0.1:5000/materias")
+            fetch("https://proyectoiid-production.up.railway.app/materias")
                 .then(r => r.json())
                 .then(d => { if (d.success) catalogoMaterias = d.materias; })
                 .catch(() => {})
@@ -457,7 +457,7 @@ function renderViewVerMateriasCarrera(container) {
 
     function cargarRegistros() {
         // BACKEND: GET /carrera_materias → { success: true, carrera_materias: [...] }
-        fetch("http://127.0.0.1:5000/carrera_materias")
+        fetch("https://proyectoiid-production.up.railway.app/carrera_materias")
             .then(res => res.json())
             .then(data => {
                 if (data.success) {

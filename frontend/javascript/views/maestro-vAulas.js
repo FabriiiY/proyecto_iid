@@ -124,7 +124,7 @@ function renderViewMaestroAulas(container) {
     // ── Carga inicial — solo ACTIVAS ──────────────────────────
     // BACKEND: GET /aulas?estado=ACTIVO
     //   → { success, aulas: [...] }
-    fetch("http://127.0.0.1:5000/aulas")
+    fetch("https://proyectoiid-production.up.railway.app/aulas")
         .then(res => res.json())
         .then(data => {
             if (data.success) {
