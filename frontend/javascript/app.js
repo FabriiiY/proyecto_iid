@@ -504,6 +504,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // 10. BOTÓN HOME — volver a pantalla de bienvenida
+    document.getElementById("btn-home").addEventListener("click", () => {
+        document.querySelectorAll("#sidebar-primary-nav a[data-view]").forEach(link => {
+            link.classList.remove("active");
+        });
+        renderViewBienvenida();
+    });
+
     // Vista inicial -> bienvenida
     renderViewBienvenida();
 });
